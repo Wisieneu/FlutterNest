@@ -8,14 +8,16 @@ datasource db {
 }
 
 model User {
-  id          String  @id @default(uuid())
-  email       String  @unique @db.VarChar(64)
-  username    String  @unique @db.VarChar(32)
-  displayName String? @db.VarChar(32)
-  posts       Tweet[] @relation("writtenPosts")
-  role        Role    @default(USER)
-  likedPosts  Tweet[]
-  password    String  @db.VarChar(100)
+  id                     String    @id @default(uuid())
+  email                  String    @unique @db.VarChar(64)
+  username               String    @unique @db.VarChar(32)
+  createdAt              DateTime  @default(now())
+  displayName            String?   @db.VarChar(32)
+  tweets                 Tweet[]   @relation("writtenPosts")
+  role                   Role      @default(USER)
+  likedPosts             Tweet[]
+  password               String    @db.VarChar(100)
+  lastPasswordChangeDate DateTime?
 }
 
 model Tweet {
@@ -24,7 +26,7 @@ model Tweet {
   author    User     @relation("writtenPosts", fields: [authorId], references: [id])
   authorId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   likes     User[]
 }
 
