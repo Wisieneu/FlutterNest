@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
 import { Application } from 'express';
 
-import app from './app.js';
+import app from './app';
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './.env' });
 
 class Server {
   private port = process.env.PORT || 6699;
@@ -15,9 +15,7 @@ class Server {
 
   private listen(app: Application) {
     return app.listen(this.port, (): void => {
-      console.log(
-        `\x1b[33mApp running on http://localhost:${this.port}\x1b[0m`,
-      );
+      console.log(`\x1b[33mApp running on http://localhost:${this.port}\x1b[0m`);
     });
   }
 }

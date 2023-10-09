@@ -5,15 +5,16 @@ import cors from 'cors';
 import compression from 'compression';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import userRouter from './routes/user.routes.js';
-import tweetRouter from './routes/tweet.routes.js';
-import initDb from './config/database.js';
+import userRouter from './routes/user.routes';
+import tweetRouter from './routes/tweet.routes';
+import viewRouter from './routes/view.routes';
+import initDb from './config/database';
+// import { PrismaClient } from '@prisma/client';
 
 class App {
-  public db: NodePgDatabase;
   public app: Application;
+  public db: any;
 
   constructor() {
     this.app = express();
@@ -22,7 +23,7 @@ class App {
     this.attachRoutes();
   }
 
-  protected initializeDatabaseConnection(): NodePgDatabase {
+  protected initializeDatabaseConnection() {
     return initDb();
   }
 
@@ -30,7 +31,7 @@ class App {
     this.app.use(
       cors({
         credentials: true,
-      }),
+      })
     );
     this.app.use(helmet());
     this.app.use(cookieParser());
@@ -43,6 +44,7 @@ class App {
   protected attachRoutes(): void {
     this.app.use('/api/v1/users', userRouter);
     this.app.use('/api/v1/tweets', tweetRouter);
+    this.app.use('/', viewRouter);
   }
 }
 
