@@ -1,7 +1,7 @@
 .vscode
-eslintrc.json
-config.env 
-drizzle
+.env
+.prettierrc
+prisma/migrations
 
 ##########################################################################################
 
