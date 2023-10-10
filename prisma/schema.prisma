@@ -9,15 +9,16 @@ datasource db {
 
 model User {
   id          String  @id @default(uuid())
-  email       String  @unique
-  username    String  @unique
-  displayName String?
-  posts       Post[]  @relation("writtenPosts")
-  isAdmin     Boolean @default(false)
-  likedPosts  Post[]
+  email       String  @unique @db.VarChar(64)
+  username    String  @unique @db.VarChar(32)
+  displayName String? @db.VarChar(32)
+  posts       Tweet[] @relation("writtenPosts")
+  role        Role    @default(USER)
+  likedPosts  Tweet[]
+  password    String  @db.VarChar(100)
 }
 
-model Post {
+model Tweet {
   id        String   @id @default(uuid())
   content   String?
   author    User     @relation("writtenPosts", fields: [authorId], references: [id])
@@ -25,4 +26,10 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime
   likes     User[]
+}
+
+enum Role {
+  USER
+  MOD
+  ADMIN
 }
