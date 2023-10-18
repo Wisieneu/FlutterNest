@@ -1,14 +1,22 @@
-// export const users = pgTable(
-//   'users',
-//   {
-//     id: serial('id').primaryKey(),
-//     nickname: varchar('nickname', { length: 20 }),
-//     email: text('email'),
-//     active: boolean('active').default(true),
-//     role: varchar('role', { enum: ['user', 'admin'] }).default('user'),
-//     password: varchar('password', { length: 64 }),
-//     passwordLastChanged: timestamp('passwordLastChanged'),
-//   },
-// );
+import { User } from '@prisma/client';
+import { database } from '../config/database';
 
-// export const User: userType =
+// Define a utility function to check if a user's password was changed after a certain date
+export async function changedPasswordAfter(
+  checkedUser: User,
+  date: Date,
+): Promise<boolean> {
+  const user = await database.user.findUnique({
+    where: { id: checkedUser.id },
+    select: { lastPasswordChangeDate: true },
+  });
+  if (!user) {
+    // Handle the case where the user is not found
+    return false;
+  }
+
+  const lastPasswordChangeDate = user.lastPasswordChangeDate;
+  if (!lastPasswordChangeDate) return true;
+
+  return lastPasswordChangeDate > date;
+}

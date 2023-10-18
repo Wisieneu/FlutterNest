@@ -8,21 +8,30 @@ datasource db {
 }
 
 model User {
-  id          String  @id @default(uuid())
-  email       String  @unique
-  username    String  @unique
-  displayName String?
-  posts       Post[]  @relation("writtenPosts")
-  isAdmin     Boolean @default(false)
-  likedPosts  Post[]
+  id                     String    @id @default(uuid())
+  email                  String    @unique @db.VarChar(64)
+  username               String    @unique @db.VarChar(32)
+  createdAt              DateTime  @default(now())
+  displayName            String?   @db.VarChar(32)
+  tweets                 Tweet[]   @relation("writtenPosts")
+  role                   Role      @default(USER)
+  likedPosts             Tweet[]
+  password               String    @db.VarChar(100)
+  lastPasswordChangeDate DateTime?
 }
 
-model Post {
+model Tweet {
   id        String   @id @default(uuid())
   content   String?
   author    User     @relation("writtenPosts", fields: [authorId], references: [id])
   authorId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   likes     User[]
+}
+
+enum Role {
+  USER
+  MOD
+  ADMIN
 }
