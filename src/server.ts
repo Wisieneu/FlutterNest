@@ -15,7 +15,9 @@ class Server {
 
   private listen(app: Application) {
     return app.listen(this.port, (): void => {
-      console.log(`\x1b[33mApp running on http://localhost:${this.port}\x1b[0m`);
+      console.log(
+        `\x1b[33mApp running on http://localhost:${this.port}\x1b[0m\n`,
+      );
     });
   }
 }
