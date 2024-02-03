@@ -1,58 +1,16 @@
 {
-  "name": "tweetsphere",
-  "version": "1.0.0",
-  "description": "A fullstack Twitter-like (or X-like), feature-rich Typescript application",
-  "main": "dist/server",
-  "types": "dist/server",
+  "name": "root",
+  "private": true,
   "scripts": {
-    "start": "nodemon",
-    "migrate": "npx prisma migrate",
-    "migrate:dev": "npx prisma migrate dev"
+    "start:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && npm start"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Wisieneu/TweetSphere.git"
-  },
-  "author": "Bartłomiej Wiśniewski",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Wisieneu/TweetSphere/issues"
-  },
-  "homepage": "https://github.com/Wisieneu/TweetSphere#readme",
-  "dependencies": {
-    "@prisma/client": "^5.4.2",
-    "@types/jsonwebtoken": "^9.0.3",
-    "@types/morgan": "^1.9.4",
-    "@types/pg": "^8.10.2",
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
-    "compression": "^1.7.4",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "helmet": "^7.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "reflect-metadata": "^0.1.13"
-  },
+  "workspaces": [
+    "frontend/*",
+    "backend/*"
+  ],
+  "dependencies": {},
   "devDependencies": {
-    "@types/bcrypt": "^5.0.0",
-    "@types/compression": "^1.7.2",
-    "@types/cookie-parser": "^1.4.3",
-    "@types/cors": "^2.8.13",
-    "@types/express": "^4.17.17",
-    "@types/helmet": "^4.0.0",
-    "@types/node": "^20.8.3",
-    "@types/validator": "^13.11.1",
-    "@typescript-eslint/eslint-plugin": "^6.3.0",
-    "@typescript-eslint/parser": "^6.3.0",
-    "drizzle-kit": "^0.19.13",
-    "eslint": "^8.47.0",
-    "morgan": "^1.10.0",
-    "nodemon": "^3.0.1",
-    "prettier": "^3.0.1",
-    "prisma": "^5.4.2",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.6.2"
+    "lerna": "^8.0.2"
   }
 }

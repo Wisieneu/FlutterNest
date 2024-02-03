@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { Request } from 'express';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
@@ -13,7 +12,7 @@ export const database = new PrismaClient().$extends({
         email: string,
         username: string,
         password: string,
-        passwordConfirm: string,
+        passwordConfirm: string
       ) {
         if (password !== passwordConfirm) {
           throw new AppError('Provided passwords do not match.', 400);
@@ -33,7 +32,7 @@ export const database = new PrismaClient().$extends({
       async updatePassword(
         password: string,
         passwordConfirm: string,
-        req: Request,
+        req: Request
       ) {},
 
       async checkPassword<User>(candidatePassword: string) {
@@ -45,5 +44,5 @@ export const database = new PrismaClient().$extends({
 
 // console.clear();
 console.log(
-  `\n✅\x1b[33m PostgreSQL database connection has been established successfully\x1b[0m`,
+  `\n✅\x1b[33m PostgreSQL database connection has been established successfully\x1b[0m`
 );

@@ -41,7 +41,7 @@ const createAndSendAuthToken = (
   });
 
   // Remove password from output
-  user.password = '';
+  user.password = undefined!;
 
   res.status(statusCode).json({
     status: 'success',
@@ -103,16 +103,20 @@ export const restrictLoginAccess = catchAsync(
   },
 );
 
-export const restrictTo = (...roles: string[]) => {
-  // return (req: Request, res: Response, next: NextFunction) => {
-  //   if (!roles.includes(req.user.role) || !req.user.role === 'admin') {
-  //     // Reject response if user's role is not in the restricted roles list for that route
-  //     return next(
-  //       new AppError('You do not have permission to perform this action.', 403),
-  //     );
-  //   }
-  //   next();
-  // };
+export const restrictTo = (roles: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (
+      !req.user ||
+      !roles.includes(req.user.role) ||
+      req.user.role !== 'ADMIN'
+    ) {
+      // Reject response if user's role is not in the restricted roles list for that route
+      return next(
+        new AppError('You do not have permission to perform this action.', 403),
+      );
+    }
+    next();
+  };
 };
 
 export const signupUser = catchAsync(

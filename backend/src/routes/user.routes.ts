@@ -17,7 +17,7 @@ router.route('/updateMyAccount');
 router.route('/deleteMyAccount');
 
 // Admin routes
-// router.use();
+router.use(authController.restrictTo('ADMIN'));
 
 router
   .route('/:userId')
