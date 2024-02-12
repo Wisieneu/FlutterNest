@@ -2,31 +2,40 @@ import express from 'express';
 
 import * as userController from '../controllers/user.controller';
 import * as authController from '../controllers/auth.controller';
+import { validateRegistrationData } from '../middlewares/user.validation.middleware';
+import validatorMiddleware from '../middlewares/validation.middleware';
 
-const router = express.Router();
+const userRouter = express.Router();
+userRouter.get('', (req, res) => res.send('user endpoint'));
 
 // General routes
-router.route('/signup').post(authController.signupUser);
-router.route('/login').post(authController.loginUser);
+userRouter
+  .route('/signup')
+  .post(
+    [...validateRegistrationData, validatorMiddleware],
+    authController.signUp
+  );
+
+userRouter.route('/login').post(authController.login);
 
 // Login protected routes
-router.use(authController.restrictLoginAccess);
+userRouter.use(authController.restrictLoginAccess);
 
-router.route('/getMyAccount').get(userController.getMyAccount);
-router.route('/updateMyAccount');
-router.route('/deleteMyAccount');
+userRouter.route('/getMyAccount').get(userController.getMyAccount);
+userRouter.route('/updateMyAccount').patch(userController.updateMyAccount);
+userRouter.route('/deleteMyAccount').delete(userController.deleteMyAccount);
 
 // Admin routes
-router.use(authController.restrictTo('ADMIN'));
+userRouter.use(authController.restrictTo('admin'));
 
-router
+userRouter
   .route('/:userId')
-  .get(userController.getOneUser)
-  .patch(userController.updateOneUser)
+  .get(userController.getUser)
+  .patch(userController.updateUser)
   .delete(userController.deleteOneUser);
-router
+userRouter
   .route('/')
   .get(userController.getUsers)
-  .post(userController.createOneUser);
+  .post(userController.createUser);
 
-export default router;
+export default userRouter;
