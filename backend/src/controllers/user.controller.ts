@@ -6,9 +6,11 @@ import { db } from '../db';
 import * as userSchemaHandler from '../db/user/user.handlers';
 import catchAsync from '../utils/catchAsync';
 import { User, users } from '../db/user/user.schema';
-import { uploadProfilePic } from '../utils/multer';
+import { uploadProfilePic } from './file.controller';
 import AppError from '../utils/appError';
 import sharp from 'sharp';
+import { validateBufferMIMEType } from 'validate-image-type';
+import { deleteFileFromS3, uploadFileToS3 } from '../utils/s3';
 
 /**
  * End user route handlers
@@ -73,51 +75,37 @@ export const updateMyAccount = catchAsync(
   }
 );
 
-export const uploadProfilePicture = catchAsync(
+export const updateUserPhoto = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response> => {
-    uploadProfilePic(req, res, (err) => {
-      if (err instanceof multer.MulterError) {
-        return next(
-          new AppError(`An error occurred when uploading: ${err.message}`, 400)
-        );
-      } else if (err) {
-        return next(
-          new AppError('An unknown error occurred when uploading', 500)
-        );
-      }
-    });
-    console.log(req.file);
+  ): Promise<Response | void> => {
+    if (!req.file)
+      return next(new AppError('The attached file is invalid', 400));
+
+    if (
+      req.user &&
+      req.user.profilePicture &&
+      !(req.user.profilePicture === 'default.png')
+    )
+      await deleteFileFromS3(req.user!.profilePicture);
+
+    await uploadFileToS3(req.file);
+
+    const profilePic = await db
+      .update(users)
+      .set({ profilePicture: req.file.filename })
+      .returning({ profilePicture: users.profilePicture });
 
     return res.status(200).json({
       status: 'success',
       data: {
-        message: 'route not defined',
+        profilePic,
       },
     });
   }
 );
-
-export const resizeUserPhoto = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (!req.file) return next();
-
-  req.file.filename = `user-${req.user!.username}-pfp-${Date.now()}.jpg`;
-
-  await sharp(req.file.buffer)
-    .resize(500, 500, { fit: 'cover' })
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`public/media/users/${req.file.filename}`);
-
-  next();
-};
 
 export const deactivateAccount = catchAsync(
   async (

@@ -42,7 +42,9 @@ export const users = pgTable('users', {
   // User info
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   birthDate: date('birthDate'),
-  profilePicture: varchar('profilePicture').default('default.png'),
+  profilePicture: varchar('profilePicture').default(
+    userConfig.defaultProfilePicture
+  ),
 
   // Security
   role: roleEnum('role').default('user').notNull(),
