@@ -7,11 +7,11 @@ import isEmail from 'validator/lib/isEmail';
 
 import { db } from '../db';
 import { User, NewUser, users } from '../db/user/user.schema';
-import { signUpEndUser } from '../db/user/user.handlers';
+import { filterUserObj, signUpEndUser } from '../db/user/user.handlers';
 
 import AppError from '../utils/appError';
 import catchAsync from '../utils/catchAsync';
-import { date } from 'drizzle-orm/mysql-core';
+import { roleType } from '../db/user/user.config';
 
 dotenv.config({ path: './.env' });
 
@@ -21,7 +21,7 @@ dotenv.config({ path: './.env' });
  * @param {string} userId
  * @returns {string} JWT token
  */
-const signToken = (userId: string) => {
+const signToken = (userId: string): string => {
   return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
     expiresIn: `${process.env.JWT_EXPIRES_IN}d`,
   });
@@ -34,13 +34,13 @@ const signToken = (userId: string) => {
  * @param {number} statusCode - The status code to be sent in the response.
  * @param {Request} req - The request object.
  * @param {Response} res - The response object.
- * @returns {void}
  */
 const createAndSendAuthToken = (
   user: User,
   statusCode: number,
   req: Request,
-  res: Response
+  res: Response,
+  expose?: boolean
 ) => {
   const token = signToken(user.id);
   res.cookie('jwt', token, {
@@ -52,13 +52,13 @@ const createAndSendAuthToken = (
   });
 
   // Remove password from output
-  user.password = undefined!;
+  const currentUser = expose ? user : filterUserObj(user);
 
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user,
+      currentUser,
     },
   });
 };
@@ -88,6 +88,7 @@ export const restrictLoginAccess = catchAsync(
       token = req.cookies.jwt;
     }
 
+    // If the token is not there
     if (!token) {
       return next(new AppError('Access denied - please log in.', 401));
     }
@@ -107,11 +108,10 @@ export const restrictLoginAccess = catchAsync(
     }
 
     // If user changed their password after the token was created
-    console.log(currentUser.lastPasswordChangeDate);
-    console.log(decodedToken);
-    console.log(new Date(decodedToken.iat!));
-    // const passwordChangeCase =
-    if (false) {
+    const passwordChangeCase =
+      decodedToken.iat! < Number(currentUser.lastPasswordChangeDate) / 1000;
+
+    if (passwordChangeCase) {
       return next(
         new AppError(
           'User recently changed their password, please log in again.',
@@ -127,11 +127,11 @@ export const restrictLoginAccess = catchAsync(
 );
 
 /**
- * A middleware, making the route accessible only to users of a certain role
+ * A function wrapper, making the route accessible only to users of a certain role
  * @param {string} role - specific role
  * calls the next middleware if the role condition is satisfied
  */
-export const restrictTo = (role: string) => {
+export const restrictTo = (role: roleType) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !(role === req.user.role) || req.user.role !== 'admin') {
       // Reject response if user's role is not in the restricted roles list for that route
@@ -150,11 +150,12 @@ export const restrictTo = (role: string) => {
 export const signUp = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { password, passwordConfirm, username, email } = req.body;
+
     if (password !== passwordConfirm)
       return next(new AppError('Provided passwords do not match.', 400));
 
     const newUser: NewUser = await signUpEndUser(password, username, email);
-    createAndSendAuthToken(newUser as User, 201, req, res);
+    createAndSendAuthToken(newUser as User, 201, req, res, true);
   }
 );
 
@@ -170,6 +171,7 @@ export const signUp = catchAsync(
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { login, password } = req.body;
+
     if (!login || !password)
       return next(new AppError('Please provide a login and a password.', 400));
 
@@ -186,16 +188,15 @@ export const login = catchAsync(
 );
 
 /**
- * Signs the user out,
+ * Signs the user out, making the auth token invalid
  */
-export const logout = catchAsync(
-  (req: Request, res: Response, next: NextFunction) => {
-    res.cookie('jwt', 'loggedout', {
-      expires: new Date(Date.now() + 10 * 1000),
-      httpOnly: true,
-    });
-    res.status(200).json({
-      status: 'success',
-    });
-  }
-);
+export const logout = (req: Request, res: Response, next: NextFunction) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  return res.status(200).json({
+    status: 'success',
+  });
+};

@@ -7,6 +7,7 @@ import {
   date,
   boolean,
   pgEnum,
+  numeric,
 } from 'drizzle-orm/pg-core';
 
 import userConfig from './user.config';
@@ -28,6 +29,7 @@ export const users = pgTable('users', {
   username: varchar('username', { length: userConfig.maxUsernameLength })
     .notNull()
     .unique(),
+  displayName: varchar('displayName', { length: userConfig.maxUsernameLength }),
 
   email: varchar('email', { length: userConfig.maxEmailLength })
     .notNull()
@@ -44,9 +46,14 @@ export const users = pgTable('users', {
 
   // Security
   role: roleEnum('role').default('user').notNull(),
-  lastPasswordChangeDate: timestamp('lastPasswordChangeDate').defaultNow(),
+  lastPasswordChangeDate: timestamp('lastPasswordChangeDate', {
+    precision: 4,
+  }),
   passwordResetToken: varchar('passwordResetToken'),
   passwordResetExpires: date('passwordResetExpires'),
+
+  fileStorageOccupied: numeric('fileStorageOccupied').default('0'),
+
   active: boolean('active').default(true).notNull(),
 });
 

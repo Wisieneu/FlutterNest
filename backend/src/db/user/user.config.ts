@@ -6,3 +6,5 @@ export default {
   minPasswordLength: 8,
   roleTypes: ['user', 'mod', 'admin'],
 } as const;
+
+export type roleType = 'user' | 'mod' | 'admin';

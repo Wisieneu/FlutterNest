@@ -6,9 +6,10 @@ import { validateRegistrationData } from '../middlewares/user.validation.middlew
 import validatorMiddleware from '../middlewares/validation.middleware';
 
 const userRouter = express.Router();
-userRouter.get('', (req, res) => res.send('user endpoint'));
 
-// General routes
+/**
+ * General user routes
+ */
 userRouter
   .route('/signup')
   .post(
@@ -17,20 +18,34 @@ userRouter
   );
 
 userRouter.route('/login').post(authController.login);
+userRouter.route('/logout').get(authController.logout);
 
-// Login protected routes
+userRouter.route('/u/:username').get(userController.getUserProfile);
+
+/**
+ * Login protected routes
+ */
 userRouter.use(authController.restrictLoginAccess);
 
 userRouter.route('/getMyAccount').get(userController.getMyAccount);
 userRouter.route('/updateMyAccount').patch(userController.updateMyAccount);
-userRouter.route('/deleteMyAccount').delete(userController.deleteMyAccount);
+userRouter.route('/deactivateAccount').patch(userController.deactivateAccount);
+userRouter.route('/deleteAccount').delete(userController.deleteAccount);
 
-// Admin routes
+userRouter
+  .route('/uploadProfilePicture')
+  .patch(userController.uploadProfilePicture);
+
+/**
+ * Admin routes - unsafe to be used by end users
+ * could cause harm to the database if used by unauthorized users
+ * these routes do not perform the necessary input validations
+ * these routes might expose sensitive data
+ */
 userRouter.use(authController.restrictTo('admin'));
 
 userRouter
   .route('/:userId')
-  .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteOneUser);
 userRouter

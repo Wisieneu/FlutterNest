@@ -1,22 +1,30 @@
 import { Response, Request, NextFunction } from 'express';
 import { eq } from 'drizzle-orm';
+import multer from 'multer';
 
 import { db } from '../db';
 import * as userSchemaHandler from '../db/user/user.handlers';
 import catchAsync from '../utils/catchAsync';
 import { User, users } from '../db/user/user.schema';
+import { uploadProfilePic } from '../utils/multer';
+import AppError from '../utils/appError';
+import sharp from 'sharp';
 
-// End user route handlers
-export const getMyAccount = catchAsync(
+/**
+ * End user route handlers
+ */
+
+// GET routes
+
+export const getUserProfile = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const [user]: Partial<User>[] = await db
-      .select({})
-      .from(users)
-      .where(eq(users.id, req.user!.id));
+    const { username } = req.params;
+
+    const user = await userSchemaHandler.getEndUser(username);
 
     return res.status(200).json({
       status: 'success',
@@ -27,18 +35,33 @@ export const getMyAccount = catchAsync(
   }
 );
 
+export const getMyAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const user = await userSchemaHandler.getEndUser(req.user!.username);
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        user,
+      },
+    });
+  }
+);
+
+// PATCH routes
 export const updateMyAccount = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const updatedFields = req.body as Partial<User>;
-    const userId = req.user!.id;
-
     const updatedUser = await userSchemaHandler.updateEndUser(
-      userId,
-      updatedFields
+      req.user!,
+      req.body
     );
 
     return res.status(200).json({
@@ -50,17 +73,85 @@ export const updateMyAccount = catchAsync(
   }
 );
 
-export const deleteMyAccount = catchAsync(
+export const uploadProfilePicture = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const userId = req.user!.id;
+    uploadProfilePic(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        return next(
+          new AppError(`An error occurred when uploading: ${err.message}`, 400)
+        );
+      } else if (err) {
+        return next(
+          new AppError('An unknown error occurred when uploading', 500)
+        );
+      }
+    });
+    console.log(req.file);
 
-    await userSchemaHandler.deleteEndUser(userId);
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        message: 'route not defined',
+      },
+    });
+  }
+);
 
-    return res.status(204).json({
+export const resizeUserPhoto = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user!.username}-pfp-${Date.now()}.jpg`;
+
+  await sharp(req.file.buffer)
+    .resize(500, 500, { fit: 'cover' })
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/media/users/${req.file.filename}`);
+
+  next();
+};
+
+export const deactivateAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const deactivatedUser = await userSchemaHandler.deactivateEndUser(
+      req.user!
+    );
+
+    res.cookie('jwt', 'loggedout');
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        message: 'Account deactivated successfully',
+      },
+    });
+  }
+);
+
+// DELETE routes
+export const deleteAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    await db.delete(users).where(eq(users.id, req.user!.id));
+
+    res.cookie('jwt', 'loggedout');
+
+    return res.status(200).json({
       status: 'success',
       data: null,
     });
@@ -71,6 +162,11 @@ export const deleteMyAccount = catchAsync(
  * Admin routes - unsafe to be used by end users
  * could cause harm to the database if used by unauthorized users
  * these routes do not perform the necessary input validations
+ * these routes expose sensitive data
+ */
+
+/**
+ * Admin route for getting users
  */
 export const getUsers = catchAsync(
   async (
@@ -79,6 +175,7 @@ export const getUsers = catchAsync(
     next: NextFunction
   ): Promise<Response> => {
     const usersArray = await db.select().from(users);
+
     return res.status(200).json({
       status: 'success',
       data: {
@@ -88,6 +185,9 @@ export const getUsers = catchAsync(
   }
 );
 
+/**
+ * Admin route for a single user
+ */
 export const getUser = catchAsync(
   async (
     req: Request,
@@ -96,12 +196,7 @@ export const getUser = catchAsync(
   ): Promise<Response> => {
     const { userId } = req.params || req.body;
 
-    const user = await db.query.users.findFirst({
-      columns: {
-        password: false,
-      },
-      where: eq(users.id, userId),
-    });
+    const user = await db.select().from(users).where(eq(users.id, userId));
 
     return res.status(200).json({
       status: 'success',
@@ -133,7 +228,7 @@ export const createUser = catchAsync(
 );
 
 /**
- * Admin route for manually updating a user in a database
+ * Admin route for manually updating a user entry in the database
  */
 export const updateUser = catchAsync(
   async (
@@ -141,7 +236,12 @@ export const updateUser = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const updatedUser = await db.update(users).set(req.body);
+    const { userId } = req.params || req.body;
+
+    const updatedUser = await db
+      .update(users)
+      .set(req.body)
+      .where(eq(users.id, userId));
 
     return res.status(200).json({
       status: 'success',
@@ -152,13 +252,16 @@ export const updateUser = catchAsync(
   }
 );
 
+/**
+ * Admin route for manually deleting a user entry in the database
+ */
 export const deleteOneUser = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const { userId } = req.body;
+    const { userId } = req.params || req.body;
 
     const [deletedUser]: User[] = await db
       .delete(users)
