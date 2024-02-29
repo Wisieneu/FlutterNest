@@ -54,7 +54,7 @@ export const users = pgTable('users', {
   passwordResetToken: varchar('passwordResetToken'),
   passwordResetExpires: date('passwordResetExpires'),
 
-  fileStorageOccupied: numeric('fileStorageOccupied').default('0'),
+  fileStorageOccupied: numeric('fileStorageOccupied').default('0').notNull(),
 
   active: boolean('active').default(true).notNull(),
 });

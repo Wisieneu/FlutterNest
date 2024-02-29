@@ -4,6 +4,7 @@ import * as userController from '../controllers/user.controller';
 import * as authController from '../controllers/auth.controller';
 import { validateRegistrationData } from '../middlewares/user.validation.middleware';
 import validatorMiddleware from '../middlewares/validation.middleware';
+import * as fileController from '../controllers/file.controller';
 
 const userRouter = express.Router();
 
@@ -34,7 +35,11 @@ userRouter.route('/deleteAccount').delete(userController.deleteAccount);
 
 userRouter
   .route('/uploadProfilePicture')
-  .patch(userController.uploadProfilePicture);
+  .patch(
+    fileController.uploadProfilePic,
+    fileController.resizeUserPhoto,
+    userController.updateUserPhoto
+  );
 
 /**
  * Admin routes - unsafe to be used by end users

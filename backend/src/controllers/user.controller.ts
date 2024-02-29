@@ -1,16 +1,13 @@
 import { Response, Request, NextFunction } from 'express';
 import { eq } from 'drizzle-orm';
-import multer from 'multer';
 
 import { db } from '../db';
 import * as userSchemaHandler from '../db/user/user.handlers';
 import catchAsync from '../utils/catchAsync';
 import { User, users } from '../db/user/user.schema';
-import { uploadProfilePic } from './file.controller';
 import AppError from '../utils/appError';
-import sharp from 'sharp';
-import { validateBufferMIMEType } from 'validate-image-type';
 import { deleteFileFromS3, uploadFileToS3 } from '../utils/s3';
+import userConfig from '../db/user/user.config';
 
 /**
  * End user route handlers
@@ -84,18 +81,20 @@ export const updateUserPhoto = catchAsync(
     if (!req.file)
       return next(new AppError('The attached file is invalid', 400));
 
-    if (
-      req.user &&
-      req.user.profilePicture &&
-      !(req.user.profilePicture === 'default.png')
-    )
-      await deleteFileFromS3(req.user!.profilePicture);
+    if (req.user!.profilePicture !== userConfig.defaultProfilePicture)
+      await deleteFileFromS3(req.user!.profilePicture!);
 
     await uploadFileToS3(req.file);
 
+    const newOccupiedStorage = req.file!.size + +req.user!.fileStorageOccupied;
+
     const profilePic = await db
       .update(users)
-      .set({ profilePicture: req.file.filename })
+      .set({
+        profilePicture: req.file.filename,
+        fileStorageOccupied: `${newOccupiedStorage}`,
+      })
+      .where(eq(users.id, req.user!.id))
       .returning({ profilePicture: users.profilePicture });
 
     return res.status(200).json({

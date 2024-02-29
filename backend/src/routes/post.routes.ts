@@ -2,7 +2,7 @@ import express from 'express';
 
 import * as postController from '../controllers/post.controller';
 import * as authController from '../controllers/auth.controller';
-import { uploadPostMedia } from '../utils/multer';
+import { uploadPostMedia } from '../controllers/file.controller';
 
 const postRouter = express.Router();
 
