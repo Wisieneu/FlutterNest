@@ -2,31 +2,60 @@ import express from 'express';
 
 import * as userController from '../controllers/user.controller';
 import * as authController from '../controllers/auth.controller';
+import { validateRegistrationData } from '../middlewares/user.validation.middleware';
+import validatorMiddleware from '../middlewares/validation.middleware';
+import * as fileController from '../controllers/file.controller';
 
-const router = express.Router();
+const userRouter = express.Router();
 
-// General routes
-router.route('/signup').post(authController.signupUser);
-router.route('/login').post(authController.loginUser);
+/**
+ * General user routes
+ */
+userRouter
+  .route('/signup')
+  .post(
+    [...validateRegistrationData, validatorMiddleware],
+    authController.signUp
+  );
 
-// Login protected routes
-router.use(authController.restrictLoginAccess);
+userRouter.route('/login').post(authController.login);
+userRouter.route('/logout').get(authController.logout);
 
-router.route('/getMyAccount').get(userController.getMyAccount);
-router.route('/updateMyAccount');
-router.route('/deleteMyAccount');
+userRouter.route('/u/:username').get(userController.getUserProfile);
 
-// Admin routes
-router.use(authController.restrictTo('ADMIN'));
+/**
+ * Login protected routes
+ */
+userRouter.use(authController.restrictLoginAccess);
 
-router
+userRouter.route('/getMyAccount').get(userController.getMyAccount);
+userRouter.route('/updateMyAccount').patch(userController.updateMyAccount);
+userRouter.route('/deactivateAccount').patch(userController.deactivateAccount);
+userRouter.route('/deleteAccount').delete(userController.deleteAccount);
+
+userRouter
+  .route('/uploadProfilePicture')
+  .patch(
+    fileController.uploadProfilePic,
+    fileController.resizeUserPhoto,
+    userController.updateUserPhoto
+  );
+
+/**
+ * Admin routes - unsafe to be used by end users
+ * could cause harm to the database if used by unauthorized users
+ * these routes do not perform the necessary input validations
+ * these routes might expose sensitive data
+ */
+userRouter.use(authController.restrictTo('admin'));
+
+userRouter
   .route('/:userId')
-  .get(userController.getOneUser)
-  .patch(userController.updateOneUser)
+  .patch(userController.updateUser)
   .delete(userController.deleteOneUser);
-router
+userRouter
   .route('/')
   .get(userController.getUsers)
-  .post(userController.createOneUser);
+  .post(userController.createUser);
 
-export default router;
+export default userRouter;

@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import AppError from '../utils/appError';
+import logger from '../utils/logger';
 
 const sendDevError = (err: AppError, req: Request, res: Response) => {
   // API error handling
-  console.error(err);
+  logger.error(err);
   if (req.originalUrl.startsWith('/api')) {
     res.status(err.statusCode).json({
       status: err.status,
@@ -50,7 +51,7 @@ const globalErrorHandler = (
   err: AppError | Error,
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const appErr: AppError =
     err instanceof AppError ? err : new AppError(err.message, 500, false);

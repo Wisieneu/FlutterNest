@@ -1,99 +1,263 @@
-import { Response } from 'express';
+import { Response, Request, NextFunction } from 'express';
+import { eq } from 'drizzle-orm';
 
-import { Request } from '../types';
-import { database } from '../config/database';
+import { db } from '../db';
+import * as userSchemaHandler from '../db/user/user.handlers';
+import catchAsync from '../utils/catchAsync';
+import { User, users } from '../db/user/user.schema';
+import AppError from '../utils/appError';
+import { deleteFileFromS3, uploadFileToS3 } from '../utils/s3';
+import userConfig from '../db/user/user.config';
 
-export const getUsers = async (
-  req: Request,
-  res: Response,
-): Promise<Response> => {
-  const users = await database.user.findMany({});
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      users,
-    },
-  });
-};
+/**
+ * End user route handlers
+ */
 
-export const getOneUser = async (
-  req: Request,
-  res: Response,
-): Promise<Response> => {
-  const user = database.user.findFirstOrThrow({
-    where: { id: req.params.userId },
-  });
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-};
+// GET routes
 
-export const createOneUser = async (
-  req: Request,
-  res: Response,
-): Promise<Response> => {
-  const newUser = await database.user.create({
-    data: req.body,
-  });
-  return res.status(201).json({
-    status: 'success',
-    data: {
-      newUser,
-    },
-  });
-};
+export const getUserProfile = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const { username } = req.params;
 
-export const updateOneUser = async (
-  req: Request,
-  res: Response,
-): Promise<Response> => {
-  const updatedUser = database.user.update({
-    where: {
-      id: req.params.userId,
-    },
-    data: req.body,
-  });
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      updatedUser,
-    },
-  });
-};
+    const user = await userSchemaHandler.getEndUser(username);
 
-export const deleteOneUser = async (
-  req: Request,
-  res: Response,
-): Promise<Response> => {
-  const deletedUser = database.user.delete({
-    where: {
-      id: req.params.id,
-    },
-  });
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      deletedUser,
-    },
-  });
-};
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        user,
+      },
+    });
+  }
+);
 
-export const getMyAccount = async (
-  req: Request,
-  res: Response,
-): Promise<Response> => {
-  const user = await database.user.findFirstOrThrow({
-    where: {
-      id: req.user!.id,
-    },
-  });
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-};
+export const getMyAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const user = await userSchemaHandler.getEndUser(req.user!.username);
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        user,
+      },
+    });
+  }
+);
+
+// PATCH routes
+export const updateMyAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const updatedUser = await userSchemaHandler.updateEndUser(
+      req.user!,
+      req.body
+    );
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        updatedUser,
+      },
+    });
+  }
+);
+
+export const updateUserPhoto = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    if (!req.file)
+      return next(new AppError('The attached file is invalid', 400));
+
+    if (req.user!.profilePicture !== userConfig.defaultProfilePicture)
+      await deleteFileFromS3(req.user!.profilePicture!);
+
+    await uploadFileToS3(req.file);
+
+    const newOccupiedStorage = req.file!.size + +req.user!.fileStorageOccupied;
+
+    const profilePic = await db
+      .update(users)
+      .set({
+        profilePicture: req.file.filename,
+        fileStorageOccupied: `${newOccupiedStorage}`,
+      })
+      .where(eq(users.id, req.user!.id))
+      .returning({ profilePicture: users.profilePicture });
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        profilePic,
+      },
+    });
+  }
+);
+
+export const deactivateAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const deactivatedUser = await userSchemaHandler.deactivateEndUser(
+      req.user!
+    );
+
+    res.cookie('jwt', 'loggedout');
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        message: 'Account deactivated successfully',
+      },
+    });
+  }
+);
+
+// DELETE routes
+export const deleteAccount = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    await db.delete(users).where(eq(users.id, req.user!.id));
+
+    res.cookie('jwt', 'loggedout');
+
+    return res.status(200).json({
+      status: 'success',
+      data: null,
+    });
+  }
+);
+
+/**
+ * Admin routes - unsafe to be used by end users
+ * could cause harm to the database if used by unauthorized users
+ * these routes do not perform the necessary input validations
+ * these routes expose sensitive data
+ */
+
+/**
+ * Admin route for getting users
+ */
+export const getUsers = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const usersArray = await db.select().from(users);
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        users: usersArray,
+      },
+    });
+  }
+);
+
+/**
+ * Admin route for a single user
+ */
+export const getUser = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const { userId } = req.params || req.body;
+
+    const user = await db.select().from(users).where(eq(users.id, userId));
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        user,
+      },
+    });
+  }
+);
+
+/**
+ * Admin route for manually inserting a user into the database
+ */
+export const createUser = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const newUser = await db.insert(users).values(req.body);
+
+    return res.status(201).json({
+      status: 'success',
+      data: {
+        newUser,
+      },
+    });
+  }
+);
+
+/**
+ * Admin route for manually updating a user entry in the database
+ */
+export const updateUser = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const { userId } = req.params || req.body;
+
+    const updatedUser = await db
+      .update(users)
+      .set(req.body)
+      .where(eq(users.id, userId));
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        updatedUser,
+      },
+    });
+  }
+);
+
+/**
+ * Admin route for manually deleting a user entry in the database
+ */
+export const deleteOneUser = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const { userId } = req.params || req.body;
+
+    const [deletedUser]: User[] = await db
+      .delete(users)
+      .where(eq(users.id, userId))
+      .returning();
+
+    return res.status(204).json({
+      status: 'success',
+      data: { deletedUser },
+    });
+  }
+);

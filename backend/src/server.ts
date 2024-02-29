@@ -1,12 +1,13 @@
-import dotenv from 'dotenv';
 import { Application } from 'express';
+import dotenv from 'dotenv';
 
 import app from './app';
+import logger from './utils/logger';
 
 dotenv.config({ path: './.env' });
 
 class Server {
-  private port = process.env.PORT || 6699;
+  private port = process.env.SERVER_PORT || 6699;
   public server;
 
   constructor(app: Application) {
@@ -14,10 +15,9 @@ class Server {
   }
 
   private listen(app: Application) {
+    const baseUrl = `http://localhost:${this.port}`;
     return app.listen(this.port, (): void => {
-      console.log(
-        `\x1b[33mApp running on http://localhost:${this.port}\x1b[0m\n`,
-      );
+      logger.info(`API running on ${baseUrl}\n`);
     });
   }
 }
@@ -25,9 +25,9 @@ class Server {
 const server = new Server(app.app).server;
 
 process.on('unhandledRejection', async (err) => {
-  console.log('\x1b[41m❌UNHANDLED REJECTION! Shutting down... ＞﹏＜\x1b[0m');
-  console.log('Error details:');
-  console.log(err);
+  logger.error('\x1b[41m❌UNHANDLED REJECTION! Shutting down... ＞﹏＜\x1b[0m');
+  logger.error('Error details:');
+  logger.error(err);
   server.close(() => {
     process.exit(1);
   });
