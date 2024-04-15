@@ -10,7 +10,6 @@
     "frontend/*",
     "backend/*"
   ],
-  "dependencies": {},
   "devDependencies": {
     "lerna": "^8.0.2"
   }
