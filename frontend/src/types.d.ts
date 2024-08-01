@@ -5,3 +5,12 @@ export interface SidebarItemProps {
   url: string;
   icon: string | IconDefinition;
 }
+
+export interface Profile {
+  id: string;
+  username: string;
+  displayName: string;
+  profilePicture: string;
+  role: string;
+  active: boolean;
+}

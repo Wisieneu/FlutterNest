@@ -1,23 +1,27 @@
-import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 
+import 'react-toastify/dist/ReactToastify.css';
 import './root.scss';
-
-import { Outlet } from 'react-router-dom';
 
 export default function Root() {
   return (
-    <div className="page-wrapper flex flex-auto">
-      <Navbar />
-      <div className="p-10 m-5 grow border-slate-400 border rounded-xl">
-        <Outlet />
+    <>
+      <div className="page-wrapper flex flex-auto justify-center">
+        <div className="border-gray-700 border-r">
+          <Navbar />
+        </div>
+        <div className="grow max-w-md md:max-w-xl">
+          <Outlet />
+        </div>
+        <div className="p-10 border-gray-700 border-l">
+          <Sidebar />
+        </div>
       </div>
-      <div className="p-10 m-5 border-slate-400 border rounded-xl">
-        <Sidebar />
-      </div>
-    </div>
+      <ToastContainer />
+    </>
   );
 }
-76;

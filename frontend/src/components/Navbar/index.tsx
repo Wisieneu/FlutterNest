@@ -1,4 +1,3 @@
-import React from 'react';
 import { faBell } from '@fortawesome/free-regular-svg-icons';
 
 import { SidebarItemProps } from '../../types';
@@ -52,8 +51,8 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="flex items-center justify-start h-screen bg-gray-300">
-      <div className="flex flex-col items-center w-40 h-full overflow-hidden text-gray-400 bg-gray-900">
+    <div className="flex items-center justify-start h-screen">
+      <div className="flex flex-col items-center w-40 h-full overflow-hidden text-gray-400">
         <a className="flex items-center w-full px-3 mt-3" href="/">
           <svg
             className="w-8 h-8 fill-current"

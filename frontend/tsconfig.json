@@ -20,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts", "src/routes/error/errorBoundary.js"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/routes/error/errorBoundary.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

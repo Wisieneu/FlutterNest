@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBomb, faBug, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,7 +13,7 @@ export default function ErrorPage() {
       <a className="back-btn" href="/">
         {'>> '}Back to main page
       </a>
-      <div role="alert">
+      <div className="error-msg">
         <p className="icons">
           <FontAwesomeIcon icon={faBomb} size="2x" />
           <FontAwesomeIcon icon={faTriangleExclamation} size="2x" />

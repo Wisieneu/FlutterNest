@@ -1,11 +1,11 @@
-import React from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import Root from './routes/root.tsx';
 import Profile from './components/Profile';
-import ErrorPage from './routes/errorPage';
-import Main from './components/Home';
+import ErrorPage from './routes/ErrorPage/index.tsx';
+import Main from './routes/Home/index.tsx';
 import AuthenticationPage from './routes/AuthenticationPage';
+import TestView from './routes/TestView/index.tsx';
 
 import './App.scss';
 
@@ -20,11 +20,15 @@ const router = createBrowserRouter([
         element: <Main />,
       },
       {
-        path: 'profile/:username',
+        path: '/profile/:username',
         element: <Profile />,
       },
       {
-        path: 'post/:postId',
+        path: '/post/:postId',
+      },
+      {
+        path: '/test',
+        element: <TestView />,
       },
     ],
   },

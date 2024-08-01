@@ -1,5 +1,3 @@
-import React from 'react';
-
 import SidebarItem from './SidebarItem';
 
 export default function Sidebar() {
