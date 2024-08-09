@@ -34,10 +34,11 @@
     "jsdoc": "^4.0.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "aws-sdk": "^2.1563.0",
+    "aws-sdk": "^2.1669.0",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",

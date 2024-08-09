@@ -41,6 +41,7 @@ export const getMyAccount = catchAsync(
     next: NextFunction
   ): Promise<Response> => {
     const user = await userSchemaHandler.getEndUser(req.user!.username);
+    if (!user) throw new AppError('Not authenticated', 403);
 
     return res.status(200).json({
       status: 'success',

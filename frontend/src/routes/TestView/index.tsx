@@ -18,7 +18,7 @@ export default function TestView() {
 
   return (
     <>
-      <div className="container fullscreen">
+      <div className="container fullscreen background-black text-white">
         <button className="p-4 border-2 rounded-md" onClick={notify}>
           Notify
         </button>

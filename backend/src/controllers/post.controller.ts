@@ -3,20 +3,50 @@ import { NextFunction, Request, Response } from 'express';
 import { db } from '../db';
 import { Like, NewPost, Post, likes, posts } from '../db/post/post.schema';
 import { and, eq } from 'drizzle-orm';
+import { findLike, getPostById } from '../db/post/post.handlers';
+import { postType } from '../db/post/post.config';
+import { User, users } from '../db/user/user.schema';
 
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { findLike, getPostById } from '../db/post/post.handlers';
-import { postType } from '../db/post/post.config';
 
 export const getPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result: Post[] = await db.query.posts.findMany();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await db
+      .select({
+        id: posts.id,
+        type: posts.type,
+        textContent: posts.textContent,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        parentId: posts.parentId,
+        isDeleted: posts.isDeleted,
+        author: {
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          createdAt: users.createdAt,
+          birthDate: users.birthDate,
+          profilePicture: users.profilePicture,
+          role: users.role,
+        },
+      })
+      .from(posts)
+      .leftJoin(users, eq(posts.authorId, users.id))
+      .where(eq(posts.isDeleted, false))
+      .limit(limit)
+      .offset((page - 1) * 10)
+      .execute();
 
     return res.status(200).json({
       status: 'success',
       data: {
         result,
+        page,
+        amount: result.length,
       },
     });
   }
@@ -53,7 +83,7 @@ export const getPost = catchAsync(
 export const createPost = (type: postType) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user!.id;
-    const { content } = req.body;
+    const { textContent } = req.body;
 
     let parentId = undefined;
     if (type !== 'post') {
@@ -68,8 +98,10 @@ export const createPost = (type: postType) => {
 
     // Only reposts can be without the text content
     if (type !== 'repost') {
-      if (!content)
-        return next(new AppError(`The ${type} content cannot be empty`, 400));
+      if (!textContent)
+        return next(
+          new AppError(`The ${type} text content cannot be empty`, 400)
+        );
     }
 
     const [newPost]: NewPost[] = await db
@@ -78,7 +110,7 @@ export const createPost = (type: postType) => {
         authorId,
         parentId,
         type,
-        content,
+        textContent,
       })
       .returning();
 
@@ -101,15 +133,15 @@ export const updatePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
     const userId = req.user!.id;
-    const { content } = req.body;
+    const { textContent } = req.body;
 
     const [updatedPost]: Partial<Post>[] = await db
       .update(posts)
-      .set({ content, updatedAt: new Date(Date.now()) })
+      .set({ textContent, updatedAt: new Date(Date.now()) })
       .where(and(eq(posts.id, postId), eq(posts.authorId, userId)))
       .returning({
         id: posts.id,
-        content: posts.content,
+        textContent: posts.textContent,
         updatedAt: posts.updatedAt,
       });
 

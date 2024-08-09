@@ -23,8 +23,8 @@ export const typeEnum = pgEnum('type', postConfig.postTypes);
 export const posts = pgTable('posts', {
   id: uuid('id').defaultRandom().primaryKey(),
   type: typeEnum('type').default('post').notNull(),
-  content: varchar('content', {
-    length: postConfig.maxContentLength,
+  textContent: varchar('textContent', {
+    length: postConfig.maxTextContentLength,
   }),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt'),

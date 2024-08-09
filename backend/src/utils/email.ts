@@ -12,7 +12,7 @@ export async function sendWelcomeEmail(toEmail: string): Promise<void> {
   await transporter.sendMail({
     from: 'Message delivery bird!!!! <noreply@flutternest.wise-ee.xyz>',
     to: toEmail,
-    subject: 'Welcome to FlutterNest 😍😎🥰💜',
+    subject: 'Welcome to FlutterNest 😍🥰💜',
     html: '<p>Welcome to the Nest.</p>',
   });
 }

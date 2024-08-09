@@ -1,16 +1,29 @@
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { IconType } from "react-icons";
 
-export interface SidebarItemProps {
-  name: string;
-  url: string;
-  icon: string | IconDefinition;
+enum userRolesEnum {
+  user,
+  mod,
+  admin,
 }
 
-export interface Profile {
+export interface User {
   id: string;
   username: string;
   displayName: string;
+  createdAt: string;
+  birthDate: string | null;
   profilePicture: string;
-  role: string;
-  active: boolean;
+  role: userRolesEnum;
+}
+
+export interface Post {
+  id: string;
+  type: string;
+  textContent: string;
+  createdAt: string;
+  updatedAt: string | null;
+  parentId: string | null;
+  isDeleted: boolean;
+  likesAmount: string;
+  author: User;
 }

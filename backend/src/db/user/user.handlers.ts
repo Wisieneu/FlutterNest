@@ -12,6 +12,7 @@ const {
   passwordResetToken,
   email,
   active,
+  fileStorageOccupied,
   ...nonSensitiveColumns
 } = getTableColumns(users);
 
@@ -58,7 +59,7 @@ export async function signUpEndUser(
       displayName: username,
     })
     .returning();
-  console.log(newUser);
+
   return newUser;
 }
 

@@ -18,20 +18,21 @@ userRouter
     authController.signUp
   );
 
-userRouter.route('/login').post(authController.login);
+userRouter.route('/signin').post(authController.signIn);
 userRouter.route('/logout').get(authController.logout);
 
-userRouter.route('/u/:username').get(userController.getUserProfile);
+userRouter.route('/profile/:username').get(userController.getUserProfile);
 
 /**
  * Login protected routes
  */
 userRouter.use(authController.restrictLoginAccess);
 
-userRouter.route('/getMyAccount').get(userController.getMyAccount);
-userRouter.route('/updateMyAccount').patch(userController.updateMyAccount);
-userRouter.route('/deactivateAccount').patch(userController.deactivateAccount);
-userRouter.route('/deleteAccount').delete(userController.deleteAccount);
+userRouter
+  .route('/me')
+  .get(userController.getMyAccount)
+  .patch(userController.updateMyAccount)
+  .delete(userController.deactivateAccount);
 
 userRouter
   .route('/uploadProfilePicture')

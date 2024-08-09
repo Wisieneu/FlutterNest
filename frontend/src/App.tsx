@@ -1,44 +1,52 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
-import Root from './routes/root.tsx';
-import Profile from './components/Profile';
-import ErrorPage from './routes/ErrorPage/index.tsx';
-import Main from './routes/Home/index.tsx';
-import AuthenticationPage from './routes/AuthenticationPage';
-import TestView from './routes/TestView/index.tsx';
+import Root from "@/routes/root.tsx";
+import Profile from "@/components/Profile";
+import ErrorPage from "@/routes/ErrorPage";
+import Home from "@/routes/Home";
+import AuthenticationPage from "@/routes/Authentication";
+import TestView from "@/routes/TestView";
+import AuthProvider from "@/components/Auth/AuthProvider";
 
-import './App.scss';
+import "react-toastify/dist/ReactToastify.css";
+import "./App.scss";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: '/',
-        element: <Main />,
+        path: "/",
+        element: <Home />,
       },
       {
-        path: '/profile/:username',
+        path: "/profile/:username",
         element: <Profile />,
       },
       {
-        path: '/post/:postId',
+        path: "/post/:postId",
       },
       {
-        path: '/test',
+        path: "/test",
         element: <TestView />,
       },
     ],
   },
   {
-    path: '/auth/*',
+    path: "/auth/*",
     element: <AuthenticationPage />,
     errorElement: <ErrorPage />,
   },
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </AuthProvider>
+  );
 }

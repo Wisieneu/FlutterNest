@@ -168,10 +168,9 @@ export const signUp = catchAsync(
  * Sends back an authentication token
  * @param {Request} req: containing a json body with username or email and password inputs
  */
-export const login = catchAsync(
+export const signIn = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { login, password } = req.body;
-
     if (!login || !password)
       return next(new AppError('Please provide a login and a password.', 400));
 
@@ -180,9 +179,14 @@ export const login = catchAsync(
       .from(users)
       .where(eq(isEmail(login) ? users.email : users.username, login));
 
+    if (!user || user.active === false)
+      return next(new AppError('Incorrect credentials', 400));
+
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (isPasswordCorrect) {
       return createAndSendAuthToken(user, 200, req, res);
+    } else {
+      return next(new AppError('Incorrect credentials', 400));
     }
   }
 );

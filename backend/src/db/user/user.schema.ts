@@ -29,7 +29,9 @@ export const users = pgTable('users', {
   username: varchar('username', { length: userConfig.maxUsernameLength })
     .notNull()
     .unique(),
-  displayName: varchar('displayName', { length: userConfig.maxUsernameLength }),
+  displayName: varchar('displayName', {
+    length: userConfig.maxUsernameLength,
+  }).notNull(),
 
   email: varchar('email', { length: userConfig.maxEmailLength })
     .notNull()

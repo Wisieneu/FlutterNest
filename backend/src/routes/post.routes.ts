@@ -9,10 +9,11 @@ const postRouter = express.Router();
 /**
  * General post routes
  */
+
 postRouter.route('/').get(postController.getPosts);
 postRouter.route('/:postId').get(postController.getPost);
 
-// Login restricted routes from now on
+// Login restricted routes only below this line
 postRouter.use(authController.restrictLoginAccess);
 
 postRouter.route('/').post(uploadPostMedia, postController.createPost('post'));

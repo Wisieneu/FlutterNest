@@ -9,19 +9,20 @@ export const validateRegistrationData = [
   check('password').trim().escape(),
 
   // Validate inputs
-  check('username').notEmpty().withMessage('Username is required'),
   check('username')
+    .notEmpty()
+    .withMessage('Username is required')
     .isLength({
       min: userConfig.minUsernameLength,
       max: userConfig.maxUsernameLength,
     })
     .withMessage(
-      `The username needs to have at least ${userConfig.minUsernameLength} characters, maximum is ${userConfig.maxUsernameLength}.`
+      `The username needs to have ${userConfig.minUsernameLength} - ${userConfig.maxUsernameLength} characters`
     ),
 
   check('email')
     .isEmail({ ignore_max_length: false })
-    .withMessage('Must be a valid email address'),
+    .withMessage('Email must be valid'),
 
   check('password')
     .isLength({
@@ -29,6 +30,6 @@ export const validateRegistrationData = [
       max: userConfig.maxPasswordLength,
     })
     .withMessage(
-      `The password needs to have at least ${userConfig.minPasswordLength} characters, maximum is ${userConfig.maxPasswordLength}.`
+      `The password needs to have ${userConfig.minPasswordLength} - ${userConfig.maxPasswordLength} characters`
     ),
 ];
