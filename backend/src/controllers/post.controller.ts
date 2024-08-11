@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { db } from '../db';
 import { Like, NewPost, Post, likes, posts } from '../db/post/post.schema';
 import { and, eq } from 'drizzle-orm';
-import { findLike, getPostById } from '../db/post/post.handlers';
+import * as postHandler from '../db/post/post.handlers';
 import { postType } from '../db/post/post.config';
 import { User, users } from '../db/user/user.schema';
 
@@ -15,31 +15,7 @@ export const getPosts = catchAsync(
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
-    const result = await db
-      .select({
-        id: posts.id,
-        type: posts.type,
-        textContent: posts.textContent,
-        createdAt: posts.createdAt,
-        updatedAt: posts.updatedAt,
-        parentId: posts.parentId,
-        isDeleted: posts.isDeleted,
-        author: {
-          id: users.id,
-          username: users.username,
-          displayName: users.displayName,
-          createdAt: users.createdAt,
-          birthDate: users.birthDate,
-          profilePicture: users.profilePicture,
-          role: users.role,
-        },
-      })
-      .from(posts)
-      .leftJoin(users, eq(posts.authorId, users.id))
-      .where(eq(posts.isDeleted, false))
-      .limit(limit)
-      .offset((page - 1) * 10)
-      .execute();
+    const result = await postHandler.getPostsPaginated(page, limit);
 
     return res.status(200).json({
       status: 'success',
@@ -56,9 +32,7 @@ export const getPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
 
-    const result = await db.query.posts.findFirst({
-      where: eq(posts.id, postId),
-    });
+    const result = await postHandler.getPostById(postId);
 
     if (!result) {
       next(new AppError('Could not find a post with this ID', 404));
@@ -75,41 +49,18 @@ export const getPost = catchAsync(
 
 /**
  * Creates a new post
- *
  * TODO: attaching images
- * @param {postType} type - The type of the post (post, comment, repost).
- * @throws {AppError} - If there is an error creating the post.
  */
-export const createPost = (type: postType) => {
-  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const createPost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user!.id;
     const { textContent } = req.body;
 
-    let parentId = undefined;
-    if (type !== 'post') {
-      const { postId } = req.params;
-      const [post]: Post[] = await getPostById.execute({ postId });
-
-      if (!post || post.isDeleted === true)
-        return next(new AppError('Could not find a post with this id', 400));
-
-      parentId = post.id;
-    }
-
-    // Only reposts can be without the text content
-    if (type !== 'repost') {
-      if (!textContent)
-        return next(
-          new AppError(`The ${type} text content cannot be empty`, 400)
-        );
-    }
-
-    const [newPost]: NewPost[] = await db
+    const [newPost] = await db
       .insert(posts)
       .values({
         authorId,
-        parentId,
-        type,
+        type: 'post',
         textContent,
       })
       .returning();
@@ -126,9 +77,34 @@ export const createPost = (type: postType) => {
         newPost,
       },
     });
-  });
-};
+  }
+);
 
+export const commentPost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //TODO: implement
+    return res.status(200).json({
+      status: 'route not implemented yet',
+      data: null,
+    });
+  }
+);
+
+export const repostPost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //TODO: implement
+    return res.status(200).json({
+      status: 'route not implemented yet',
+      data: null,
+    });
+  }
+);
+
+/**
+ * Updates a post
+ * Only the author of the post can update it
+ * Checks if the post exists and has not been deleted already
+ */
 export const updatePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
@@ -145,7 +121,7 @@ export const updatePost = catchAsync(
         updatedAt: posts.updatedAt,
       });
 
-    res.status(202).json({
+    res.status(200).json({
       status: 'success',
       data: {
         updatedPost,
@@ -154,10 +130,32 @@ export const updatePost = catchAsync(
   }
 );
 
+/**
+ * Deletes a post
+ * Only the author of the post can delete it
+ * Checks if the post exists and has not been deleted already
+ * Sets the isDeleted flag to true
+ */
 export const deletePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
     const userId = req.user!.id;
+
+    const [deletedPost] = await db
+      .update(posts)
+      .set({ isDeleted: true })
+      .where(
+        and(
+          eq(posts.id, postId),
+          eq(posts.authorId, userId),
+          eq(posts.isDeleted, false)
+        )
+      )
+      .returning();
+
+    if (!deletedPost) {
+      return next(new AppError('Could not find a post with this id', 400));
+    }
 
     res.status(204).json({
       status: 'success',
@@ -171,38 +169,58 @@ export const deletePost = catchAsync(
  */
 
 /**
- * A controller which checks if the user has liked the post already
- * Check if the post exists and has not been deleted already
- * If not, creates a like for this post
- * If already liked, removes the like
+ * A controller which creates a like for a post
+ * Checks if the user has liked the post already
+ * Checks if the post exists and has not been deleted already
  */
-export const togglePostLike = catchAsync(
+export const likePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
     const userId = req.user!.id;
-    const [post]: Post[] = await getPostById.execute({ postId });
+    const [post] = await postHandler.getPostById(postId);
+
+    if (!post || post.isDeleted === true)
+      return next(new AppError('Could not find a post with this id', 400));
+    const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);
+    if (likeLookup) {
+      return next(
+        new AppError('Post is already liked by the current user', 400)
+      );
+    }
+
+    await postHandler.likePost(postId, userId);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Like added successfully',
+    });
+  }
+);
+
+/**
+ * A controller which removes a like from a post
+ * Checks if the user has liked the post already
+ * Checks if the post exists and has not been deleted already
+ */
+export const unlikePost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId } = req.params;
+    const userId = req.user!.id;
+    const [post] = await postHandler.getPostById(postId);
 
     if (!post || post.isDeleted === true)
       return next(new AppError('Could not find a post with this id', 400));
 
-    const [likeLookup]: Like[] = await findLike.execute({ postId, userId });
+    const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);
 
-    let liked: boolean;
+    if (!likeLookup)
+      return next(new AppError('Post is not liked by the current user', 400));
 
-    if (likeLookup) {
-      await db.delete(likes).where(eq(likes.id, likeLookup.id));
-      liked = false;
-    } else {
-      await db.insert(likes).values({ userId, postId });
-      liked = true;
-    }
-    // const likes = await getLikesByPostId.execute({ postId: req.params.postId });
-
-    // const likes = await getLikesByPostId.execute({ postId: req.params.postId });
+    await db.delete(likes).where(eq(likes.id, likeLookup.id));
 
     res.status(200).json({
       status: 'success',
-      data: { liked },
+      message: 'Like removed successfully',
     });
   }
 );

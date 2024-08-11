@@ -1,6 +1,7 @@
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
 import {
   boolean,
+  integer,
   pgEnum,
   pgTable,
   serial,
@@ -8,7 +9,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { users } from '../user/user.schema';
+import { User, users } from '../user/user.schema';
 import postConfig from './post.config';
 
 // Post Schema
@@ -31,6 +32,8 @@ export const posts = pgTable('posts', {
   authorId: uuid('authorId').notNull(),
   parentId: uuid('parentId'),
   isDeleted: boolean('isDeleted').default(false).notNull(),
+  likesAmount: integer('likesAmount').default(0).notNull(),
+  commentsAmount: integer('commentsAmount').default(0).notNull(),
   // images:
 });
 
@@ -46,9 +49,17 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
     relationName: 'parentPost',
   }),
   childPosts: many(posts),
+  likes: many(likes),
 }));
 
-export type Post = InferSelectModel<typeof posts>;
+/**
+ * Infer the Post type
+ * Omit the authorId field
+ * Add the author field as a User object
+ */
+export type Post = Omit<InferSelectModel<typeof posts>, 'authorId'> & {
+  author: User | null;
+};
 export type NewPost = InferInsertModel<typeof posts>;
 
 export const likes = pgTable('likes', {
@@ -61,10 +72,12 @@ export const likesRelations = relations(likes, ({ one }) => ({
   user: one(users, {
     fields: [likes.userId],
     references: [users.id],
+    relationName: 'followers',
   }),
   post: one(posts, {
     fields: [likes.postId],
     references: [posts.id],
+    relationName: 'createdPosts',
   }),
 }));
 

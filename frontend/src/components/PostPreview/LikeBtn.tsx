@@ -6,6 +6,7 @@ interface LikeBtnProps {
   isLiked: boolean;
 }
 
+// TODO: add likes
 export default function LikesBtn(props: LikeBtnProps) {
   function handleLike() {
     console.log("Liked");

@@ -71,8 +71,6 @@ const postMediaStorage = multer.diskStorage({
     cb(null, 'public/media/posts/'); // Set the destination directory
   },
   filename: function (req, file, cb) {
-    console.log(req.body);
-    console.log(req.files);
     cb(
       !req.user!.id
         ? new AppError('An error has occurred when uploading your file(s)', 400)

@@ -1,5 +1,5 @@
 export default {
-  maxTextContentLength: 256,
+  maxTextContentLength: 128,
   postTypes: ['post', 'comment', 'repost'],
 } as const;
 

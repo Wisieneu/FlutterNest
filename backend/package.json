@@ -11,7 +11,8 @@
     "introspect": "drizzle-kit introspect:pg --config=drizzle.config.ts",
     "generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
     "migrate": "tsx -r dotenv/config src/db/migrate.ts",
-    "studio": "drizzle-kit studio --config=drizzle.config.ts"
+    "studio": "drizzle-kit studio --config=drizzle.config.ts",
+    "devscript": "tsx -r dotenv/config src/db/devScripts/devScript.ts"
   },
   "keywords": [],
   "author": "",

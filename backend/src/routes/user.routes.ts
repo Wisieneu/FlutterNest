@@ -21,7 +21,7 @@ userRouter
 userRouter.route('/signin').post(authController.signIn);
 userRouter.route('/logout').get(authController.logout);
 
-userRouter.route('/profile/:username').get(userController.getUserProfile);
+userRouter.route('/profile/:username').get(userController.getUserByUsername);
 
 /**
  * Login protected routes
@@ -52,8 +52,8 @@ userRouter.use(authController.restrictTo('admin'));
 
 userRouter
   .route('/:userId')
-  .patch(userController.updateUser)
-  .delete(userController.deleteOneUser);
+  .patch(userController.updateUserById)
+  .delete(userController.deleteOneUserById);
 userRouter
   .route('/')
   .get(userController.getUsers)

@@ -15,7 +15,7 @@ import userConfig from '../db/user/user.config';
 
 // GET routes
 
-export const getUserProfile = catchAsync(
+export const getUserByUsername = catchAsync(
   async (
     req: Request,
     res: Response,
@@ -41,7 +41,10 @@ export const getMyAccount = catchAsync(
     next: NextFunction
   ): Promise<Response> => {
     const user = await userSchemaHandler.getEndUser(req.user!.username);
-    if (!user) throw new AppError('Not authenticated', 403);
+    if (!user)
+      next(
+        new AppError('An error has occurred while searching for the user', 403)
+      );
 
     return res.status(200).json({
       status: 'success',
@@ -60,7 +63,7 @@ export const updateMyAccount = catchAsync(
     next: NextFunction
   ): Promise<Response> => {
     const updatedUser = await userSchemaHandler.updateEndUser(
-      req.user!,
+      req.user!.id,
       req.body
     );
 
@@ -87,13 +90,10 @@ export const updateUserPhoto = catchAsync(
 
     await uploadFileToS3(req.file);
 
-    const newOccupiedStorage = req.file!.size + +req.user!.fileStorageOccupied;
-
     const profilePic = await db
       .update(users)
       .set({
         profilePicture: req.file.filename,
-        fileStorageOccupied: `${newOccupiedStorage}`,
       })
       .where(eq(users.id, req.user!.id))
       .returning({ profilePicture: users.profilePicture });
@@ -218,7 +218,7 @@ export const createUser = catchAsync(
 /**
  * Admin route for manually updating a user entry in the database
  */
-export const updateUser = catchAsync(
+export const updateUserById = catchAsync(
   async (
     req: Request,
     res: Response,
@@ -243,7 +243,7 @@ export const updateUser = catchAsync(
 /**
  * Admin route for manually deleting a user entry in the database
  */
-export const deleteOneUser = catchAsync(
+export const deleteOneUserById = catchAsync(
   async (
     req: Request,
     res: Response,

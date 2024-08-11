@@ -43,7 +43,7 @@ export default function Post({ data }: { data: PostType }) {
               likesAmount={data.likesAmount}
               isLiked={false}
             />
-            <CommentsBtn postId={23} commentAmount={55} />
+            <CommentsBtn postId={23} commentsAmount={55} />
             <ShareBtn postId={23} />
           </div>
         </div>

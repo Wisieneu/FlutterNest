@@ -1,6 +1,4 @@
-import { Pool } from 'pg';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { NodePgDatabase, drizzle } from 'drizzle-orm/node-postgres';
 import { db, connection } from '.';
 
 import logger from '../utils/logger';

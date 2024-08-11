@@ -6,8 +6,6 @@ import NavbarItem from "./NavbarItem";
 import Logo from "@/components/SiteLogo";
 
 export default function Sidebar() {
-  // useContext();
-
   const socialButtonsData = [
     {
       name: "Home",
@@ -49,7 +47,7 @@ export default function Sidebar() {
       <div className="flex h-full w-40 flex-col items-center text-gray-400">
         <Logo />
         <div className="flex w-full flex-1 flex-col px-2">
-          <div className="mt-3 flex w-full flex-col items-center">
+          <div className="flex w-full flex-col items-center">
             {socialButtonsData.map((el, index) => (
               <NavbarItem
                 key={index}

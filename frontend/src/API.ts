@@ -10,7 +10,6 @@ const API: AxiosInstance = axios.create({
 
 export async function getPosts(page: number): Promise<Post[]> {
   const response = await API.get(`/posts?page=${page}&limit=10`);
-  console.log(response);
   return response.data.data.result;
 }
 
@@ -19,8 +18,13 @@ export async function getPost(postId: string): Promise<Post> {
   return response.data.data.result;
 }
 
-export async function createPost(postType: string, requestBody: string) {
-  const response = API.post(`/posts/${postType}`, requestBody);
+export async function createPost(formData: FormData) {
+  const response = await API.post(`/posts`, formData);
+  return response;
+}
+
+export async function createComment(postId: string, requestBody: string) {
+  const response = API.post(`/posts/${postId}/comment`, requestBody);
   return response;
 }
 

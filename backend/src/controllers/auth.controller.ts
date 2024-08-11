@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import isEmail from 'validator/lib/isEmail';
 
 import { db } from '../db';
-import { User, NewUser, users } from '../db/user/user.schema';
+import { User, NewUser, users, UserUnsafe } from '../db/user/user.schema';
 import { filterUserObj, signUpEndUser } from '../db/user/user.handlers';
 
 import AppError from '../utils/appError';
@@ -97,7 +97,7 @@ export const restrictLoginAccess = catchAsync(
       jwt.verify(token, process.env.JWT_SECRET as string)
     );
 
-    const [currentUser]: User[] = await db
+    const [currentUser]: UserUnsafe[] = await db
       .select()
       .from(users)
       .where(eq(users.id, decodedToken.userId));
@@ -174,7 +174,7 @@ export const signIn = catchAsync(
     if (!login || !password)
       return next(new AppError('Please provide a login and a password.', 400));
 
-    let [user]: User[] = await db
+    let [user]: UserUnsafe[] = await db
       .select()
       .from(users)
       .where(eq(isEmail(login) ? users.email : users.username, login));

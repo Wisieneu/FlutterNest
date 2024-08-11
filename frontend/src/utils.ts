@@ -14,6 +14,5 @@ export function convertDateRelative(date: string) {
 export function isScrolledToBottom() {
   const scrolledTo = window.scrollY + window.innerHeight;
   const isReachBottom = document.body.scrollHeight - scrolledTo <= 1;
-  console.log(isReachBottom, document.body.scrollHeight, scrolledTo);
   return isReachBottom;
 }

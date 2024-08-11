@@ -72,5 +72,15 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   // followers: many(users),
 }));
 
-export type User = InferSelectModel<typeof users>;
+type SensitiveFields =
+  | 'fileStorageOccupied'
+  | 'passwordResetExpires'
+  | 'passwordResetToken'
+  | 'lastPasswordChangeDate'
+  | 'password'
+  | 'email'
+  | 'active';
+
+export type User = Omit<InferSelectModel<typeof users>, SensitiveFields>;
+export type UserUnsafe = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;

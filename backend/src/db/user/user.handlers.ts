@@ -2,7 +2,7 @@ import { and, eq, getTableColumns } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 
 import { db } from '..';
-import { users, User, NewUser } from './user.schema';
+import { users, User, NewUser, UserUnsafe } from './user.schema';
 
 // Define columns that are safe to expose to other end users
 const {
@@ -24,7 +24,7 @@ const {
  * @param {User} userObj
  * @returns {Partial<User>} the user object without sensitive
  */
-export function filterUserObj(userObj: User): Partial<User> {
+export function filterUserObj(userObj: Partial<UserUnsafe>): Partial<User> {
   userObj.password = undefined!;
   userObj.email = undefined!;
   userObj.active = undefined!;
@@ -67,10 +67,10 @@ export async function signUpEndUser(
  * Retrieves an end user from the database based on the provided username.
  *
  * @param {string} username - The username of the user to retrieve.
- * @returns {Promise<Partial<User>>} - the queried user
+ * @returns {Promise<User>} - the queried user
  */
-export async function getEndUser(username: string): Promise<Partial<User>> {
-  const [user]: Partial<User>[] = await db
+export async function getEndUser(username: string): Promise<User> {
+  const [user]: User[] = await db
     .select({ ...nonSensitiveColumns })
     .from(users)
     .where(and(eq(users.username, username), eq(users.active, true)));
@@ -82,23 +82,23 @@ export async function getEndUser(username: string): Promise<Partial<User>> {
  * Filters the desired fields to update
  * Safely updates the user that is logged in
  * @param userId
- * @param updatedFieldsObject
+ * @param updatedFieldsObject - the fields to update
  */
 export async function updateEndUser(
-  user: User,
+  userId: string,
   updatedFieldsObject: Partial<User>
-): Promise<Partial<User>[]> {
+): Promise<User> {
   // username email password
 
-  const filteredUpdateFields = filterUserObj(updatedFieldsObject as User);
-  console.log(filteredUpdateFields);
+  const filteredUpdateFields = filterUserObj(updatedFieldsObject);
 
   //TODO: update users
-  return db
+  const [result]: User[] = await db
     .update(users)
     .set(filteredUpdateFields)
-    .where(eq(users.id, user.id))
+    .where(eq(users.id, userId))
     .returning();
+  return result;
 }
 
 export async function deactivateEndUser(user: User) {

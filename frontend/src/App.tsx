@@ -30,7 +30,7 @@ const router = createBrowserRouter([
         path: "/post/:postId",
       },
       {
-        path: "/test",
+        path: "/test", // TODO: remove
         element: <TestView />,
       },
     ],
