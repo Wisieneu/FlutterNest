@@ -1,5 +1,6 @@
-import { BaseSyntheticEvent } from 'react';
-import { toast, Slide } from 'react-toastify';
+import { BaseSyntheticEvent } from "react";
+import { toast, Slide } from "react-toastify";
+import { displayToast } from "../Toast";
 
 interface ShareBtnProps {
   postId: number;
@@ -9,22 +10,20 @@ export default function ShareBtn(props: ShareBtnProps) {
   // Copies the link to the post's detail page to clipboard
   function handleShare(event: BaseSyntheticEvent) {
     event.preventDefault();
-    navigator.clipboard.writeText(`${window.location.host}/post?id=${props.postId}`);
-    toast('Link copied to clipboard', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: 'dark',
-      transition: Slide,
-    });
+    navigator.clipboard.writeText(
+      `${window.location.host}/post?id=${props.postId}`,
+    );
+    displayToast("Link copied to clipboard.");
   }
 
   return (
-    <div className="flex text-sm mr-4 cursor-pointer" onClick={handleShare}>
-      <svg fill="none" viewBox="0 0 24 24" className="w-4 h-4 mr-1" stroke="currentColor">
+    <div className="mr-4 flex cursor-pointer text-sm" onClick={handleShare}>
+      <svg
+        fill="none"
+        viewBox="0 0 24 24"
+        className="mr-1 h-4 w-4"
+        stroke="currentColor"
+      >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"

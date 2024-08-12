@@ -12,11 +12,7 @@ import catchAsync from '../utils/catchAsync';
  */
 export const uploadProfilePic = multer({
   storage: multer.memoryStorage(),
-  fileFilter: async (
-    req: Request,
-    file: Express.Multer.File,
-    cb: FileFilterCallback
-  ) => {
+  fileFilter: async (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
     if (!file.mimetype.startsWith('image/')) {
       cb(new AppError('Invalid file type. Only images are allowed', 400));
     } else {
@@ -30,19 +26,11 @@ export const resizeUserPhoto = catchAsync(
     if (!req.file) return next();
 
     const validationResult = await validateBufferMIMEType(req.file.buffer, {
-      allowMimeTypes: [
-        'image/jpeg',
-        'image/jpg',
-        'image/gif',
-        'image/png',
-        'image/webp',
-      ],
+      allowMimeTypes: ['image/jpeg', 'image/jpg', 'image/gif', 'image/png', 'image/webp'],
     });
 
     if (!validationResult.ok)
-      return next(
-        new AppError('Invalid file type. Only images are allowed', 400)
-      );
+      return next(new AppError('Invalid file type. Only images are allowed', 400));
 
     req.file.filename = `user-${req.user!.username}-${
       req.user!.id
@@ -66,40 +54,37 @@ export const resizeUserPhoto = catchAsync(
   }
 );
 
-const postMediaStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/media/posts/'); // Set the destination directory
-  },
-  filename: function (req, file, cb) {
-    cb(
-      !req.user!.id
-        ? new AppError('An error has occurred when uploading your file(s)', 400)
-        : null,
-      `${req.user!.id}-${Date.now()}-${file.originalname}`
-      // file.fieldname + '-' + Date.now() + path.extname(file.originalname)
-    );
-  },
-});
-
 export const uploadPostMedia = multer({
-  storage: postMediaStorage,
-  fileFilter: (
-    req: Request,
-    file: Express.Multer.File,
-    cb: FileFilterCallback
-  ) => {
-    if (
-      file.mimetype.startsWith('image/') ||
-      file.mimetype.startsWith('video/')
-    ) {
+  storage: multer.memoryStorage(),
+  fileFilter: async (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    console.log(file);
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(
-        new AppError(
-          'Invalid file type. Only images and videos are allowed',
-          400
-        )
-      );
+      cb(new AppError('Invalid file type. Only images and videos are allowed', 400));
     }
   },
-}).array('media', 9);
+}).array('files', 4);
+
+export const processPostMedia = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // if (!req.files) return next();
+    console.log(req);
+    // req.files.filename = `post-${req.user!.username}-${req.body.postId}-${Date.now()}-${
+    //   req.files.originalname.split('.')[0]
+    // }.${req.files.originalname.split('.')[1]}`;
+    // const compressedBuffer = await sharp(req.file.buffer)
+    //   .resize(500, 500, { fit: 'cover' })
+    //   .toFormat('jpeg')
+    //   .jpeg({ quality: 90 })
+    //   .toBuffer();
+    // // replace the current req.file object with compressed buffer's data
+    // req.file = {
+    //   ...req.file,
+    //   buffer: compressedBuffer,
+    //   size: compressedBuffer.length,
+    //   mimetype: 'image/jpeg',
+    // };
+    // next();
+  }
+);

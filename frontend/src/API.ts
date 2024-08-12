@@ -5,7 +5,6 @@ import { Post, User } from "@/types";
 const API: AxiosInstance = axios.create({
   baseURL: `http://localhost:6699/api/v1`,
   withCredentials: true,
-  responseType: "json",
 });
 
 export async function getPosts(page: number): Promise<Post[]> {

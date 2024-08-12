@@ -2,7 +2,7 @@ import express from 'express';
 
 import * as postController from '../controllers/post.controller';
 import * as authController from '../controllers/auth.controller';
-import { uploadPostMedia } from '../controllers/file.controller';
+import { processPostMedia, uploadPostMedia } from '../controllers/file.controller';
 
 const postRouter = express.Router();
 
@@ -16,7 +16,7 @@ postRouter.route('/:postId').get(postController.getPost);
 // Login restricted routes only below this line
 postRouter.use(authController.restrictLoginAccess);
 
-postRouter.route('/').post(uploadPostMedia, postController.createPost);
+postRouter.route('/').post(uploadPostMedia, processPostMedia, postController.createPost);
 // postRouter.route('/').post(uploadPostMedia, postController.test);
 postRouter.route('/:postId/comment').post(postController.commentPost);
 postRouter.route('/:postId/repost').post(postController.repostPost);

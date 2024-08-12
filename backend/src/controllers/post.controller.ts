@@ -55,6 +55,7 @@ export const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user!.id;
     const { textContent } = req.body;
+    console.log(req.body);
 
     const [newPost] = await db
       .insert(posts)
@@ -66,9 +67,7 @@ export const createPost = catchAsync(
       .returning();
 
     if (!newPost) {
-      return next(
-        new AppError('An error has occurred while creating your post.', 400)
-      );
+      return next(new AppError('An error has occurred while creating your post.', 400));
     }
 
     res.status(201).json({
@@ -145,11 +144,7 @@ export const deletePost = catchAsync(
       .update(posts)
       .set({ isDeleted: true })
       .where(
-        and(
-          eq(posts.id, postId),
-          eq(posts.authorId, userId),
-          eq(posts.isDeleted, false)
-        )
+        and(eq(posts.id, postId), eq(posts.authorId, userId), eq(posts.isDeleted, false))
       )
       .returning();
 
@@ -183,9 +178,7 @@ export const likePost = catchAsync(
       return next(new AppError('Could not find a post with this id', 400));
     const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);
     if (likeLookup) {
-      return next(
-        new AppError('Post is already liked by the current user', 400)
-      );
+      return next(new AppError('Post is already liked by the current user', 400));
     }
 
     await postHandler.likePost(postId, userId);

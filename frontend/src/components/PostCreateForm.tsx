@@ -1,17 +1,22 @@
 import { ChangeEvent, useEffect, useState, useCallback } from "react";
-import { toast } from "react-toastify";
+import { Slide, toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
 
-import SubmitBtn from "./Buttons/SubmitBtn";
+import { FaFileImage } from "react-icons/fa";
+
+import SubmitBtn from "@/components/Buttons/SubmitBtn";
 
 import { createPost } from "@/API";
+import { displayToast } from "./Toast";
 
 export default function PostCreateForm() {
   const [textContent, setTextContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [colorClass, setColorClass] = useState("");
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<
+    (string | ArrayBuffer | null)[]
+  >([]);
 
   const isFormSubmittable = textContent.length > 2 && textContent.length < 129;
   const gradientWidth = Math.min(
@@ -21,41 +26,46 @@ export default function PostCreateForm() {
 
   useEffect(() => {
     if (textContent.length > 128) {
-      setColorClass("red");
+      setColorClass("#dc2626");
     } else if (textContent.length > 90) {
-      setColorClass("yellow");
+      setColorClass("#ca8a04");
     } else {
-      setColorClass("green");
+      setColorClass("#16a34a");
     }
   }, [textContent]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log(acceptedFiles);
     const file = new FileReader();
     file.onload = () => {
-      setUploadedImages((prevState) => [...prevState, file.result as string]);
+      setUploadedImages((prevState) => [...prevState, file.result]);
     };
 
     file.readAsDataURL(acceptedFiles[0]);
   }, []);
+
   const { acceptedFiles, getRootProps, getInputProps, isDragActive } =
     useDropzone({ onDrop });
 
   async function handleSubmit() {
     // TODO: fix redirect
-    console.log("files", uploadedImages);
-
     setIsLoading(true);
     const formData = new FormData();
+    console.log(
+      (document.getElementById("file-upload")! as HTMLInputElement).files,
+    );
     formData.append("textContent", textContent);
     if (uploadedImages)
-      uploadedImages.forEach((image) => formData.append("media", image));
+      uploadedImages.forEach((image, index) =>
+        formData.append(`files`, image as string),
+      );
+    console.log(formData.getAll("files"));
+
     const response = await createPost(formData);
     console.log(response);
     if (response.status === 201) {
-      toast.success("Post created successfully.");
+      displayToast("Post created successfully.", "success");
     } else {
-      toast.error("An error occurred while creating the post.");
+      displayToast("An error occurred while creating the post.", "error");
     }
     setIsLoading(false);
   }
@@ -76,7 +86,7 @@ export default function PostCreateForm() {
           onChange={(event) => setTextContent(event.target.value)}
         />
         <div {...getRootProps()}>
-          <input {...getInputProps()} />
+          <input id="file-upload" {...getInputProps()} />
           {isDragActive ? (
             <p>Drop the files here ...</p>
           ) : (
@@ -85,17 +95,19 @@ export default function PostCreateForm() {
         </div>
         {/* Display uploaded images */}
         {uploadedImages.map((image, index) => (
-          <img key={index} src={image} />
+          <img key={index} src={image as string} />
         ))}
         <div className="absolute bottom-4 right-4 flex">
           {/* Visual indicator for the character limit */}
           <div
-            className={`${textContent.length > 3 ? "" : "hidden"} mr-6 inline-block h-6 w-16 self-center rounded-full border text-center border-${colorClass}-600`}
+            className={`${textContent.length > 3 ? "" : "hidden"} mr-6 inline-block h-6 w-16 self-center rounded-full border text-center`}
+            style={{ borderColor: colorClass }} // for some reason, it does not work with tailwind classes
           >
             <div
               className={`h-full rounded-full bg-${colorClass}-600`}
               style={{
                 width: `${textContent.length > 44 ? gradientWidth : 35}%`,
+                backgroundColor: colorClass, // for some reason, it does not work with tailwind classes
               }}
             />
             <span className="text-sm">
@@ -106,7 +118,7 @@ export default function PostCreateForm() {
             type="button"
             text="Post"
             onClickHandler={() => handleSubmit()}
-            disabled={isFormSubmittable}
+            disabled={!isFormSubmittable}
           />
         </div>
       </form>
