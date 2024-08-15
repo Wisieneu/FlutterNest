@@ -8,6 +8,7 @@ import SubmitBtn from "@/components/Buttons/SubmitBtn";
 
 import { createPost } from "@/API";
 import { displayToast } from "./Toast";
+import MultipleFileUploadField from "./Upload/MultipleFileUploadField";
 
 export default function PostCreateForm() {
   const [textContent, setTextContent] = useState("");
@@ -34,17 +35,16 @@ export default function PostCreateForm() {
     }
   }, [textContent]);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    console.log(event.target.files);
+    const target = event.target as HTMLInputElement & { files: FileList };
+    console.log(target.files);
     const file = new FileReader();
     file.onload = () => {
       setUploadedImages((prevState) => [...prevState, file.result]);
     };
-
-    file.readAsDataURL(acceptedFiles[0]);
-  }, []);
-
-  const { acceptedFiles, getRootProps, getInputProps, isDragActive } =
-    useDropzone({ onDrop });
+    file.readAsDataURL(target.files[0]);
+  }
 
   async function handleSubmit() {
     // TODO: fix redirect
@@ -85,13 +85,15 @@ export default function PostCreateForm() {
           }}
           onChange={(event) => setTextContent(event.target.value)}
         />
-        <div {...getRootProps()}>
-          <input id="file-upload" {...getInputProps()} />
-          {isDragActive ? (
-            <p>Drop the files here ...</p>
-          ) : (
-            <p>Drag 'n' drop some files here, or click to select files</p>
-          )}
+        <div>
+          {/* <input
+            onChange={handleImageUpload}
+            type="file"
+            name="files"
+            id="file-upload"
+            multiple
+          /> */}
+          <MultipleFileUploadField />
         </div>
         {/* Display uploaded images */}
         {uploadedImages.map((image, index) => (
