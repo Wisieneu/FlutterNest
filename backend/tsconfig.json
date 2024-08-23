@@ -8,9 +8,10 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "baseUrl": "src",
+    "baseUrl": "src"
   },
   "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules"],
   "files": ["src/utils/types.d.ts"],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
