@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import AWS from "aws-sdk";
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -8,13 +8,16 @@ AWS.config.update({
 
 const s3 = new AWS.S3() as any;
 
-export async function uploadFileToS3(file: Express.Multer.File) {
+export async function uploadFileToS3(
+  file: Express.Multer.File,
+  customFileName?: string
+) {
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: file.filename,
+    Key: customFileName || file.filename,
     Body: file.buffer,
     ContentType: file.mimetype,
-    ACL: 'public-read',
+    ACL: "public-read",
   };
 
   return await s3.upload(params).promise();

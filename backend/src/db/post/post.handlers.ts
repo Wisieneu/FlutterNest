@@ -1,8 +1,8 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from "drizzle-orm";
 
-import { db } from '..';
-import { likes, Post, posts } from './post.schema';
-import { users } from '../user/user.schema';
+import { db } from "..";
+import { likes, Post, posts } from "./post.schema";
+import { users } from "../user/user.schema";
 
 // Post columns for select query
 const postBody = {
@@ -37,9 +37,9 @@ const getPostsPaginatedQuery = db
   .leftJoin(users, eq(posts.authorId, users.id))
   .where(eq(posts.isDeleted, false))
   .orderBy(desc(posts.createdAt))
-  .limit(sql.placeholder('limit'))
-  .offset(Number(sql.placeholder('page')) * 10)
-  .prepare('getPostsPaginatedQuery');
+  .limit(sql.placeholder("limit"))
+  .offset(Number(sql.placeholder("page")) * 10)
+  .prepare("getPostsPaginatedQuery");
 
 const getLikesByPostId = db
   .select({
@@ -52,44 +52,44 @@ const getLikesByPostId = db
   })
   .from(likes)
   .leftJoin(users, eq(likes.userId, users.id))
-  .where(eq(likes.postId, sql.placeholder('postId')))
-  .prepare('getLikesByPostId');
+  .where(eq(likes.postId, sql.placeholder("postId")))
+  .prepare("getLikesByPostId");
 
 const getPostByIdQuery = db
   .select(postBody)
   .from(posts)
   .leftJoin(users, eq(posts.authorId, users.id))
-  .where(and(eq(posts.id, sql.placeholder('postId')), postIsNotDeleted))
-  .prepare('getPostByIdQuery');
+  .where(and(eq(posts.id, sql.placeholder("postId")), postIsNotDeleted))
+  .prepare("getPostByIdQuery");
 
 const findLikeQuery = db
   .select()
   .from(likes)
   .where(
     and(
-      eq(likes.postId, sql.placeholder('postId')),
-      eq(likes.userId, sql.placeholder('userId'))
+      eq(likes.postId, sql.placeholder("postId")),
+      eq(likes.userId, sql.placeholder("userId"))
     )
   )
-  .prepare('findLikeQuery');
+  .prepare("findLikeQuery");
 
 const likePostDbQuery = db
   .insert(likes)
   .values({
-    userId: sql.placeholder('userId'),
-    postId: sql.placeholder('postId'),
+    userId: sql.placeholder("userId"),
+    postId: sql.placeholder("postId"),
   })
-  .prepare('likePostDbQuery');
+  .prepare("likePostDbQuery");
 
 const unlikePostDbQuery = db
   .delete(likes)
   .where(
     and(
-      eq(likes.postId, sql.placeholder('postId')),
-      eq(likes.userId, sql.placeholder('userId'))
+      eq(likes.postId, sql.placeholder("postId")),
+      eq(likes.userId, sql.placeholder("userId"))
     )
   )
-  .prepare('unlikePostDbQuery');
+  .prepare("unlikePostDbQuery");
 
 /**
  * Functions for the post controller to use
@@ -111,6 +111,19 @@ export async function getPostsByUserId(userId: string) {
     .where(and(eq(posts.authorId, userId), postIsNotDeleted))
     .execute();
   return postsData;
+}
+
+export async function insertPost(authorId: string, textContent: string) {
+  const [newPost] = await db
+    .insert(posts)
+    .values({
+      authorId,
+      type: "post",
+      textContent,
+    })
+    .returning();
+
+  return newPost;
 }
 
 export async function findLike(userId: string, postId: string) {

@@ -1,24 +1,31 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from "express";
 
-import { db } from '../db';
-import { Like, NewPost, Post, likes, posts } from '../db/post/post.schema';
-import { and, eq } from 'drizzle-orm';
-import * as postHandler from '../db/post/post.handlers';
-import { postType } from '../db/post/post.config';
-import { User, users } from '../db/user/user.schema';
+import { db } from "../db";
+import { Like, Post, likes, posts } from "../db/post/post.schema";
+import { and, eq } from "drizzle-orm";
+import * as postHandler from "../db/post/post.handlers";
+import * as postMediaFilesHandler from "../db/postMediaFiles/post.media.files.handlers";
 
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
+import catchAsync from "../utils/catchAsync";
+import AppError from "../utils/appError";
+import { uploadFileToS3 } from "utils/s3";
 
 export const getPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
-    const result = await postHandler.getPostsPaginated(page, limit);
+    const result: Post[] = await postHandler.getPostsPaginated(page, limit);
+
+    // result.forEach(async (post) => {
+    //   post.files = await postMediaFilesHandler.getPostMediaFilesByPostId(
+    //     post.id
+    //   );
+    // });
+    // console.log(result);
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         result,
         page,
@@ -35,11 +42,11 @@ export const getPost = catchAsync(
     const result = await postHandler.getPostById(postId);
 
     if (!result) {
-      next(new AppError('Could not find a post with this ID', 404));
+      next(new AppError("Could not find a post with this ID", 404));
     }
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         result,
       },
@@ -49,31 +56,38 @@ export const getPost = catchAsync(
 
 /**
  * Creates a new post
- * TODO: attaching images
  */
 export const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user!.id;
     const { textContent } = req.body;
-    console.log(req.body);
+    let postFiles;
 
-    const [newPost] = await db
-      .insert(posts)
-      .values({
-        authorId,
-        type: 'post',
-        textContent,
-      })
-      .returning();
+    const newPost = await postHandler.insertPost(authorId, textContent);
 
     if (!newPost) {
-      return next(new AppError('An error has occurred while creating your post.', 400));
+      return next(
+        new AppError("An error has occurred while creating your post.", 400)
+      );
+    }
+
+    // After the post is created, we can insert the media files if there are any
+    if (req.files && Array.isArray(req.files)) {
+      postFiles = await postMediaFilesHandler.insertPostMediaFiles(
+        req.files,
+        newPost.id,
+        authorId
+      );
+      console.log(postFiles);
     }
 
     res.status(201).json({
-      status: 'success',
+      status: "success",
       data: {
-        newPost,
+        newPost: {
+          ...newPost,
+          files: postFiles,
+        },
       },
     });
   }
@@ -83,7 +97,7 @@ export const commentPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     //TODO: implement
     return res.status(200).json({
-      status: 'route not implemented yet',
+      status: "route not implemented yet",
       data: null,
     });
   }
@@ -93,7 +107,7 @@ export const repostPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     //TODO: implement
     return res.status(200).json({
-      status: 'route not implemented yet',
+      status: "route not implemented yet",
       data: null,
     });
   }
@@ -121,7 +135,7 @@ export const updatePost = catchAsync(
       });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         updatedPost,
       },
@@ -144,16 +158,23 @@ export const deletePost = catchAsync(
       .update(posts)
       .set({ isDeleted: true })
       .where(
-        and(eq(posts.id, postId), eq(posts.authorId, userId), eq(posts.isDeleted, false))
+        and(
+          eq(posts.id, postId),
+          eq(posts.authorId, userId),
+          eq(posts.isDeleted, false)
+        )
       )
       .returning();
 
     if (!deletedPost) {
-      return next(new AppError('Could not find a post with this id', 400));
+      return next(new AppError("Could not find a post with this id", 400));
     }
 
+    // Delete the post media files
+    postMediaFilesHandler.deletePostMediaFiles(postId);
+
     res.status(204).json({
-      status: 'success',
+      status: "success",
       data: null,
     });
   }
@@ -175,17 +196,19 @@ export const likePost = catchAsync(
     const [post] = await postHandler.getPostById(postId);
 
     if (!post || post.isDeleted === true)
-      return next(new AppError('Could not find a post with this id', 400));
+      return next(new AppError("Could not find a post with this id", 400));
     const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);
     if (likeLookup) {
-      return next(new AppError('Post is already liked by the current user', 400));
+      return next(
+        new AppError("Post is already liked by the current user", 400)
+      );
     }
 
     await postHandler.likePost(postId, userId);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Like added successfully',
+      status: "success",
+      message: "Like added successfully",
     });
   }
 );
@@ -202,18 +225,18 @@ export const unlikePost = catchAsync(
     const [post] = await postHandler.getPostById(postId);
 
     if (!post || post.isDeleted === true)
-      return next(new AppError('Could not find a post with this id', 400));
+      return next(new AppError("Could not find a post with this id", 400));
 
     const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);
 
     if (!likeLookup)
-      return next(new AppError('Post is not liked by the current user', 400));
+      return next(new AppError("Post is not liked by the current user", 400));
 
     await db.delete(likes).where(eq(likes.id, likeLookup.id));
 
     res.status(200).json({
-      status: 'success',
-      message: 'Like removed successfully',
+      status: "success",
+      message: "Like removed successfully",
     });
   }
 );

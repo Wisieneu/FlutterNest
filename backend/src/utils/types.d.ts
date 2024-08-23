@@ -1,7 +1,7 @@
-import { User } from '../db/user/user.schema';
-import jwt from 'jsonwebtoken';
+import { User } from "../db/user/user.schema";
+import jwt from "jsonwebtoken";
 
-declare module 'express' {
+declare module "express" {
   export interface Request {
     user?: User;
     fileSaveName?: string;
@@ -11,7 +11,7 @@ declare module 'express' {
   }
 }
 
-declare module 'jsonwebtoken' {
+declare module "jsonwebtoken" {
   export interface JwtPayload {
     userId: string;
   }

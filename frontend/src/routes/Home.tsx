@@ -29,7 +29,7 @@ export default function Home() {
     };
   }, []);
 
-  /** Fetches pages from the posts API endpoint each time the user scrolls to the bottom of the page
+  /** Fetches posts from the posts API endpoint each time the user scrolls to the bottom of the page
    *  If no results are returned, resets the page state to 0, which is handled not to fetch anymore
    *  */
   useEffect(() => {

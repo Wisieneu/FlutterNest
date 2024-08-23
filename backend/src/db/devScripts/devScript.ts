@@ -1,8 +1,9 @@
-import { db, connection } from '..';
-import { likes } from 'db/post/post.schema';
+import { db, connection } from "..";
+import { likes, posts } from "db/post/post.schema";
 
-import logger from '../../utils/logger';
-import { findLike } from 'db/post/post.handlers';
+import logger from "../../utils/logger";
+import { findLike } from "db/post/post.handlers";
+import { users } from "db/user/user.schema";
 
 const removeAllLikes = async () => {
   await db.delete(likes);
@@ -17,11 +18,19 @@ const insertLike = async () => {
   const result = await db
     .insert(likes)
     .values({
-      userId: '5578d7c3-0ba2-4a17-a826-4760bf52d380',
-      postId: '59a2cf23-bda4-49b3-8b29-d7b90164e2af',
+      userId: "5578d7c3-0ba2-4a17-a826-4760bf52d380",
+      postId: "59a2cf23-bda4-49b3-8b29-d7b90164e2af",
     })
     .returning();
   return result;
+};
+
+const deleteAllPosts = async () => {
+  await db.delete(posts);
+};
+
+const deleteAllUsers = async () => {
+  await db.delete(users);
 };
 
 /**
@@ -31,18 +40,18 @@ const insertLike = async () => {
  * Just comment out the lines you don't need
  */
 async function main() {
-  logger.info('Starting script...');
+  logger.info("Starting script...");
   await removeAllLikes();
-  logger.info('Removed all likes');
+  logger.info("Removed all likes");
   const newLike = await insertLike();
   console.log({ newLike: newLike });
   await getAllLikes();
   const result = await findLike(
-    '5578d7c3-0ba2-4a17-a826-4760bf52d380',
-    '59a2cf23-bda4-49b3-8b29-d7b90164e2af'
+    "5578d7c3-0ba2-4a17-a826-4760bf52d380",
+    "59a2cf23-bda4-49b3-8b29-d7b90164e2af"
   );
   console.log(result);
-  logger.info('Script finished');
+  logger.info("Script finished");
 
   await connection.end();
 }
