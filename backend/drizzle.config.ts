@@ -1,10 +1,14 @@
-import 'dotenv/config';
-import type { Config } from 'drizzle-kit';
+import "dotenv/config";
+import type { Config } from "drizzle-kit";
 
 export default {
-  schema: ['./src/db/post/post.schema.ts', './src/db/user/user.schema.ts'],
-  out: './src/db/drizzle',
-  driver: 'pg',
+  schema: [
+    "./src/db/post/post.schema.ts",
+    "./src/db/user/user.schema.ts",
+    "./src/db/postMediaFiles/post.media.files.schema.ts",
+  ],
+  out: "./src/db/drizzle",
+  driver: "pg",
   dbCredentials: {
     connectionString: String(process.env.DB_URL),
   },

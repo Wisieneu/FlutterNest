@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState, useCallback } from "react";
+import { ChangeEvent, useEffect, useState, useCallback, useRef } from "react";
 import { Slide, toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
 
@@ -8,16 +8,59 @@ import SubmitBtn from "@/components/Buttons/SubmitBtn";
 
 import { createPost } from "@/API";
 import { displayToast } from "./Toast";
-import MultipleFileUploadField from "./Upload/MultipleFileUploadField";
+import MultipleFileUploadField, {
+  UploadableFile,
+} from "./Upload/MultipleFileUploadField";
+
+import FormData from "form-data";
+import axios from "axios";
+import UploadedImagePreview from "./Upload/UploadedImagePreview";
 
 export default function PostCreateForm() {
+  // const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // const handleUpload = async () => {
+  //   if (!fileInputRef.current?.files?.length) return;
+
+  //   const formData = new FormData();
+  //   // formData.append("file", fileInputRef.current.files[0]);
+  //   Array.from(fileInputRef.current.files).forEach((file) => {
+  //     formData.append("files", file);
+  //   });
+
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:6699/api/v1/posts",
+  //       formData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //         withCredentials: true,
+  //       },
+  //     );
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.error("Upload failed:", error);
+  //   }
+  // };
+
+  // return (
+  //   <div>
+  //     <input type="file" ref={fileInputRef} multiple />
+  //     <button onClick={handleUpload}>Upload</button>
+  //   </div>
+  // );
+
+  // DEBUG:ASDASDASD
+
   const [textContent, setTextContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [colorClass, setColorClass] = useState("");
-  const [uploadedImages, setUploadedImages] = useState<
-    (string | ArrayBuffer | null)[]
-  >([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadableFile[]>([]);
+
+  // const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isFormSubmittable = textContent.length > 2 && textContent.length < 129;
   const gradientWidth = Math.min(
@@ -26,7 +69,7 @@ export default function PostCreateForm() {
   );
 
   useEffect(() => {
-    if (textContent.length > 128) {
+    if (textContent.length > 128 || textContent.length < 4) {
       setColorClass("#dc2626");
     } else if (textContent.length > 90) {
       setColorClass("#ca8a04");
@@ -35,30 +78,27 @@ export default function PostCreateForm() {
     }
   }, [textContent]);
 
-  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
-    console.log(event.target.files);
-    const target = event.target as HTMLInputElement & { files: FileList };
-    console.log(target.files);
-    const file = new FileReader();
-    file.onload = () => {
-      setUploadedImages((prevState) => [...prevState, file.result]);
-    };
-    file.readAsDataURL(target.files[0]);
-  }
+  // function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  //   console.log(event.target.files);
+
+  //   const target = event.target as HTMLInputElement & { files: FileList };
+  //   console.log(target.files);
+  //   const file = new FileReader();
+  //   file.onload = () => {
+  //     setUploadedImages((prevState) => [...prevState, file.result]);
+  //   };
+  //   file.readAsDataURL(target.files[0]);
+  // }
 
   async function handleSubmit() {
     // TODO: fix redirect
     setIsLoading(true);
     const formData = new FormData();
-    console.log(
-      (document.getElementById("file-upload")! as HTMLInputElement).files,
-    );
     formData.append("textContent", textContent);
-    if (uploadedImages)
-      uploadedImages.forEach((image, index) =>
-        formData.append(`files`, image as string),
-      );
-    console.log(formData.getAll("files"));
+
+    if (uploadedImages) {
+      uploadedImages.forEach((file) => formData.append("media", file.file));
+    }
 
     const response = await createPost(formData);
     console.log(response);
@@ -70,7 +110,6 @@ export default function PostCreateForm() {
     setIsLoading(false);
   }
 
-  // TODO: add image upload
   return (
     <div className={`relative w-full p-6 ${isLoading ? "blur-container" : ""}`}>
       <form onSubmit={handleSubmit}>
@@ -86,23 +125,19 @@ export default function PostCreateForm() {
           onChange={(event) => setTextContent(event.target.value)}
         />
         <div>
-          {/* <input
-            onChange={handleImageUpload}
-            type="file"
-            name="files"
-            id="file-upload"
-            multiple
-          /> */}
-          <MultipleFileUploadField />
+          <MultipleFileUploadField
+            files={uploadedImages}
+            setFiles={setUploadedImages}
+          />
         </div>
         {/* Display uploaded images */}
         {uploadedImages.map((image, index) => (
-          <img key={index} src={image as string} />
+          <UploadedImagePreview key={index} index={index} image={image} />
         ))}
         <div className="absolute bottom-4 right-4 flex">
           {/* Visual indicator for the character limit */}
           <div
-            className={`${textContent.length > 3 ? "" : "hidden"} mr-6 inline-block h-6 w-16 self-center rounded-full border text-center`}
+            className={`${isExpanded ? "" : "hidden"} mr-6 inline-block h-6 w-16 self-center rounded-full border text-center`}
             style={{ borderColor: colorClass }} // for some reason, it does not work with tailwind classes
           >
             <div

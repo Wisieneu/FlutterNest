@@ -1,28 +1,36 @@
-import { toast, Slide } from 'react-toastify';
-
-// https://fkhadra.github.io/react-toastify/introduction
+import axios from "axios";
+import { useRef } from "react";
 
 export default function TestView() {
-  function notify() {
-    toast('🦄 Wow so easy!', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: 'dark',
-      transition: Slide,
-    });
-  }
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async () => {
+    if (!fileInputRef.current?.files?.length) return;
+
+    const formData = new FormData();
+    formData.append("file", fileInputRef.current.files[0]);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:6699/api/v1/posts",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
 
   return (
-    <>
-      <div className="container fullscreen background-black text-white">
-        <button className="p-4 border-2 rounded-md" onClick={notify}>
-          Notify
-        </button>
-      </div>
-    </>
+    <div>
+      <input type="file" ref={fileInputRef} multiple />
+      <input type="file" ref={fileInputRef} multiple />
+      <button onClick={handleUpload}>Upload</button>
+    </div>
   );
 }

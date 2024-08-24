@@ -1,13 +1,13 @@
-import { Response, Request, NextFunction } from 'express';
-import { eq } from 'drizzle-orm';
+import { Response, Request, NextFunction } from "express";
+import { eq } from "drizzle-orm";
 
-import { db } from '../db';
-import * as userSchemaHandler from '../db/user/user.handlers';
-import catchAsync from '../utils/catchAsync';
-import { User, users } from '../db/user/user.schema';
-import AppError from '../utils/appError';
-import { deleteFileFromS3, uploadFileToS3 } from '../utils/s3';
-import userConfig from '../db/user/user.config';
+import { db } from "../db";
+import * as userSchemaHandler from "../db/user/user.handlers";
+import catchAsync from "../utils/catchAsync";
+import { User, users } from "../db/user/user.schema";
+import AppError from "../utils/appError";
+import { deleteFileFromS3, uploadFileToS3 } from "../utils/s3";
+import userConfig from "../db/user/user.config";
 
 /**
  * End user route handlers
@@ -26,7 +26,7 @@ export const getUserByUsername = catchAsync(
     const user = await userSchemaHandler.getEndUser(username);
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user,
       },
@@ -43,11 +43,11 @@ export const getMyAccount = catchAsync(
     const user = await userSchemaHandler.getEndUser(req.user!.username);
     if (!user)
       next(
-        new AppError('An error has occurred while searching for the user', 403)
+        new AppError("An error has occurred while searching for the user", 403)
       );
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user,
       },
@@ -68,7 +68,7 @@ export const updateMyAccount = catchAsync(
     );
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         updatedUser,
       },
@@ -83,7 +83,7 @@ export const updateUserPhoto = catchAsync(
     next: NextFunction
   ): Promise<Response | void> => {
     if (!req.file)
-      return next(new AppError('The attached file is invalid', 400));
+      return next(new AppError("The attached file is invalid", 400));
 
     if (req.user!.profilePicture !== userConfig.defaultProfilePicture)
       await deleteFileFromS3(req.user!.profilePicture!);
@@ -99,7 +99,7 @@ export const updateUserPhoto = catchAsync(
       .returning({ profilePicture: users.profilePicture });
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         profilePic,
       },
@@ -117,12 +117,12 @@ export const deactivateAccount = catchAsync(
       req.user!
     );
 
-    res.cookie('jwt', 'loggedout');
+    res.cookie("jwt", "loggedout");
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        message: 'Account deactivated successfully',
+        message: "Account deactivated successfully",
       },
     });
   }
@@ -137,10 +137,10 @@ export const deleteAccount = catchAsync(
   ): Promise<Response> => {
     await db.delete(users).where(eq(users.id, req.user!.id));
 
-    res.cookie('jwt', 'loggedout');
+    res.cookie("jwt", "loggedout");
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: null,
     });
   }
@@ -165,7 +165,7 @@ export const getUsers = catchAsync(
     const usersArray = await db.select().from(users);
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         users: usersArray,
       },
@@ -187,7 +187,7 @@ export const getUser = catchAsync(
     const user = await db.select().from(users).where(eq(users.id, userId));
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user,
       },
@@ -207,7 +207,7 @@ export const createUser = catchAsync(
     const newUser = await db.insert(users).values(req.body);
 
     return res.status(201).json({
-      status: 'success',
+      status: "success",
       data: {
         newUser,
       },
@@ -232,7 +232,7 @@ export const updateUserById = catchAsync(
       .where(eq(users.id, userId));
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         updatedUser,
       },
@@ -257,7 +257,7 @@ export const deleteOneUserById = catchAsync(
       .returning();
 
     return res.status(204).json({
-      status: 'success',
+      status: "success",
       data: { deletedUser },
     });
   }
