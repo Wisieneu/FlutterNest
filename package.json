@@ -3,13 +3,9 @@
   "private": true,
   "scripts": {
     "start": "lerna run start --parallel",
-    "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start"
+    "start:backend": "cd backend && pnpm start",
+    "start:frontend": "cd frontend && pnpm start"
   },
-  "workspaces": [
-    "frontend/*",
-    "backend/*"
-  ],
   "devDependencies": {
     "lerna": "^8.0.2"
   }
