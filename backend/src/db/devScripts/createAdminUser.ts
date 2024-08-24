@@ -16,7 +16,7 @@ import { createInterface } from "readline";
 
 async function main() {
   logger.info("Starting...");
-  const inputs = [];
+  const inputs: string[] = [];
 
   const rl = createInterface({
     input: process.stdin,
@@ -48,7 +48,7 @@ async function main() {
     const [admin] = await db
       .update(users)
       .set({ role: "admin" })
-      .where(eq(users.id, user.id))
+      .where(eq(users.id, user.id!))
       .returning();
 
     console.info("Your admin account:");
