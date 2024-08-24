@@ -8,10 +8,10 @@ export default {
     "./src/db/postMediaFiles/post.media.files.schema.ts",
   ],
   out: "./src/db/drizzle",
-  driver: "pg",
-  dbCredentials: {
-    connectionString: String(process.env.DB_URL),
-  },
+  dialect: "postgresql",
+  // dbCredentials: {
+  //   connectionString: String(process.env.DB_URL),
+  // },
   verbose: true,
   strict: true,
 } satisfies Config;
