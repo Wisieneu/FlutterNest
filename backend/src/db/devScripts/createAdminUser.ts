@@ -5,6 +5,7 @@ import { users } from "../user/user.schema";
 import userConfig from "../user/user.config";
 import { signUpEndUser } from "../user/user.handlers";
 import { eq } from "drizzle-orm";
+import { createInterface } from "readline";
 
 /**
  * This script is used for development purposes
@@ -12,49 +13,48 @@ import { eq } from "drizzle-orm";
  * It is meant to be used for testing and debugging purposes
  * Just comment out the lines you don't need
  */
+
 async function main() {
   logger.info("Starting...");
+  const inputs = [];
 
-  const creds = process.argv.slice(2);
-  let name: string;
-  let email: string;
-  let password: string;
-
-  creds.forEach(async (cred) => {
-    if (cred.startsWith("--name=")) {
-      name = cred.split("=")[1];
-    } else if (cred.startsWith("--email=")) {
-      email = cred.split("=")[1];
-    } else if (cred.startsWith("--password=")) {
-      password = cred.split("=")[1];
-    }
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
 
-  console.log(name, email, password);
-  if (!name || !email || !password) {
-    throw new Error(
-      "Usage: createadmin --name=<ADMIN_USERNAME> --email=<ADMIN_EMAIL> --password=<ADMIN_PASSWORD>"
-    );
-  }
-  if (!isEmail(email)) throw new Error("Invalid email");
-  if (
-    password.length < userConfig.minPasswordLength ||
-    password.length > userConfig.maxPasswordLength
-  )
-    throw new Error(
-      `Password must be ${userConfig.minPasswordLength}-${userConfig.maxPasswordLength} characters long`
-    );
+  rl.question("Enter new admin's username: ", (username) => {
+    rl.question("Enter new admin's email: ", (email) => {
+      rl.question("Finally, enter the admin's password: ", (password) => {
+        console.log(username, email, password);
+        if (!username || !email || !password) {
+          throw new Error("One or more fields are missing. Please try again.");
+        }
+        if (!isEmail(email)) throw new Error("Invalid email");
+        if (
+          password.length < userConfig.minPasswordLength ||
+          password.length > userConfig.maxPasswordLength
+        )
+          throw new Error(
+            `Password must be ${userConfig.minPasswordLength}-${userConfig.maxPasswordLength} characters long`
+          );
+        inputs.push(password, username, email);
+        rl.close();
+      });
+    });
+  });
+  rl.on("close", async () => {
+    const user = await signUpEndUser(inputs[0], inputs[1], inputs[2]);
+    const [admin] = await db
+      .update(users)
+      .set({ role: "admin" })
+      .where(eq(users.id, user.id))
+      .returning();
 
-  const user = await signUpEndUser(password, name, email);
-  const admin = db
-    .update(users)
-    .set({ role: "admin" })
-    .where(eq(users.id, user.id))
-    .returning();
-
-  console.info("Your admin account:");
-  console.log(admin);
-  await connection.end();
+    console.info("Your admin account:");
+    console.log(admin);
+    await connection.end();
+  });
 }
 
 main();

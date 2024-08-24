@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { User, users } from "../user/user.schema";
 import postConfig from "./post.config";
-import { PostMediaFile } from "db/postMediaFiles/post.media.files.schema";
+import { PostMediaFile } from "../postMediaFiles/post.media.files.schema";
 
 // Post Schema
 /**
