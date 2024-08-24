@@ -20,7 +20,7 @@ export async function insertPostMediaFiles(
   authorId: string
 ) {
   filesArray.forEach(async (file, index) => {
-    const fileName = `${postId}-${authorId}-${index}-.jpeg`;
+    const fileName = `${postId}_${authorId}_${index}_.jpeg`;
     await uploadFileToS3(file, fileName);
   });
 
@@ -30,7 +30,7 @@ export async function insertPostMediaFiles(
       authorId,
       mimetype: file.mimetype,
       fileSize: String(file.size),
-      fileName: `${postId}-${authorId}-${index}-.jpeg`,
+      fileName: `${postId}_${authorId}_${index}_.jpeg`,
     };
   });
 

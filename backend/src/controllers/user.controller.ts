@@ -76,7 +76,7 @@ export const updateMyAccount = catchAsync(
   }
 );
 
-export const updateUserPhoto = catchAsync(
+export const updateUserProfilePicture = catchAsync(
   async (
     req: Request,
     res: Response,
@@ -88,6 +88,7 @@ export const updateUserPhoto = catchAsync(
     if (req.user!.profilePicture !== userConfig.defaultProfilePicture)
       await deleteFileFromS3(req.user!.profilePicture!);
 
+    req.file.filename = `${req.user!.username}-${Date.now()}-_pfp.jpeg`;
     await uploadFileToS3(req.file);
 
     const profilePic = await db

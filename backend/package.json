@@ -12,7 +12,8 @@
     "generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
     "migrate": "tsx -r dotenv/config src/db/migrate.ts",
     "studio": "drizzle-kit studio --config=drizzle.config.ts",
-    "devscript": "tsx -r dotenv/config src/db/devScripts/devScript.ts"
+    "devscript": "tsx -r dotenv/config src/db/devScripts/devScript.ts",
+    "createadmin": "tsx -r dotenv/config src/db/devScripts/createAdminUser.ts --name=admin --email=admin@example.com --password=admin"
   },
   "keywords": [],
   "author": "",
