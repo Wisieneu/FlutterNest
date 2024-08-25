@@ -9,9 +9,12 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { User, users } from "../user/user.schema";
+import { User, users, UserUnsafe } from "../user/user.schema";
 import postConfig from "./post.config";
-import { PostMediaFile } from "../postMediaFiles/post.media.files.schema";
+import {
+  PostMediaFile,
+  postMediaFiles,
+} from "../postMediaFiles/post.media.files.schema";
 
 // Post Schema
 /**
@@ -48,8 +51,9 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
     references: [posts.id],
     relationName: "parentPost",
   }),
-  childPosts: many(posts),
-  likes: many(likes),
+  media: many(postMediaFiles, {
+    relationName: "postMedia",
+  }),
 }));
 
 /**
@@ -57,8 +61,9 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
  * Omit the authorId field
  * Add the author field as a User object
  */
-export type Post = Omit<InferSelectModel<typeof posts>, "authorId"> & {
+export type Post = InferSelectModel<typeof posts> & {
   author: User | null;
+} & {
   files?: PostMediaFile[];
 };
 export type NewPost = InferInsertModel<typeof posts>;

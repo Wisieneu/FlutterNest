@@ -18,12 +18,25 @@ export interface User {
 
 export interface Post {
   id: string;
+  authorId: string;
   type: string;
   textContent: string;
   createdAt: string;
   updatedAt: string | null;
   parentId: string | null;
-  isDeleted: boolean;
-  likesAmount: string;
+  likesAmount: number;
+  commentsAmount: number;
   author: User;
+  media?: Media[];
+  isDeleted: boolean;
+}
+
+export interface Media {
+  authorId: string;
+  createdAt: string;
+  fileName: string;
+  fileSize: number;
+  id: string;
+  mimetype: string;
+  postId: string;
 }

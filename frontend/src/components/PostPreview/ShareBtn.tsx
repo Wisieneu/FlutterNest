@@ -3,7 +3,7 @@ import { toast, Slide } from "react-toastify";
 import { displayToast } from "../Toast";
 
 interface ShareBtnProps {
-  postId: number;
+  postId: string;
 }
 
 export default function ShareBtn(props: ShareBtnProps) {
@@ -17,7 +17,10 @@ export default function ShareBtn(props: ShareBtnProps) {
   }
 
   return (
-    <div className="mr-4 flex cursor-pointer text-sm" onClick={handleShare}>
+    <div
+      className="mr-4 flex cursor-pointer items-center text-sm"
+      onClick={handleShare}
+    >
       <svg
         fill="none"
         viewBox="0 0 24 24"

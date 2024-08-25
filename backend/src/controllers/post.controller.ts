@@ -8,7 +8,7 @@ import * as postMediaFilesHandler from "../db/postMediaFiles/post.media.files.ha
 
 import catchAsync from "../utils/catchAsync";
 import AppError from "../utils/appError";
-import { uploadFileToS3 } from "utils/s3";
+import { postMediaFiles } from "db/postMediaFiles/post.media.files.schema";
 
 export const getPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -61,7 +61,6 @@ export const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user!.id;
     const { textContent } = req.body;
-    let postFiles;
 
     const newPost = await postHandler.insertPost(authorId, textContent);
 
@@ -71,14 +70,14 @@ export const createPost = catchAsync(
       );
     }
 
+    let postFiles;
     // After the post is created, we can insert the media files if there are any
-    if (req.files && Array.isArray(req.files)) {
+    if ((req.files!.length as number) > 0 && Array.isArray(req.files)) {
       postFiles = await postMediaFilesHandler.insertPostMediaFiles(
         req.files,
         newPost.id,
         authorId
       );
-      console.log(postFiles);
     }
 
     res.status(201).json({
@@ -193,7 +192,7 @@ export const likePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
     const userId = req.user!.id;
-    const [post] = await postHandler.getPostById(postId);
+    const post = await postHandler.getPostById(postId);
 
     if (!post || post.isDeleted === true)
       return next(new AppError("Could not find a post with this id", 400));
@@ -222,9 +221,9 @@ export const unlikePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.params;
     const userId = req.user!.id;
-    const [post] = await postHandler.getPostById(postId);
+    const post = await postHandler.getPostById(postId);
 
-    if (!post || post.isDeleted === true)
+    if (!post)
       return next(new AppError("Could not find a post with this id", 400));
 
     const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);

@@ -7,6 +7,7 @@ import * as userSchema from "./user/user.schema";
 import * as postMediaFilesSchema from "./postMediaFiles/post.media.files.schema";
 
 import logger from "../utils/logger";
+import { Logger } from "drizzle-orm";
 
 function main() {
   if (

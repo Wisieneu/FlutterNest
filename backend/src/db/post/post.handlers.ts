@@ -1,8 +1,9 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 
 import { db } from "..";
 import { likes, Post, posts } from "./post.schema";
 import { users } from "../user/user.schema";
+import { postMediaFiles } from "../postMediaFiles/post.media.files.schema";
 
 // Post columns for select query
 const postBody = {
@@ -24,6 +25,7 @@ const postBody = {
   },
   likesAmount: posts.likesAmount,
   commentsAmount: posts.commentsAmount,
+  media: postMediaFiles,
 };
 
 const postIsNotDeleted = eq(posts.isDeleted, false);
@@ -31,14 +33,28 @@ const postIsNotDeleted = eq(posts.isDeleted, false);
 /**
  * Prepared queries for the schema handlers below to use
  */
-const getPostsPaginatedQuery = db
-  .select(postBody)
-  .from(posts)
-  .leftJoin(users, eq(posts.authorId, users.id))
-  .where(eq(posts.isDeleted, false))
-  .orderBy(desc(posts.createdAt))
-  .limit(sql.placeholder("limit"))
-  .offset(Number(sql.placeholder("page")) * 10)
+const getPostsPaginatedQuery = db.query.posts
+  .findMany({
+    with: {
+      author: {
+        columns: {
+          id: true,
+          username: true,
+          displayName: true,
+          profilePicture: true,
+          role: true,
+          active: true,
+          createdAt: true,
+          birthDate: true,
+        },
+      },
+      media: true,
+    },
+    limit: sql.placeholder("limit"),
+    offset: Number(sql.placeholder("page")) * 10,
+    where: postIsNotDeleted,
+    orderBy: desc(posts.createdAt),
+  })
   .prepare("getPostsPaginatedQuery");
 
 const getLikesByPostId = db
@@ -55,11 +71,23 @@ const getLikesByPostId = db
   .where(eq(likes.postId, sql.placeholder("postId")))
   .prepare("getLikesByPostId");
 
-const getPostByIdQuery = db
-  .select(postBody)
-  .from(posts)
-  .leftJoin(users, eq(posts.authorId, users.id))
-  .where(and(eq(posts.id, sql.placeholder("postId")), postIsNotDeleted))
+const getPostByIdQuery = db.query.posts
+  .findFirst({
+    with: {
+      author: {
+        columns: {
+          id: true,
+          username: true,
+          displayName: true,
+          profilePicture: true,
+          role: true,
+          active: true,
+        },
+      },
+      media: true,
+    },
+    where: eq(posts.id, sql.placeholder("postId")),
+  })
   .prepare("getPostByIdQuery");
 
 const findLikeQuery = db
@@ -95,7 +123,16 @@ const unlikePostDbQuery = db
  * Functions for the post controller to use
  */
 export async function getPostsPaginated(page: number, limit: number) {
-  const result: Post[] = await getPostsPaginatedQuery.execute({ page, limit });
+  const result = await getPostsPaginatedQuery.execute({ page, limit });
+  // const postIds = result.map((post) => post.id);
+  // console.log(postIds);
+  // const files = await db
+  //   .select()
+  //   .from(postMediaFiles)
+  //   .where(inArray(postMediaFiles.postId, postIds));
+  // // .groupBy(postMediaFiles.postId);
+  // console.log(files);
+
   return result;
 }
 

@@ -1,11 +1,11 @@
 interface CommentsBtnProps {
-  postId: number;
+  postId: string;
   commentsAmount: number;
 }
 
 export default function CommentsBtn(props: CommentsBtnProps) {
   return (
-    <div className="mr-8 flex text-sm">
+    <div className="mr-8 flex items-center text-sm">
       <svg
         fill="none"
         viewBox="0 0 24 24"
