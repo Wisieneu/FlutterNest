@@ -13,7 +13,7 @@ import { posts } from "../post/post.schema";
 export const postMediaFiles = pgTable("postMediaFiles", {
   id: uuid("id").defaultRandom().primaryKey(),
   authorId: uuid("authorId").notNull(),
-  postId: uuid("parentId").notNull(),
+  postId: uuid("postId").notNull(),
   fileName: varchar("fileName", { length: 128 }).notNull(),
   mimetype: varchar("mimetype", { length: 128 }).notNull(),
   fileSize: numeric("fileSize").notNull(),
@@ -26,10 +26,10 @@ export const postMediaFilesRelations = relations(postMediaFiles, ({ one }) => ({
     references: [users.id],
     relationName: "author",
   }),
-  post: one(posts, {
+  parentPost: one(posts, {
     fields: [postMediaFiles.postId],
     references: [posts.id],
-    relationName: "post",
+    relationName: "postMedia",
   }),
 }));
 

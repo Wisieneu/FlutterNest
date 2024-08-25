@@ -2,14 +2,30 @@ import { BsThreeDots } from "react-icons/bs";
 
 import ShareBtn from "./ShareBtn";
 import CommentsBtn from "./CommentsBtn";
-import LikesBtn from "./LikeBtn";
+import LikeBtn from "./LikeBtn";
 
 import { convertDateRelative } from "@/utils";
 
 import { Post as PostType } from "@/types";
+import SingleMediaElementPreview from "../MediaPreview/SingleMediaElementPreview";
+import TwoMediaElementsPreview from "../MediaPreview/TwoMediaElementsPreview";
+import MultipleMediaElementsPreview from "../MediaPreview/MultipleMediaElementsPreview";
 
-export default function Post({ data }: { data: PostType }) {
+export default function PostPreview({ data }: { data: PostType }) {
+  console.log(data);
   const convertedPostDate = convertDateRelative(data.createdAt);
+
+  let mediaPreviewElement;
+  if (data.media && data.media.length > 0) {
+    if (data.media.length === 1) {
+      mediaPreviewElement = <SingleMediaElementPreview file={data.media[0]} />;
+    } else if (data.media.length === 2) {
+      mediaPreviewElement = <TwoMediaElementsPreview files={data.media} />;
+    } else {
+      mediaPreviewElement = <MultipleMediaElementsPreview files={data.media} />;
+    }
+  }
+
   return (
     <div className="flex border-b border-gray-700 shadow-lg">
       <div className="flex w-full px-8 py-6">
@@ -35,16 +51,21 @@ export default function Post({ data }: { data: PostType }) {
             <BsThreeDots size="24" className="ml-2 text-gray-600" />
           </div>
 
-          <p className="mt-3 text-sm">{data.textContent}</p>
+          <p className="my-3">{data.textContent}</p>
+
+          {mediaPreviewElement}
 
           <div className="interactions-container mt-4 flex items-center text-gray-500">
-            <LikesBtn
+            <LikeBtn
               postId={data.id}
               likesAmount={data.likesAmount}
               isLiked={false}
             />
-            <CommentsBtn postId={23} commentsAmount={55} />
-            <ShareBtn postId={23} />
+            <CommentsBtn
+              postId={data.id}
+              commentsAmount={data.commentsAmount}
+            />
+            <ShareBtn postId={data.id} />
           </div>
         </div>
       </div>

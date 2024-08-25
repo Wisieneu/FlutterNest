@@ -79,7 +79,7 @@ export const uploadPostMedia = multer({
       cb(null, true);
     }
   },
-}).array("media", 4);
+}).array("media", 6);
 
 /**
  * Processes the uploaded files
