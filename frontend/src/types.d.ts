@@ -40,3 +40,9 @@ export interface Media {
   mimetype: string;
   postId: string;
 }
+
+type UploadedImagesReducerActionBody = {
+  type: "pop" | "append";
+  filesToAppend?: File[];
+  indexToRemove?: number;
+};

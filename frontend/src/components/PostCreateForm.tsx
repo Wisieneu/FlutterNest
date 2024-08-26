@@ -1,25 +1,48 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useReducer } from "react";
 import { useDropzone } from "react-dropzone";
 import FormData from "form-data";
 
 import { createPost } from "@/API";
 import { displayToast } from "./Toast";
+// import { debounce } from "@/../../shared";
 
 import SubmitBtn from "@/components/Buttons/SubmitBtn";
 import UploadedImagePreview from "@/components/Upload/UploadedImagePreview";
 import ProgressBarIndicator from "@/components/ProgressBarIndicator";
-import MultipleFileUploadField, {
-  UploadableFile,
-} from "@/components/Upload/MultipleFileUploadField";
+import MultipleFileUploadField from "@/components/Upload/MultipleFileUploadField";
+import { UploadedImagesReducerActionBody } from "@/types";
+import { IoMdCloudUpload } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 export default function PostCreateForm() {
+  const navigate = useNavigate();
+
+  function uploadedImagesReducer(
+    state: File[],
+    action: UploadedImagesReducerActionBody,
+  ): File[] {
+    switch (action.type) {
+      case "append":
+        return [...state, ...action.filesToAppend!];
+      case "pop":
+        return state.filter((_, i) => i !== action.indexToRemove!);
+      default:
+        return state;
+    }
+  }
+  const [uploadedImages, uploadedImagesDispatch] = useReducer(
+    uploadedImagesReducer,
+    [],
+  );
+
+  // States
   const [textContent, setTextContent] = useState("");
   const [isFormBeingSubmitted, setIsFormBeingSubmitted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [colorClass, setColorClass] = useState("");
-  const [uploadedImages, setUploadedImages] = useState<UploadableFile[]>([]);
   const [isFormSubmittable, setIsFormSubmittable] = useState(false);
   const [barProgress, setBarProgress] = useState(0);
+  const [isDraggingOverForm, setIsDraggingOverForm] = useState(false);
 
   // On each keystroke
   useEffect(() => {
@@ -44,24 +67,37 @@ export default function PostCreateForm() {
   }, [textContent]);
 
   /**
+   * Function to handle the hovering over the form container with a file (to show the dropzone)
+   * Debounced state update because onDragExit does not work well
+   * This is a workaround, a more elegant and consistent solution to onDragExit
+   */
+  function handleFileHover() {
+    setIsDraggingOverForm(true);
+    let timer;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      setIsDraggingOverForm(false);
+    }, 3000);
+  }
+
+  /**
    * Image upload logic
    * Prevents from uploading more than 6 images
    * TODO: add a max file size
    * TODO: add a file type check
    */
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (isExpanded === false) setIsExpanded(true);
-    if (uploadedImages.length >= 6) {
-      displayToast("You can only upload 6 images.", "error");
-      return;
-    }
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (isExpanded === false) setIsExpanded(true);
+      if (uploadedImages.length >= 6) {
+        displayToast("You can only upload up to 6 images.", "error");
+        return;
+      }
 
-    const mappedAcc = acceptedFiles.map((file) => ({
-      file,
-      errors: [],
-    }));
-    setUploadedImages((prevState) => [...prevState, ...mappedAcc]);
-  }, []);
+      uploadedImagesDispatch({ type: "append", filesToAppend: acceptedFiles });
+    },
+    [uploadedImages],
+  );
 
   // A dropzone for hovering with a file over the form container
   const { getRootProps } = useDropzone({
@@ -77,12 +113,14 @@ export default function PostCreateForm() {
     formData.append("textContent", textContent);
 
     if (uploadedImages) {
-      uploadedImages.forEach((file) => formData.append("media", file.file));
+      uploadedImages.forEach((file) => formData.append("media", file));
     }
 
     const response = await createPost(formData);
+    console.log(response);
     if (response.status === 201) {
       displayToast("Post created successfully.", "success");
+      navigate(`/post/${response.data.data.newPost}`);
     } else {
       displayToast("An error occurred while creating the post.", "error");
     }
@@ -93,6 +131,7 @@ export default function PostCreateForm() {
     <div
       className={`relative w-full p-6 ${isFormBeingSubmitted ? "blur-container" : ""}`}
       {...getRootProps()} // dropzone initialization for the form container (no clicking, just hover)
+      onDragEnter={() => handleFileHover()} // dragging over the form container with a file, show the dropzone
     >
       <form onSubmit={handleSubmit}>
         <textarea
@@ -116,7 +155,7 @@ export default function PostCreateForm() {
                   imageIndex={index}
                   imageFile={image}
                   uploadedImages={uploadedImages}
-                  setUploadedImages={setUploadedImages}
+                  uploadedImagesDispatch={uploadedImagesDispatch}
                 />
               ))}
             </div>
@@ -144,6 +183,12 @@ export default function PostCreateForm() {
           />
         </div>
       </form>
+      {/* Element which shows when the form is being dragged over */}
+      <div
+        className={`pointer-events-none absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-80 ${isDraggingOverForm ? "" : "invisible"}`}
+      >
+        <IoMdCloudUpload color="#af68df" size={100} />
+      </div>
     </div>
   );
 }

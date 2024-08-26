@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       lerna:
-        specifier: ^8.0.2
+        specifier: ^8.1.8
         version: 8.1.8(encoding@0.1.13)
 
   backend:
@@ -8969,7 +8969,7 @@ snapshots:
   jake@10.9.2:
     dependencies:
       async: 3.2.6
-      chalk: 4.1.2
+      chalk: 4.1.0
       filelist: 1.0.4
       minimatch: 3.1.2
 
@@ -9269,7 +9269,7 @@ snapshots:
 
   log-symbols@4.1.0:
     dependencies:
-      chalk: 4.1.2
+      chalk: 4.1.0
       is-unicode-supported: 0.1.0
 
   logform@2.6.1:
@@ -9749,7 +9749,7 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.2
+      chalk: 4.1.0
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       is-interactive: 1.0.0

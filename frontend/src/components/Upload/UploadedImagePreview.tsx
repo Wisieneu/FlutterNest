@@ -1,29 +1,30 @@
-import RemoveButton from "@/components/Buttons/CloseButton";
-import { UploadableFile } from "./MultipleFileUploadField";
+import CloseButton from "@/components/Buttons/CloseButton";
+import { UploadedImagesReducerActionBody } from "@/types";
 
 interface UploadedImagePreviewProps {
-  imageFile: UploadableFile;
+  imageFile: File;
   imageIndex: number;
-  uploadedImages: UploadableFile[];
-  setUploadedImages: React.Dispatch<React.SetStateAction<UploadableFile[]>>;
+  uploadedImages: File[];
+  uploadedImagesDispatch: React.Dispatch<UploadedImagesReducerActionBody>;
 }
 
 export default function UploadedImagePreview(props: UploadedImagePreviewProps) {
   return (
-    <div className="relative">
+    <div className="relative max-h-44">
       <img
-        className={`upload-preview-index-${props.imageIndex} rounded-4xl p-2`}
-        src={URL.createObjectURL(props.imageFile.file)}
+        className={`upload-preview-index-${props.imageIndex} h-full w-full rounded-4xl object-cover p-2`}
+        src={URL.createObjectURL(props.imageFile)}
       />
       <div
         className="absolute right-0 top-0"
         onClick={() =>
-          props.setUploadedImages(
-            props.uploadedImages.filter((_, i) => i !== props.imageIndex),
-          )
+          props.uploadedImagesDispatch({
+            type: "pop",
+            indexToRemove: props.imageIndex,
+          })
         }
       >
-        <RemoveButton />
+        <CloseButton />
       </div>
     </div>
   );

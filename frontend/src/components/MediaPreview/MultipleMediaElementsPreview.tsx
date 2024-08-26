@@ -12,7 +12,12 @@ export default function MultipleMediaElementsPreview(
     <div className="uploaded-images-container overflow-hidden rounded-2xl">
       <div className="grid grid-cols-3 gap-2">
         {props.files.map((image, index) => (
-          <ImageComponent media={image} key={index} />
+          <ImageComponent
+            media={image}
+            mediaIndex={index}
+            key={index}
+            heightPx={144}
+          />
         ))}
       </div>
     </div>

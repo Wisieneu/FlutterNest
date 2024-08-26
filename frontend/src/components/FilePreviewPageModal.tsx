@@ -16,7 +16,7 @@ export default function FilePreviewPageModal(props: FilePreviewPageModalProps) {
       onClick={() => props.setIsFullscreen(false)}
     >
       <img
-        className="z-20 max-h-[90%] max-w-[90%]"
+        className="z-11 max-h-[80%] max-w-[80%]"
         src={createImageUrl(props.file.fileName)}
       />
       <div

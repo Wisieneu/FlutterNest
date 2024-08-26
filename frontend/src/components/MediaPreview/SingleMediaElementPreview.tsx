@@ -10,7 +10,7 @@ export default function SingleMediaElementPreview(
 ) {
   return (
     <div className="overflow-hidden rounded-2xl">
-      <ImageComponent media={props.file} />
+      <ImageComponent media={props.file} mediaIndex={0} />
     </div>
   );
 }

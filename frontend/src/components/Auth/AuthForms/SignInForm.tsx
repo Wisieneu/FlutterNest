@@ -26,6 +26,7 @@ export default function SignInForm(props: SignInFormProps) {
   async function handleSubmit(event: BaseSyntheticEvent) {
     event.preventDefault();
     const response = await signIn(formState);
+    console.log(response.status);
     console.log(response);
   }
 

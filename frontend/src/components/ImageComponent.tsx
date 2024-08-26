@@ -5,14 +5,17 @@ import { createImageUrl } from "../utils";
 
 interface ImageComponentProps {
   media: Media;
+  mediaIndex: number;
+  heightPx?: number;
 }
 
 export default function ImageComponent(props: ImageComponentProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+
   return (
-    <div>
+    <div style={{ maxHeight: `${props.heightPx}px` }}>
       <img
-        className="h-full w-full cursor-pointer object-cover"
+        className={`h-full w-full cursor-pointer object-cover media-preview-index-${props.mediaIndex}`}
         src={createImageUrl(props.media.fileName)}
         onClick={() => setIsFullscreen(true)}
       />

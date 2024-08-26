@@ -6,13 +6,8 @@ import {
   useDropzone,
 } from "react-dropzone";
 
-export interface UploadableFile {
-  file: File;
-  errors: FileError[];
-}
-
 export interface MultipleFileUploadFieldProps {
-  files: UploadableFile[];
+  files: File[];
   onDrop: <T extends File>(
     acceptedFiles: T[],
     fileRejections: FileRejection[],
@@ -31,7 +26,7 @@ export default function MultipleFileUploadField(
       className="cursor-pointer rounded-full p-3 hover:bg-purple-900 hover:bg-opacity-30"
       {...getRootProps()}
     >
-      <FaFileImage className="text-lg text-purple-900" />
+      <FaFileImage className="text-lg text-purple-900" size={20} />
       <input {...getInputProps()} />
     </div>
   );
