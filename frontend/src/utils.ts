@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { toast } from "react-toastify";
 import { displayToast } from "./components/Toast";
 
 dayjs.extend(relativeTime);
@@ -25,4 +24,8 @@ export function catchToastError(functionToCatch: any) {
   } catch (error) {
     displayToast(String(error), "error");
   }
+}
+
+export function createImageUrl(fileName: string) {
+  return `https://wisie-flutternest.s3.eu-central-1.amazonaws.com/${fileName}`;
 }
