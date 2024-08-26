@@ -4,7 +4,7 @@ import ShareBtn from "./ShareBtn";
 import CommentsBtn from "./CommentsBtn";
 import LikeBtn from "./LikeBtn";
 
-import { convertDateRelative } from "@/utils";
+import { convertDateRelative, createImageUrl } from "@/utils";
 
 import { Post as PostType } from "@/types";
 import SingleMediaElementPreview from "../MediaPreview/SingleMediaElementPreview";
@@ -31,7 +31,7 @@ export default function PostPreview({ data }: { data: PostType }) {
       <div className="flex w-full px-8 py-6">
         <img
           className="mr-4 h-12 w-12 rounded-full object-cover shadow"
-          src={`https://wisie-flutternest.s3.eu-central-1.amazonaws.com/${data.author.profilePicture}`}
+          src={createImageUrl(data.author.profilePicture)}
           alt="pfp"
         />
         <div className="w-full">

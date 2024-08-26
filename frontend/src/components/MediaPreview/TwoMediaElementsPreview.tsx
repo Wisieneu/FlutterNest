@@ -1,4 +1,5 @@
 import { Media } from "@/types";
+import ImageComponent from "../ImageComponent";
 
 export interface TwoMediaElementsPreviewProps {
   files: Media[];
@@ -9,14 +10,10 @@ export default function TwoMediaElementsPreview(
 ) {
   // TODO: style separately
   return (
-    <div className="uploaded-images-container overflow-hidden rounded-2xl border border-gray-700">
-      <div className="grid grid-cols-2 gap-2">
+    <div className="uploaded-images-container overflow-hidden rounded-2xl">
+      <div className="grid grid-cols-2 gap-1">
         {props.files.map((image, index) => (
-          <img
-            src={`https://wisie-flutternest.s3.eu-central-1.amazonaws.com/${image.fileName}`}
-            alt="uploaded image"
-            key={index}
-          />
+          <ImageComponent media={image} key={index} />
         ))}
       </div>
     </div>

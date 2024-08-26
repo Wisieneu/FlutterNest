@@ -26,7 +26,6 @@ async function main() {
   rl.question("Enter new admin's username: ", (username) => {
     rl.question("Enter new admin's email: ", (email) => {
       rl.question("Finally, enter the admin's password: ", (password) => {
-        console.log(username, email, password);
         if (!username || !email || !password) {
           throw new Error("One or more fields are missing. Please try again.");
         }
@@ -52,7 +51,7 @@ async function main() {
       .returning();
 
     console.info("Your admin account:");
-    console.log(admin);
+    console.info(admin);
     await connection.end();
   });
 }

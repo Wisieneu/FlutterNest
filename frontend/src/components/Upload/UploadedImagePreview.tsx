@@ -1,4 +1,4 @@
-import RemoveButton from "../Buttons/removeButton";
+import RemoveButton from "@/components/Buttons/CloseButton";
 import { UploadableFile } from "./MultipleFileUploadField";
 
 interface UploadedImagePreviewProps {

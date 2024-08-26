@@ -17,13 +17,6 @@ export const getPosts = catchAsync(
 
     const result: Post[] = await postHandler.getPostsPaginated(page, limit);
 
-    // result.forEach(async (post) => {
-    //   post.files = await postMediaFilesHandler.getPostMediaFilesByPostId(
-    //     post.id
-    //   );
-    // });
-    // console.log(result);
-
     return res.status(200).json({
       status: "success",
       data: {
@@ -72,7 +65,11 @@ export const createPost = catchAsync(
 
     let postFiles;
     // After the post is created, we can insert the media files if there are any
-    if ((req.files!.length as number) > 0 && Array.isArray(req.files)) {
+    if (
+      req.files &&
+      (req.files.length as number) > 0 &&
+      Array.isArray(req.files)
+    ) {
       postFiles = await postMediaFilesHandler.insertPostMediaFiles(
         req.files,
         newPost.id,

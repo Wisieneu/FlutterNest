@@ -1,4 +1,5 @@
 import { Media } from "@/types";
+import ImageComponent from "../ImageComponent";
 
 export interface SingleMediaElementPreviewProps {
   file: Media;
@@ -8,11 +9,8 @@ export default function SingleMediaElementPreview(
   props: SingleMediaElementPreviewProps,
 ) {
   return (
-    <div className="w-full">
-      <img
-        src={`https://wisie-flutternest.s3.eu-central-1.amazonaws.com/${props.file.fileName}`}
-        alt="uploaded image"
-      />
+    <div className="overflow-hidden rounded-2xl">
+      <ImageComponent media={props.file} />
     </div>
   );
 }
