@@ -33,10 +33,8 @@ export default function Home() {
    *  */
   useEffect(() => {
     async function fetchPostsPage() {
-      console.log("fetch" + page);
       if (page === null) return;
       const newPosts: Post[] = await getPosts(page);
-      console.log(newPosts);
       if (newPosts.length > 0) {
         setPosts([...postsState, ...newPosts]);
       } else {

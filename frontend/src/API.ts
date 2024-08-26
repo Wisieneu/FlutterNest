@@ -13,7 +13,6 @@ export async function getPosts(
   limit: number = 10,
 ): Promise<Post[]> {
   const response = await API.get(`/posts?page=${page}&limit=${limit}`);
-  console.log(response);
   return response.data.data.result;
 }
 

@@ -1,9 +1,10 @@
-import { Slide, toast, ToastPosition } from "react-toastify";
+import { Slide, toast, ToastOptions, ToastPosition } from "react-toastify";
 
 export function displayToast(
   message: string,
   type?: "success" | "error",
   displayDuration: number = 3000,
+  overrideConfig: ToastOptions<unknown> = {},
 ) {
   const toastSettings = {
     position: "top-right" as ToastPosition,
@@ -14,6 +15,7 @@ export function displayToast(
     draggable: true,
     theme: "dark",
     transition: Slide,
+    ...overrideConfig,
   };
 
   if (type === "success") {

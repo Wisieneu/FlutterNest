@@ -14,7 +14,6 @@ export const getPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
-    console.log(page, limit);
     const result: Post[] = await postHandler.getPostsPaginated(page, limit);
 
     return res.status(200).json({
