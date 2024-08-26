@@ -10,8 +10,9 @@ interface ImageComponentProps {
 export default function ImageComponent(props: ImageComponentProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   return (
-    <>
+    <div>
       <img
+        className="h-full w-full cursor-pointer object-cover"
         src={createImageUrl(props.media.fileName)}
         onClick={() => setIsFullscreen(true)}
       />
@@ -22,6 +23,6 @@ export default function ImageComponent(props: ImageComponentProps) {
           setIsFullscreen={setIsFullscreen}
         />
       )}
-    </>
+    </div>
   );
 }
