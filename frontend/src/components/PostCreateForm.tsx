@@ -81,7 +81,6 @@ export default function PostCreateForm() {
     }
 
     const response = await createPost(formData);
-    console.log(response);
     if (response.status === 201) {
       displayToast("Post created successfully.", "success");
     } else {

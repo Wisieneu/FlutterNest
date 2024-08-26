@@ -8,8 +8,12 @@ const API: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-export async function getPosts(page: number, limit: number = 10): Promise<Post[]> {
+export async function getPosts(
+  page: number = 1,
+  limit: number = 10,
+): Promise<Post[]> {
   const response = await API.get(`/posts?page=${page}&limit=${limit}`);
+  console.log(response);
   return response.data.data.result;
 }
 
@@ -21,8 +25,8 @@ export async function getPost(postId: string): Promise<Post> {
 export async function createPost(formData: FormData) {
   const response = await API.post(`/posts`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data', 
-      'Accept': 'application/json'
+      "Content-Type": "multipart/form-data",
+      Accept: "application/json",
     },
   });
   return response;

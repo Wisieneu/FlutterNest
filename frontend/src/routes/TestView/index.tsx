@@ -20,7 +20,6 @@ export default function TestView() {
           },
         },
       );
-      console.log(response.data);
     } catch (error) {
       console.error("Upload failed:", error);
     }

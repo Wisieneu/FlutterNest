@@ -14,8 +14,7 @@ export default function Home() {
   const [postsState, setPosts] = useState<Post[]>([]);
 
   function handleScroll() {
-    const isBottom = isScrolledToBottom();
-    if (isBottom && page !== null) setPage((page) => Number(page) + 1);
+    if (isScrolledToBottom()) setPage((page) => (page ? page + 1 : null));
   }
 
   /** Attaches an event listener to the window object
@@ -23,9 +22,9 @@ export default function Home() {
    *  and fetches the next page of posts
    */
   useEffect(() => {
-    window.addEventListener("scroll", () => handleScroll());
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener("scroll", () => handleScroll());
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -33,19 +32,19 @@ export default function Home() {
    *  If no results are returned, resets the page state to 0, which is handled not to fetch anymore
    *  */
   useEffect(() => {
-    async function fetchPosts() {
+    async function fetchPostsPage() {
+      console.log("fetch" + page);
       if (page === null) return;
-      const newPosts: Post[] = await getPosts(page as number);
+      const newPosts: Post[] = await getPosts(page);
+      console.log(newPosts);
       if (newPosts.length > 0) {
         setPosts([...postsState, ...newPosts]);
       } else {
         setPage(null);
       }
-
-      setPosts([...postsState, ...newPosts]);
     }
 
-    fetchPosts();
+    fetchPostsPage();
   }, [page]);
 
   return (

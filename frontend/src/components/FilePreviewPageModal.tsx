@@ -10,7 +10,6 @@ export interface FilePreviewPageModalProps {
 }
 
 export default function FilePreviewPageModal(props: FilePreviewPageModalProps) {
-  console.log(props);
   return (
     <div
       className="image-preview-modal fixed left-0 top-0 z-10 flex h-screen w-screen items-center justify-center bg-zinc-900 bg-opacity-95"

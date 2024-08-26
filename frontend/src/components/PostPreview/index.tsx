@@ -12,7 +12,6 @@ import TwoMediaElementsPreview from "../MediaPreview/TwoMediaElementsPreview";
 import MultipleMediaElementsPreview from "../MediaPreview/MultipleMediaElementsPreview";
 
 export default function PostPreview({ data }: { data: PostType }) {
-  console.log(data);
   const convertedPostDate = convertDateRelative(data.createdAt);
 
   let mediaPreviewElement;

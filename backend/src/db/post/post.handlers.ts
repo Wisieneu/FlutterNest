@@ -50,8 +50,8 @@ const getPostsPaginatedQuery = db.query.posts
       },
       media: true,
     },
+    offset: sql.placeholder("offset"),
     limit: sql.placeholder("limit"),
-    offset: Number(sql.placeholder("page")) * 10,
     where: postIsNotDeleted,
     orderBy: desc(posts.createdAt),
   })
@@ -122,17 +122,12 @@ const unlikePostDbQuery = db
 /**
  * Functions for the post controller to use
  */
-export async function getPostsPaginated(page: number, limit: number) {
-  const result = await getPostsPaginatedQuery.execute({ page, limit });
-  // const postIds = result.map((post) => post.id);
-  // console.log(postIds);
-  // const files = await db
-  //   .select()
-  //   .from(postMediaFiles)
-  //   .where(inArray(postMediaFiles.postId, postIds));
-  // // .groupBy(postMediaFiles.postId);
-  // console.log(files);
-
+export async function getPostsPaginated(page: number, objectsPerPage: number) {
+  const offset = (page - 1) * objectsPerPage;
+  const result = await getPostsPaginatedQuery.execute({
+    offset,
+    limit: objectsPerPage,
+  });
   return result;
 }
 

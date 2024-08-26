@@ -1,11 +1,11 @@
 import isEmail from "validator/lib/isEmail";
-import { db, connection } from "..";
-import logger from "../../utils/logger";
-import { users } from "../user/user.schema";
-import userConfig from "../user/user.config";
-import { signUpEndUser } from "../user/user.handlers";
-import { eq } from "drizzle-orm";
+import { db, connection } from "../db";
+import logger from "../utils/logger";
+import { users } from "../db/user/user.schema";
+import userConfig from "../db/user/user.config";
+import { signUpEndUser } from "../db/user/user.handlers";
 import { createInterface } from "readline";
+import { eq } from "drizzle-orm";
 
 /**
  * This script is used for development purposes
