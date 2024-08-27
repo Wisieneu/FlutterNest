@@ -8,7 +8,7 @@ const API: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-export async function getPosts(
+export async function fetchPostsPaginated(
   page: number = 1,
   limit: number = 10,
 ): Promise<Post[]> {
@@ -16,7 +16,7 @@ export async function getPosts(
   return response.data.data.result;
 }
 
-export async function getPost(postId: string): Promise<Post> {
+export async function fetchPostById(postId: string): Promise<Post> {
   const response = await API.get(`/posts/${postId}`);
   return response.data.data.result;
 }
@@ -31,7 +31,7 @@ export async function createPost(formData: FormData) {
   return response;
 }
 
-export async function createComment(postId: string, requestBody: string) {
+export async function createComment(postId: string, requestBody: FormData) {
   const response = API.post(`/posts/${postId}/comment`, requestBody);
   return response;
 }
@@ -57,7 +57,17 @@ export async function signOut() {
   return response;
 }
 
-export async function getUser(): Promise<User> {
+export async function fetchCurrentUser(): Promise<User> {
   const response = await API.get("/users/me");
+  return response.data.data.user;
+}
+
+export async function fetchUserByUsername(username: string): Promise<User> {
+  const response = await API.get(`/users/?username=${username}`);
+  return response.data.data.user;
+}
+
+export async function fetchUserById(username: string): Promise<User> {
+  const response = await API.get(`/users/?id=${username}`);
   return response.data.data.user;
 }

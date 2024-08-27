@@ -1,8 +1,8 @@
-import { and, eq, getTableColumns } from 'drizzle-orm';
-import bcrypt from 'bcrypt';
+import { and, eq, getTableColumns } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
-import { db } from '..';
-import { users, User, NewUser, UserUnsafe } from './user.schema';
+import { db } from "..";
+import { users, User, NewUser, UserUnsafe } from "./user.schema";
 
 // Define columns that are safe to expose to other end users
 const {
@@ -11,7 +11,6 @@ const {
   passwordResetExpires,
   passwordResetToken,
   email,
-  active,
   fileStorageOccupied,
   ...nonSensitiveColumns
 } = getTableColumns(users);
@@ -24,7 +23,7 @@ const {
  * @param {User} userObj
  * @returns {Partial<User>} the user object without sensitive
  */
-export function filterUserObj(userObj: Partial<UserUnsafe>): Partial<User> {
+export function filterUserObj(userObj: UserUnsafe): User {
   userObj.password = undefined!;
   userObj.email = undefined!;
   userObj.active = undefined!;
@@ -33,6 +32,8 @@ export function filterUserObj(userObj: Partial<UserUnsafe>): Partial<User> {
   userObj.passwordResetExpires = undefined!;
   return userObj;
 }
+
+const userIsNotInactive = eq(users.active, true);
 
 // Functions responsible for manipulating the user model
 /**
@@ -69,11 +70,20 @@ export async function signUpEndUser(
  * @param {string} username - The username of the user to retrieve.
  * @returns {Promise<User>} - the queried user
  */
-export async function getEndUser(username: string): Promise<User> {
+export async function getEndUserByUsername(username: string): Promise<User> {
   const [user]: User[] = await db
     .select({ ...nonSensitiveColumns })
     .from(users)
-    .where(and(eq(users.username, username), eq(users.active, true)));
+    .where(and(eq(users.username, username), userIsNotInactive));
+
+  return user;
+}
+
+export async function getEndUserById(userId: string): Promise<User> {
+  const [user]: User[] = await db
+    .select({ ...nonSensitiveColumns })
+    .from(users)
+    .where(and(eq(users.id, userId), userIsNotInactive));
 
   return user;
 }
@@ -86,18 +96,16 @@ export async function getEndUser(username: string): Promise<User> {
  */
 export async function updateEndUser(
   userId: string,
-  updatedFieldsObject: Partial<User>
-): Promise<User> {
-  // username email password
-
-  const filteredUpdateFields = filterUserObj(updatedFieldsObject);
+  fieldsToUpdateObj: UserUnsafe
+): Promise<Partial<UserUnsafe>> {
+  const filteredUpdateFields = filterUserObj(fieldsToUpdateObj);
 
   //TODO: update users
-  const [result]: User[] = await db
+  const [result]: Partial<UserUnsafe>[] = await db
     .update(users)
     .set(filteredUpdateFields)
     .where(eq(users.id, userId))
-    .returning();
+    .returning({ ...nonSensitiveColumns, email: users.email });
   return result;
 }
 
@@ -106,11 +114,11 @@ export async function deactivateEndUser(user: User) {
     .update(users)
     .set({
       active: false,
-      profilePicture: 'default.png',
-      role: 'user',
+      profilePicture: "default.png",
+      role: "user",
     })
     .where(eq(users.id, user.id))
-    .returning();
+    .returning(nonSensitiveColumns);
 
   return deactivatedUser;
 }

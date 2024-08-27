@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { getPosts } from "@/API";
+import { fetchPostsPaginated } from "@/API";
 
-import PostPreview from "@/components/PostPreview";
+import PostPreview from "@/components/PostPreview/PostPreview";
 import PostCreateForm from "@/components/PostCreateForm";
 
 import { Post } from "@/types";
@@ -34,7 +34,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchPostsPage() {
       if (page === null) return;
-      const newPosts: Post[] = await getPosts(page);
+      const newPosts: Post[] = await fetchPostsPaginated(page);
       if (newPosts.length > 0) {
         setPosts([...postsState, ...newPosts]);
       } else {
@@ -47,7 +47,10 @@ export default function Home() {
 
   return (
     <div className="home">
-      <PostCreateForm />
+      <PostCreateForm
+        postType="post"
+        textareaPlaceholder="What's on your mind?"
+      />
       <div className="posts-container border-t border-gray-700">
         {postsState.map((post, index) => (
           <PostPreview key={index} data={post} />

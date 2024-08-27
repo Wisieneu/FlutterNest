@@ -2,12 +2,14 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import Root from "@/routes/root.tsx";
-import Profile from "@/components/Profile";
-import ErrorPage from "@/routes/ErrorPage";
 import Home from "@/routes/Home";
+import PostDetailPage from "./routes/PostDetailPage";
+import UserDetailPage from "@/routes/UserDetailPage";
+import ErrorPage from "@/routes/ErrorPage";
 import AuthenticationPage from "@/routes/Authentication";
-import TestView from "@/routes/TestView";
-import AuthProvider from "@/components/Auth/AuthProvider";
+import AuthProvider from "@/components/Wrappers/AuthProvider";
+
+import { fetchPostById, fetchUserByUsername } from "./API";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
@@ -23,15 +25,20 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/profile/:username",
-        element: <Profile />,
+        path: "/u/:username",
+        element: <UserDetailPage />,
+        loader: async ({ params }) => {
+          const user = await fetchUserByUsername(params.username!);
+          return user || null;
+        },
       },
       {
         path: "/post/:postId",
-      },
-      {
-        path: "/test", // TODO: remove
-        element: <TestView />,
+        element: <PostDetailPage />,
+        loader: async ({ params }) => {
+          const post = await fetchPostById(params.postId!);
+          return post || null;
+        },
       },
     ],
   },

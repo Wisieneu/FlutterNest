@@ -4,8 +4,11 @@ import { useContext } from "react";
 
 import NavbarItem from "./NavbarItem";
 import Logo from "@/components/SiteLogo";
+import { AuthContext } from "../Wrappers/AuthProvider";
 
 export default function Sidebar() {
+  const user = useContext(AuthContext);
+
   const socialButtonsData = [
     {
       name: "Home",
@@ -22,7 +25,7 @@ export default function Sidebar() {
   const personalButtonsData = [
     {
       name: "Profile",
-      url: "/me",
+      url: `/u/${user?.username}`,
       icon: FaUser,
     },
     {
@@ -67,9 +70,17 @@ export default function Sidebar() {
               />
             ))}
           </div>
-          <div className="mt-auto flex w-full flex-col items-center pb-4">
-            <NavbarItem name={"Sign in"} url={"/auth/signin"} icon={FiLogIn} />
-          </div>
+          {user ? (
+            <div className=""></div>
+          ) : (
+            <div className="mt-auto flex w-full flex-col items-center pb-4">
+              <NavbarItem
+                name={"Sign in"}
+                url={"/auth/signin"}
+                icon={FiLogIn}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

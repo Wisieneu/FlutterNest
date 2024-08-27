@@ -78,8 +78,7 @@ type SensitiveFields =
   | "passwordResetToken"
   | "lastPasswordChangeDate"
   | "password"
-  | "email"
-  | "active";
+  | "email";
 
 export type User = Omit<InferSelectModel<typeof users>, SensitiveFields>;
 export type UserUnsafe = InferSelectModel<typeof users>;

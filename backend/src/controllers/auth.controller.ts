@@ -1,19 +1,19 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
-import { NextFunction, Request, Response } from 'express';
-import { eq } from 'drizzle-orm';
-import isEmail from 'validator/lib/isEmail';
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+import { NextFunction, Request, Response } from "express";
+import { eq } from "drizzle-orm";
+import isEmail from "validator/lib/isEmail";
 
-import { db } from '../db';
-import { User, NewUser, users, UserUnsafe } from '../db/user/user.schema';
-import { filterUserObj, signUpEndUser } from '../db/user/user.handlers';
+import { db } from "../db";
+import { User, NewUser, users, UserUnsafe } from "../db/user/user.schema";
+import { filterUserObj, signUpEndUser } from "../db/user/user.handlers";
 
-import AppError from '../utils/appError';
-import catchAsync from '../utils/catchAsync';
-import { roleType } from '../db/user/user.config';
+import AppError from "../utils/appError";
+import catchAsync from "../utils/catchAsync";
+import { roleType } from "../db/user/user.config";
 
-dotenv.config({ path: './.env' });
+dotenv.config({ path: "./.env" });
 
 // Authentication middlewares/functions
 /**
@@ -36,26 +36,26 @@ const signToken = (userId: string): string => {
  * @param {Response} res - The response object.
  */
 const createAndSendAuthToken = (
-  user: User,
+  user: UserUnsafe,
   statusCode: number,
   req: Request,
   res: Response,
   expose?: boolean
 ) => {
   const token = signToken(user.id);
-  res.cookie('jwt', token, {
+  res.cookie("jwt", token, {
     expires: new Date(
       Date.now() + Number(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000 // number of days from .env file - converted to miliseconds by multiplication
     ),
     httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+    secure: req.secure || req.headers["x-forwarded-proto"] === "https",
   });
 
   // Remove password from output
   const currentUser = expose ? user : filterUserObj(user);
 
   return res.status(statusCode).json({
-    status: 'success',
+    status: "success",
     token,
     data: {
       currentUser,
@@ -81,16 +81,16 @@ export const restrictLoginAccess = catchAsync(
     let token;
     if (
       req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
+      req.headers.authorization.startsWith("Bearer")
     ) {
-      token = req.headers.authorization.split(' ')[1];
+      token = req.headers.authorization.split(" ")[1];
     } else if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
 
     // If the token is not there
     if (!token) {
-      return next(new AppError('Access denied - please log in.', 401));
+      return next(new AppError("Access denied - please log in.", 401));
     }
 
     const decodedToken = <jwt.JwtPayload>(
@@ -104,7 +104,7 @@ export const restrictLoginAccess = catchAsync(
 
     // If user does not exist
     if (!currentUser) {
-      return next(new AppError('Invalid token. Please log in again.', 401));
+      return next(new AppError("Invalid token. Please log in again.", 401));
     }
 
     // If user changed their password after the token was created
@@ -114,7 +114,7 @@ export const restrictLoginAccess = catchAsync(
     if (passwordChangeCase) {
       return next(
         new AppError(
-          'User recently changed their password, please log in again.',
+          "User recently changed their password, please log in again.",
           401
         )
       );
@@ -133,10 +133,10 @@ export const restrictLoginAccess = catchAsync(
  */
 export const restrictTo = (role: roleType) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user || !(role === req.user.role) || req.user.role !== 'admin') {
+    if (!req.user || !(role === req.user.role) || req.user.role !== "admin") {
       // Reject response if user's role is not in the restricted roles list for that route
       return next(
-        new AppError('You do not have permission to perform this action.', 403)
+        new AppError("You do not have permission to perform this action.", 403)
       );
     }
     next();
@@ -152,10 +152,10 @@ export const signUp = catchAsync(
     const { password, passwordConfirm, username, email } = req.body;
 
     if (password !== passwordConfirm)
-      return next(new AppError('Provided passwords do not match.', 400));
+      return next(new AppError("Provided passwords do not match.", 400));
 
     const newUser: NewUser = await signUpEndUser(password, username, email);
-    createAndSendAuthToken(newUser as User, 201, req, res, true);
+    createAndSendAuthToken(newUser as UserUnsafe, 201, req, res, true);
   }
 );
 
@@ -172,7 +172,7 @@ export const signIn = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { login, password } = req.body;
     if (!login || !password)
-      return next(new AppError('Please provide a login and a password.', 400));
+      return next(new AppError("Please provide a login and a password.", 400));
 
     let [user]: UserUnsafe[] = await db
       .select()
@@ -180,13 +180,13 @@ export const signIn = catchAsync(
       .where(eq(isEmail(login) ? users.email : users.username, login));
 
     if (!user || user.active === false)
-      return next(new AppError('Incorrect credentials', 400));
+      return next(new AppError("Incorrect credentials", 400));
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (isPasswordCorrect) {
       return createAndSendAuthToken(user, 200, req, res);
     } else {
-      return next(new AppError('Incorrect credentials', 400));
+      return next(new AppError("Incorrect credentials", 400));
     }
   }
 );
@@ -195,12 +195,12 @@ export const signIn = catchAsync(
  * Signs the user out, making the auth token invalid
  */
 export const logout = (req: Request, res: Response, next: NextFunction) => {
-  res.cookie('jwt', 'loggedout', {
+  res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
 
   return res.status(200).json({
-    status: 'success',
+    status: "success",
   });
 };
