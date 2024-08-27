@@ -14,12 +14,13 @@ export interface User {
   birthDate: string | null;
   profilePicture: string;
   role: userRolesEnum;
+  active: boolean;
 }
 
 export interface Post {
   id: string;
   authorId: string;
-  type: string;
+  type: PostType;
   textContent: string;
   createdAt: string;
   updatedAt: string | null;
@@ -46,3 +47,5 @@ type UploadedImagesReducerActionBody = {
   filesToAppend?: File[];
   indexToRemove?: number;
 };
+
+export type PostType = "post" | "comment" | "repost";

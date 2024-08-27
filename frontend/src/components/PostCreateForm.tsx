@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useReducer } from "react";
 import { useDropzone } from "react-dropzone";
 import FormData from "form-data";
 
-import { createPost } from "@/API";
+import { createComment, createPost } from "@/API";
 import { displayToast } from "./Toast";
 // import { debounce } from "@/../../shared";
 
@@ -10,11 +10,18 @@ import SubmitBtn from "@/components/Buttons/SubmitBtn";
 import UploadedImagePreview from "@/components/Upload/UploadedImagePreview";
 import ProgressBarIndicator from "@/components/ProgressBarIndicator";
 import MultipleFileUploadField from "@/components/Upload/MultipleFileUploadField";
-import { UploadedImagesReducerActionBody } from "@/types";
+import { UploadedImagesReducerActionBody, PostType } from "@/types";
 import { IoMdCloudUpload } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import { AxiosResponse } from "axios";
 
-export default function PostCreateForm() {
+export interface PostCreateFormProps {
+  postType: PostType;
+  parentPostId?: string;
+  textareaPlaceholder?: string;
+}
+
+export default function PostCreateForm(props: PostCreateFormProps) {
   const navigate = useNavigate();
 
   function uploadedImagesReducer(
@@ -116,13 +123,23 @@ export default function PostCreateForm() {
       uploadedImages.forEach((file) => formData.append("media", file));
     }
 
-    const response = await createPost(formData);
-    console.log(response);
-    if (response.status === 201) {
+    let response: AxiosResponse<any, any>;
+    switch (props.postType) {
+      case "post":
+        response = await createPost(formData);
+        break;
+      case "comment":
+        response = await createComment(props.parentPostId!, formData);
+    }
+
+    if (response!.status === 201) {
       displayToast("Post created successfully.", "success");
-      navigate(`/post/${response.data.data.newPost}`);
+      navigate(`/post/${response!.data.data.newPost.id}`);
     } else {
-      displayToast("An error occurred while creating the post.", "error");
+      displayToast(
+        `An error occurred while creating the ${props.postType}.`,
+        "error",
+      );
     }
     setIsFormBeingSubmitted(false);
   }
@@ -138,7 +155,7 @@ export default function PostCreateForm() {
           name="textContent"
           id="textContent"
           className={`placeholder-shown:border-blue-gray-200 peer h-full min-h-[100px] w-full resize-none bg-transparent px-2 pb-1.5 pt-6 outline-0 focus:mb-10 ${isExpanded ? "mb-10 border-b border-gray-700" : ""}`}
-          placeholder="What's on your mind?"
+          placeholder={props.textareaPlaceholder || ""}
           value={textContent}
           onClick={() => {
             if (!isExpanded) setIsExpanded(true);

@@ -15,15 +15,18 @@ import userConfig from "../db/user/user.config";
 
 // GET routes
 
-export const getUserByUsername = catchAsync(
+export const getOneUser = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const { username } = req.params;
+    const { username, id } = req.query;
 
-    const user = await userSchemaHandler.getEndUser(username);
+    const user =
+      (username &&
+        (await userSchemaHandler.getEndUserByUsername(username as string))) ||
+      (id && (await userSchemaHandler.getEndUserById(id as string)));
 
     return res.status(200).json({
       status: "success",
@@ -40,7 +43,9 @@ export const getMyAccount = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const user = await userSchemaHandler.getEndUser(req.user!.username);
+    const user = await userSchemaHandler.getEndUserByUsername(
+      req.user!.username
+    );
     if (!user)
       next(
         new AppError("An error has occurred while searching for the user", 403)
@@ -176,6 +181,7 @@ export const getUsers = catchAsync(
 
 /**
  * Admin route for a single user
+ * First tries to search by username, then by id
  */
 export const getUser = catchAsync(
   async (

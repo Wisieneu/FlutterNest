@@ -5,11 +5,11 @@ import {
   useState,
 } from "react";
 
-import { getUser } from "@/API";
+import { fetchCurrentUser } from "@/API";
 
 import { User } from "@/types";
 
-const AuthContext = createContext<User | null>(null);
+export const AuthContext = createContext<User | null>(null);
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<User | null>(null);
@@ -17,7 +17,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   useLayoutEffect(() => {
     async function fetchMe() {
       try {
-        const user = await getUser();
+        const user = await fetchCurrentUser();
         setUser(user);
       } catch {
         setUser(null);

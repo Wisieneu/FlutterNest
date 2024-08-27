@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-import RegisterForm from "@/components/Auth/AuthForms/RegisterForm";
-import SignInForm from "@/components/Auth/AuthForms/SignInForm";
+import RegisterForm from "@/components/Auth/forms/RegisterForm";
+import SignInForm from "@/components/Auth/forms/SignInForm";
 import Logo from "@/components/SiteLogo";
 
 export default function AuthenticationPage() {
   const [isLogin, setIsLogin] = useState<boolean>(
-    location.pathname === "/auth/login",
+    location.pathname === "/auth/signin",
   );
 
   const switchToLogin = () => setIsLogin(true);

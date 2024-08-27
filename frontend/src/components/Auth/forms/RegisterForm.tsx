@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
-import { BaseSyntheticEvent, FormEvent, useState } from "react";
-import { redirect } from "react-router-dom";
-import { Slide, toast } from "react-toastify";
+import { BaseSyntheticEvent, FormEvent, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Id, Slide, toast } from "react-toastify";
 
 import { signUp } from "@/API";
 
@@ -10,6 +10,8 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm(props: RegisterFormProps) {
+  const navigate = useNavigate();
+  const toastId = useRef<Id | null>(null);
   const [formState, setFormState] = useState({
     username: "",
     email: "",
@@ -41,27 +43,32 @@ export default function RegisterForm(props: RegisterFormProps) {
       return alert("Service temporary unavailable. Please try again later.");
     }
 
-    // Signing up
-    const id = toast.loading("Signing up...", {
+    toast.dismiss(toastId.current as Id);
+    toastId.current = toast.loading("Signing up...", {
       position: "top-right",
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
       theme: "dark",
+
       transition: Slide,
     });
 
+    // Signing up
     try {
       const response = await signUp(formState);
-      toast.update(id, {
-        render: "All is good",
+      toast.update(toastId.current, {
+        render: "Registration successful. Redirecting...",
         type: "success",
         isLoading: false,
-        autoClose: 5000,
+        autoClose: 3000,
       });
 
-      redirect("/");
+      setTimeout(() => {
+        toast.dismiss(toastId.current as Id);
+        navigate("/");
+      }, 2000);
     } catch (error) {
       // Creating the error toast, depending on the returned error format from the API
       const err = error as AxiosError;
@@ -71,10 +78,10 @@ export default function RegisterForm(props: RegisterFormProps) {
         ? errors.split(": ")[1].split(", ")
         : Array(errors);
 
-      toast.update(id, {
+      toast.update(toastId.current, {
         render: (
           <div>
-            <h1>Registration failed:</h1>
+            <h1 className="mb-3">Registration failed:</h1>
             <ul className="ml-4 list-disc text-sm">
               {errorsArray.map((error, index) => (
                 <li key={index}>{error}</li>

@@ -11,6 +11,7 @@ const userRouter = express.Router();
 /**
  * General user routes
  */
+userRouter.route("/").get(userController.getOneUser);
 userRouter
   .route("/signup")
   .post(
@@ -20,8 +21,6 @@ userRouter
 
 userRouter.route("/signin").post(authController.signIn);
 userRouter.route("/logout").get(authController.logout);
-
-userRouter.route("/profile/:username").get(userController.getUserByUsername);
 
 /**
  * Login protected routes
