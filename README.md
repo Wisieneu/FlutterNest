@@ -43,6 +43,7 @@ In the future, I plan to add (once I actually find the time):
   - NODE_ENV, PORT variables
   - JWT details (ref to [auth.controller.ts](backend/src/controllers/auth.controller.ts) file)
 - `pnpm start`, fix any bugs that arise ([contact me directly](https://portfolio.wise-ee.xyz/contact) if needed)
+- Once you confirm the database works as intended, run `pnpm run generate` and `pnpm run migrate` in the `./backend` folder 
 - Start coding and enjoy 🤠
 
 ### Notes:
