@@ -17,8 +17,8 @@ export async function getPostMediaFilesByPostId(postId: string) {
 
 export async function getPostMediaFilesByPostIdsArray(postIdsArray: string[]) {
   /**
-   * TODO: figure out why this cannot be replaced with a prepared query statement
-   * FIXME: array cannot be used as a placeholder, throws a syntax error
+   * TODO: this cannot be replaced with a prepared query statement
+   * array cannot be used as a placeholder, throws a syntax error
    * https://github.com/drizzle-team/drizzle-orm/issues/2872
    */
   const result = await db
