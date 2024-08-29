@@ -1,12 +1,31 @@
 import { BaseSyntheticEvent } from "react";
 import { toast, Slide } from "react-toastify";
 import { displayToast } from "../Toast";
+import { SizeType } from "@/types";
+import { FiShare2 } from "react-icons/fi";
 
 interface ShareBtnProps {
   postId: string;
+  size: SizeType;
 }
 
 export default function ShareBtn(props: ShareBtnProps) {
+  let textSizeClass: string;
+  let size: number;
+  switch (props.size) {
+    case "L":
+      textSizeClass = "text-lg";
+      size = 16;
+      break;
+    case "M":
+      textSizeClass = "text-base";
+      size = 16;
+      break;
+    case "S":
+      textSizeClass = "text-sm";
+      size = 14;
+  }
+
   // Copies the link to the post's detail page to clipboard
   function handleShare(event: BaseSyntheticEvent) {
     event.preventDefault();
@@ -18,22 +37,10 @@ export default function ShareBtn(props: ShareBtnProps) {
 
   return (
     <div
-      className="mr-4 flex cursor-pointer items-center text-sm"
+      className={`mr-4 flex cursor-pointer items-center ${textSizeClass}`}
       onClick={handleShare}
     >
-      <svg
-        fill="none"
-        viewBox="0 0 24 24"
-        className="mr-1 h-4 w-4"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-        />
-      </svg>
+      <FiShare2 size={size} className={`mr-2`} />
       <span>Share</span>
     </div>
   );

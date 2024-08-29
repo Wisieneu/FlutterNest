@@ -9,6 +9,8 @@ import * as postMediaFilesHandler from "../db/postMediaFiles/post.media.files.ha
 import catchAsync from "../utils/catchAsync";
 import AppError from "../utils/appError";
 import { postMediaFiles } from "db/postMediaFiles/post.media.files.schema";
+import { User } from "db/user/user.schema";
+import { PostType } from "db/post/post.config";
 
 export const getPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -46,6 +48,58 @@ export const getPost = catchAsync(
   }
 );
 
+export const getPostCommentsPaginated = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId } = req.params;
+    const { page, limit } = req.query;
+
+    const post = await postHandler.getPostById(postId);
+
+    if (!post) {
+      next(new AppError("Could not find a post with this ID", 404));
+    }
+
+    const result = await postHandler.getPostCommentsPaginated(
+      postId,
+      Number(page),
+      Number(limit)
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        result: result.result,
+        commentCount: result.commentCount.commentCount,
+        page: page,
+        amount: result.result.length,
+      },
+    });
+  }
+);
+
+export const getPostsByUserId = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    const { page, limit, type } = req.query;
+
+    const result = await postHandler.getPostsByUserIdPaginated(
+      userId,
+      type as PostType,
+      Number(page),
+      Number(limit)
+    );
+
+    console.log(result);
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        result,
+      },
+    });
+  }
+);
+
 /**
  * Creates a new post
  */
@@ -54,7 +108,7 @@ export const createPost = catchAsync(
     const authorId = req.user!.id;
     const { textContent } = req.body;
 
-    const newPost = await postHandler.insertPost(authorId, textContent);
+    const newPost = await postHandler.insertPost(authorId, textContent, "post");
 
     if (!newPost) {
       return next(
@@ -81,7 +135,7 @@ export const createPost = catchAsync(
       data: {
         newPost: {
           ...newPost,
-          files: postFiles,
+          media: postFiles,
         },
       },
     });
@@ -90,10 +144,39 @@ export const createPost = catchAsync(
 
 export const commentPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    //TODO: implement
-    return res.status(200).json({
-      status: "route not implemented yet",
-      data: null,
+    const author = req.user! as User;
+    const { textContent } = req.body;
+
+    const result = await postHandler.insertPost(
+      author.id,
+      textContent,
+      "comment",
+      req.params.postId
+    );
+
+    let postFiles;
+    // After the post is created, we can insert the media files if there are any
+    if (
+      req.files &&
+      (req.files.length as number) > 0 &&
+      Array.isArray(req.files)
+    ) {
+      postFiles = await postMediaFilesHandler.insertPostMediaFiles(
+        req.files,
+        result.id,
+        author.id
+      );
+    }
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        newPost: {
+          ...result,
+          author,
+          media: postFiles,
+        },
+      },
     });
   }
 );
@@ -103,7 +186,6 @@ export const repostPost = catchAsync(
     //TODO: implement
     return res.status(200).json({
       status: "route not implemented yet",
-      data: null,
     });
   }
 );

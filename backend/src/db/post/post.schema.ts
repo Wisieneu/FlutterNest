@@ -38,6 +38,8 @@ export const posts = pgTable("posts", {
   isDeleted: boolean("isDeleted").default(false).notNull(),
   likesAmount: integer("likesAmount").default(0).notNull(),
   commentsAmount: integer("commentsAmount").default(0).notNull(),
+  viewsAmount: integer("viewsAmount").default(0).notNull(),
+  bookmarksAmount: integer("bookmarksAmount").default(0).notNull(),
 });
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -64,7 +66,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 export type Post = InferSelectModel<typeof posts> & {
   author: User | null;
 } & {
-  files?: PostMediaFile[];
+  media?: PostMediaFile[];
 };
 export type NewPost = InferInsertModel<typeof posts>;
 

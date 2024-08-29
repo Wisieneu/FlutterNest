@@ -1,9 +1,10 @@
-import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, SQL, sql } from "drizzle-orm";
 
 import { db } from "..";
 import { likes, Post, posts } from "./post.schema";
 import { users } from "../user/user.schema";
-import { postMediaFiles } from "../postMediaFiles/post.media.files.schema";
+import { PostType } from "./post.config";
+import * as postMediaHandler from "../postMediaFiles/post.media.files.handlers";
 
 // Post columns for select query
 const postBody = {
@@ -22,10 +23,13 @@ const postBody = {
     birthDate: users.birthDate,
     profilePicture: users.profilePicture,
     role: users.role,
+    active: users.active,
   },
   likesAmount: posts.likesAmount,
   commentsAmount: posts.commentsAmount,
-  media: postMediaFiles,
+  bookmarksAmount: posts.bookmarksAmount,
+  viewsAmount: posts.viewsAmount,
+  authorId: posts.authorId,
 };
 
 const postIsNotDeleted = eq(posts.isDeleted, false);
@@ -52,10 +56,44 @@ const getPostsPaginatedQuery = db.query.posts
     },
     offset: sql.placeholder("offset"),
     limit: sql.placeholder("limit"),
-    where: postIsNotDeleted,
+    where: and(postIsNotDeleted, eq(posts.type, "post")),
     orderBy: desc(posts.createdAt),
   })
   .prepare("getPostsPaginatedQuery");
+
+const getPostCommentsPaginatedQuery = db.query.posts
+  .findMany({
+    with: {
+      author: {
+        columns: {
+          id: true,
+          username: true,
+          displayName: true,
+          profilePicture: true,
+          role: true,
+          active: true,
+          createdAt: true,
+          birthDate: true,
+        },
+      },
+      media: true,
+    },
+    offset: sql.placeholder("offset"),
+    limit: sql.placeholder("limit"),
+    where: and(
+      postIsNotDeleted,
+      eq(posts.parentId, sql.placeholder("postId")),
+      eq(posts.type, "comment")
+    ),
+    orderBy: desc(posts.createdAt),
+  })
+  .prepare("getPostsPaginatedQuery");
+
+const getCommentCountByPostIdQuery = db
+  .select({ commentCount: sql.raw("COUNT(*) as commentCount") })
+  .from(posts)
+  .where(and(eq(posts.parentId, sql.placeholder("postId")), postIsNotDeleted))
+  .prepare("getCommentCountByPostIdQuery");
 
 const getLikesByPostId = db
   .select({
@@ -86,9 +124,24 @@ const getPostByIdQuery = db.query.posts
       },
       media: true,
     },
-    where: eq(posts.id, sql.placeholder("postId")),
+    where: and(eq(posts.id, sql.placeholder("postId")), postIsNotDeleted),
   })
   .prepare("getPostByIdQuery");
+
+async function getPostsPaginatedQuery2(
+  queryStatement: SQL,
+  page: number,
+  objectsPerPage: number
+) {
+  const result = await db
+    .select(postBody)
+    .from(posts)
+    .where(queryStatement)
+    .offset((page - 1) * objectsPerPage)
+    .limit(objectsPerPage);
+
+  return result;
+}
 
 const findLikeQuery = db
   .select()
@@ -136,22 +189,63 @@ export async function getPostById(postId: string) {
   return result;
 }
 
-export async function getPostsByUserId(userId: string) {
-  const postsData = await db
-    .select()
+export async function getPostsByUserIdPaginated(
+  userId: string,
+  type: PostType,
+  page: number,
+  objectsPerPage: number
+): Promise<Post[]> {
+  const postsPage = await db
+    .select(postBody)
     .from(posts)
-    .where(and(eq(posts.authorId, userId), postIsNotDeleted))
-    .execute();
-  return postsData;
+    .where(
+      and(
+        eq(posts.isDeleted, false),
+        eq(posts.type, type),
+        eq(posts.authorId, userId)
+      )
+    )
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .orderBy(desc(posts.createdAt))
+    .offset((page - 1) * objectsPerPage)
+    .limit(objectsPerPage);
+
+  const result =
+    await postMediaHandler.populatePostObjectWithMediaFilesManually(postsPage);
+
+  return result;
 }
 
-export async function insertPost(authorId: string, textContent: string) {
+export async function getPostCommentsPaginated(
+  postId: string,
+  page: number,
+  objectsPerPage: number
+) {
+  const offset = (page - 1) * objectsPerPage;
+  const result = await getPostCommentsPaginatedQuery.execute({
+    offset,
+    limit: objectsPerPage,
+    postId,
+  });
+  const [commentCount] = await getCommentCountByPostIdQuery.execute({
+    postId,
+  });
+  return { result, commentCount: commentCount };
+}
+
+export async function insertPost(
+  authorId: string,
+  textContent: string,
+  postType: PostType,
+  parentId?: string
+) {
   const [newPost] = await db
     .insert(posts)
     .values({
       authorId,
-      type: "post",
+      type: postType,
       textContent,
+      parentId: parentId ? parentId : null,
     })
     .returning();
 

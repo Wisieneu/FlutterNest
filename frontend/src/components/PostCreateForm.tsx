@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useReducer } from "react";
+import { useEffect, useState, useCallback, useReducer, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import FormData from "form-data";
 
@@ -10,17 +10,24 @@ import SubmitBtn from "@/components/Buttons/SubmitBtn";
 import UploadedImagePreview from "@/components/Upload/UploadedImagePreview";
 import ProgressBarIndicator from "@/components/ProgressBarIndicator";
 import MultipleFileUploadField from "@/components/Upload/MultipleFileUploadField";
-import { UploadedImagesReducerActionBody, PostType } from "@/types";
+import { UploadedImagesReducerActionBody, PostType, Post } from "@/types";
 import { IoMdCloudUpload } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
+import { Id, Slide, toast } from "react-toastify";
 
 export interface PostCreateFormProps {
   postType: PostType;
-  parentPostId?: string;
   textareaPlaceholder?: string;
+  parentPostId?: string;
+  insertNewComment?: (post: Post) => void;
 }
 
+/**
+ * Different
+ * @param props.parentPostId and @param props.insertNewComment
+ * are to be used only when the postType is "comment"
+ */
 export default function PostCreateForm(props: PostCreateFormProps) {
   const navigate = useNavigate();
 
@@ -33,6 +40,8 @@ export default function PostCreateForm(props: PostCreateFormProps) {
         return [...state, ...action.filesToAppend!];
       case "pop":
         return state.filter((_, i) => i !== action.indexToRemove!);
+      case "clear":
+        return [];
       default:
         return state;
     }
@@ -41,6 +50,8 @@ export default function PostCreateForm(props: PostCreateFormProps) {
     uploadedImagesReducer,
     [],
   );
+
+  const toastId = useRef<Id | null>(null);
 
   // States
   const [textContent, setTextContent] = useState("");
@@ -63,7 +74,7 @@ export default function PostCreateForm(props: PostCreateFormProps) {
     }
 
     // Update the submit button's disabled state
-    if (textContent.length >= 2 && textContent.length < 128) {
+    if (textContent.length >= 2 && textContent.length <= 128) {
       setIsFormSubmittable(true);
     } else {
       setIsFormSubmittable(false);
@@ -84,7 +95,7 @@ export default function PostCreateForm(props: PostCreateFormProps) {
     clearTimeout(timer);
     timer = setTimeout(() => {
       setIsDraggingOverForm(false);
-    }, 3000);
+    }, 2000);
   }
 
   /**
@@ -114,8 +125,18 @@ export default function PostCreateForm(props: PostCreateFormProps) {
   });
 
   async function handleSubmit() {
-    // TODO: fix redirect
     setIsFormBeingSubmitted(true);
+    toast.dismiss(toastId.current as Id);
+    toastId.current = toast.loading(`Adding your ${props.postType}...`, {
+      position: "top-right",
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "dark",
+
+      transition: Slide,
+    });
     const formData = new FormData();
     formData.append("textContent", textContent);
 
@@ -133,20 +154,37 @@ export default function PostCreateForm(props: PostCreateFormProps) {
     }
 
     if (response!.status === 201) {
-      displayToast("Post created successfully.", "success");
-      navigate(`/post/${response!.data.data.newPost.id}`);
+      setTimeout(() => {
+        toast.update(toastId.current!, {
+          render: `The ${props.postType} has been added successfully.`,
+          type: "success",
+          isLoading: false,
+          autoClose: 2000,
+        });
+        if (props.postType === "post") {
+          navigate(`/post/${response!.data.data.newPost.id}`);
+        } else {
+          props.insertNewComment!(response!.data.data.newPost);
+          // clears everything from the form
+          setTextContent("");
+          uploadedImagesDispatch({ type: "clear" });
+          setIsExpanded(false);
+        }
+      }, 1000);
     } else {
-      displayToast(
-        `An error occurred while creating the ${props.postType}.`,
-        "error",
-      );
+      toast.update(toastId.current, {
+        render: `An error occurred while creating the ${props.postType}.`,
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
     }
     setIsFormBeingSubmitted(false);
   }
 
   return (
     <div
-      className={`relative w-full p-6 ${isFormBeingSubmitted ? "blur-container" : ""}`}
+      className={`relative w-full p-6 transition-all ${isFormBeingSubmitted ? "blur-container" : ""}`}
       {...getRootProps()} // dropzone initialization for the form container (no clicking, just hover)
       onDragEnter={() => handleFileHover()} // dragging over the form container with a file, show the dropzone
     >
@@ -154,7 +192,7 @@ export default function PostCreateForm(props: PostCreateFormProps) {
         <textarea
           name="textContent"
           id="textContent"
-          className={`placeholder-shown:border-blue-gray-200 peer h-full min-h-[100px] w-full resize-none bg-transparent px-2 pb-1.5 pt-6 outline-0 focus:mb-10 ${isExpanded ? "mb-10 border-b border-gray-700" : ""}`}
+          className={`h-full min-h-24 w-full bg-transparent px-2 pb-1.5 pt-4 ${isExpanded ? "mb-4 border-b border-gray-700" : "resize-none"}`}
           placeholder={props.textareaPlaceholder || ""}
           value={textContent}
           onClick={() => {
@@ -176,9 +214,15 @@ export default function PostCreateForm(props: PostCreateFormProps) {
                 />
               ))}
             </div>
-            <div className="uploaded-images-counter p-4 text-xs">{`${uploadedImages.length} out of 6`}</div>
           </div>
         )}
+
+        <div
+          className={`uploaded-images-counter p-4 text-xs ${isExpanded ? "" : "hidden"}`}
+        >
+          <p>Drag and drop images here</p>
+          <p>{`${uploadedImages.length} out of 6`}</p>
+        </div>
         <div className="flex items-center justify-end">
           {/* Visual indicator for the character limit */}
           <div className="mr-auto text-xs">
@@ -202,7 +246,7 @@ export default function PostCreateForm(props: PostCreateFormProps) {
       </form>
       {/* Element which shows when the form is being dragged over */}
       <div
-        className={`pointer-events-none absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-80 ${isDraggingOverForm ? "" : "invisible"}`}
+        className={`pointer-events-none absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-90 ${isDraggingOverForm ? "" : "invisible"}`}
       >
         <IoMdCloudUpload color="#af68df" size={100} />
       </div>

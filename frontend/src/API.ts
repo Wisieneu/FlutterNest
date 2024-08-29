@@ -31,8 +31,19 @@ export async function createPost(formData: FormData) {
   return response;
 }
 
+export async function getPostComments(
+  postId: string,
+  page: number = 1,
+  limit: number = 10,
+): Promise<Post[]> {
+  const response = await API.get(
+    `/posts/${postId}/comments?page=${page}&limit=${limit}`,
+  );
+  return response.data.data.result;
+}
+
 export async function createComment(postId: string, requestBody: FormData) {
-  const response = API.post(`/posts/${postId}/comment`, requestBody);
+  const response = API.post(`/posts/${postId}/comments`, requestBody);
   return response;
 }
 

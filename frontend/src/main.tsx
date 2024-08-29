@@ -5,8 +5,10 @@ import App from "./App.tsx";
 
 import "./index.scss";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+const rootElement = (
   <React.StrictMode>
-    <App />,
-  </React.StrictMode>,
+    <App />
+  </React.StrictMode>
 );
+
+ReactDOM.createRoot(document.getElementById("root")!).render(rootElement);
