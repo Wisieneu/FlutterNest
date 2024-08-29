@@ -30,6 +30,8 @@ export interface Post {
   author: User;
   media?: Media[];
   isDeleted: boolean;
+  bookmarksAmount: number;
+  viewsAmount: number;
 }
 
 export interface Media {
@@ -43,9 +45,11 @@ export interface Media {
 }
 
 type UploadedImagesReducerActionBody = {
-  type: "pop" | "append";
+  type: "pop" | "append" | "clear";
   filesToAppend?: File[];
   indexToRemove?: number;
 };
 
 export type PostType = "post" | "comment" | "repost";
+
+type SizeType = "L" | "M" | "S";

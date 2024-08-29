@@ -1,7 +1,8 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { postMediaFiles } from "./post.media.files.schema";
 import { db } from "..";
 import { uploadFileToS3 } from "../../utils/s3";
+import { Post } from "db/post/post.schema";
 
 const getPostMediaFilesByPostIdQuery = db
   .select()
@@ -11,6 +12,35 @@ const getPostMediaFilesByPostIdQuery = db
 
 export async function getPostMediaFilesByPostId(postId: string) {
   const result = await getPostMediaFilesByPostIdQuery.execute({ postId });
+  return result;
+}
+
+export async function getPostMediaFilesByPostIdsArray(postIdsArray: string[]) {
+  /**
+   * TODO: figure out why this cannot be replaced with a prepared query statement
+   * FIXME: array cannot be used as a placeholder, throws a syntax error
+   * https://github.com/drizzle-team/drizzle-orm/issues/2872
+   */
+  const result = await db
+    .select()
+    .from(postMediaFiles)
+    .where(inArray(postMediaFiles.postId, postIdsArray));
+
+  return result;
+}
+
+export async function populatePostObjectWithMediaFilesManually(
+  postsArray: Omit<Post, "media">[]
+): Promise<Post[]> {
+  const postIdsArray = postsArray.map((post) => post.id);
+  const postMediaFiles = await getPostMediaFilesByPostIdsArray(postIdsArray);
+  const result: Post[] = postsArray.map((post) => {
+    const postMedia = postMediaFiles.filter(
+      (postMedia) => postMedia.postId === post.id
+    );
+    return { ...post, media: [...postMedia] };
+  });
+  console.log(result);
   return result;
 }
 

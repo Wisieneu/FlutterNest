@@ -1,7 +1,7 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-import Root from "@/routes/root.tsx";
+import Root from "@/routes/root";
 import Home from "@/routes/Home";
 import PostDetailPage from "./routes/PostDetailPage";
 import UserDetailPage from "@/routes/UserDetailPage";

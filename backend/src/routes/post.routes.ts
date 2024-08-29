@@ -18,7 +18,9 @@ import multer from "multer";
 postRouter.route("/").get(postController.getPosts);
 postRouter.route("/:postId").get(postController.getPost);
 
-// Login restricted routes only below this line
+/**
+ * Login restricted routes only below this line
+ */
 postRouter.use(authController.restrictLoginAccess);
 
 postRouter
@@ -26,8 +28,12 @@ postRouter
   .post(uploadPostMedia, processPostMedia, postController.createPost);
 
 // postRouter.route('/').post(uploadPostMedia, postController.test);
-postRouter.route("/:postId/comment").post(postController.commentPost);
-postRouter.route("/:postId/repost").post(postController.repostPost);
+postRouter
+  .route("/:postId/comments")
+  .get(postController.getPostCommentsPaginated)
+  .post(uploadPostMedia, processPostMedia, postController.commentPost);
+
+postRouter.route("/:postId/reposts").post(postController.repostPost);
 
 postRouter
   .route("/:postId")
@@ -36,5 +42,7 @@ postRouter
 
 postRouter.route("/:postId/like").post(postController.likePost);
 postRouter.route("/:postId/unlike").post(postController.unlikePost);
+
+postRouter.get("/user/:userId", postController.getPostsByUserId);
 
 export default postRouter;
