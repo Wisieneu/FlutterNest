@@ -12,7 +12,6 @@ const removeAllLikes = async () => {
 
 const getAllLikes = async () => {
   const likesArray = await db.select().from(likes);
-  console.log(likesArray);
 };
 
 const insertLike = async () => {

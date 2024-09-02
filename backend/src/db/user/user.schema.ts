@@ -42,6 +42,11 @@ export const users = pgTable("users", {
   }).notNull(),
 
   // User info
+  bio: varchar("bio", { length: userConfig.maxBioLength }).default(
+    "No bio added."
+  ),
+  website: varchar("website", { length: userConfig.maxWebsiteLink }),
+  location: varchar("location", { length: userConfig.maxLocationLength }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   birthDate: date("birthDate"),
   profilePicture: varchar("profilePicture")

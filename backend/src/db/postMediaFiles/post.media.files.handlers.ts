@@ -29,7 +29,7 @@ export async function getPostMediaFilesByPostIdsArray(postIdsArray: string[]) {
   return result;
 }
 
-export async function populatePostObjectWithMediaFilesManually(
+export async function populatePostObjectsWithMediaFilesManually(
   postsArray: Omit<Post, "media">[]
 ): Promise<Post[]> {
   const postIdsArray = postsArray.map((post) => post.id);
@@ -40,7 +40,6 @@ export async function populatePostObjectWithMediaFilesManually(
     );
     return { ...post, media: [...postMedia] };
   });
-  console.log(result);
   return result;
 }
 

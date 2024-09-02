@@ -3,6 +3,8 @@ import axios, { AxiosInstance } from "axios";
 import { Post, User } from "@/types";
 import FormData from "form-data";
 
+type APIPostType = "post" | "comment" | "repost";
+
 const API: AxiosInstance = axios.create({
   baseURL: `http://localhost:6699/api/v1`,
   withCredentials: true,
@@ -13,6 +15,29 @@ export async function fetchPostsPaginated(
   limit: number = 10,
 ): Promise<Post[]> {
   const response = await API.get(`/posts?page=${page}&limit=${limit}`);
+  return response.data.data.result;
+}
+
+export async function fetchPostsByUserIdPaginated(
+  userId: string,
+  postType: APIPostType,
+  page: number = 1,
+  limit: number = 10,
+): Promise<Post[]> {
+  const response = await API.get(
+    `/posts/user/${userId}?type=${postType}&page=${page}&limit=${limit}`,
+  );
+  return response.data.data.result;
+}
+
+export async function fetchUserLikesPaginated(
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+) {
+  const response = await API.get(
+    `/posts/likes/${userId}?page=${page}&limit=${limit}`,
+  );
   return response.data.data.result;
 }
 
@@ -81,4 +106,14 @@ export async function fetchUserByUsername(username: string): Promise<User> {
 export async function fetchUserById(username: string): Promise<User> {
   const response = await API.get(`/users/?id=${username}`);
   return response.data.data.user;
+}
+
+export async function likePost(postId: string) {
+  const response = await API.post(`/posts/${postId}/like`);
+  return response;
+}
+
+export async function unlikePost(postId: string) {
+  const response = await API.delete(`/posts/${postId}/like`);
+  return response;
 }

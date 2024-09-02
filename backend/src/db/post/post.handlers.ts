@@ -1,10 +1,11 @@
-import { and, desc, eq, SQL, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, SQL, sql } from "drizzle-orm";
 
 import { db } from "..";
 import { likes, Post, posts } from "./post.schema";
 import { users } from "../user/user.schema";
 import { PostType } from "./post.config";
 import * as postMediaHandler from "../postMediaFiles/post.media.files.handlers";
+import placeholderUser from "../user/placeholder.user";
 
 // Post columns for select query
 const postBody = {
@@ -24,6 +25,9 @@ const postBody = {
     profilePicture: users.profilePicture,
     role: users.role,
     active: users.active,
+    bio: users.bio,
+    website: users.website,
+    location: users.location,
   },
   likesAmount: posts.likesAmount,
   commentsAmount: posts.commentsAmount,
@@ -31,6 +35,21 @@ const postBody = {
   viewsAmount: posts.viewsAmount,
   authorId: posts.authorId,
 };
+
+const {
+  password,
+  lastPasswordChangeDate,
+  passwordResetExpires,
+  passwordResetToken,
+  email,
+  fileStorageOccupied,
+  ...nonSensitiveColumns
+} = getTableColumns(users);
+
+let safeUserColumns: { [key: string]: any } = {}; // TODO: typesafe this somehow:)
+Object.keys(nonSensitiveColumns).forEach(
+  (col) => (safeUserColumns[col] = true)
+);
 
 const postIsNotDeleted = eq(posts.isDeleted, false);
 
@@ -41,16 +60,7 @@ const getPostsPaginatedQuery = db.query.posts
   .findMany({
     with: {
       author: {
-        columns: {
-          id: true,
-          username: true,
-          displayName: true,
-          profilePicture: true,
-          role: true,
-          active: true,
-          createdAt: true,
-          birthDate: true,
-        },
+        columns: safeUserColumns,
       },
       media: true,
     },
@@ -65,16 +75,7 @@ const getPostCommentsPaginatedQuery = db.query.posts
   .findMany({
     with: {
       author: {
-        columns: {
-          id: true,
-          username: true,
-          displayName: true,
-          profilePicture: true,
-          role: true,
-          active: true,
-          createdAt: true,
-          birthDate: true,
-        },
+        columns: safeUserColumns,
       },
       media: true,
     },
@@ -87,12 +88,12 @@ const getPostCommentsPaginatedQuery = db.query.posts
     ),
     orderBy: desc(posts.createdAt),
   })
-  .prepare("getPostsPaginatedQuery");
+  .prepare("getPostCommentsPaginatedQuery");
 
 const getCommentCountByPostIdQuery = db
   .select({ commentCount: sql.raw("COUNT(*) as commentCount") })
   .from(posts)
-  .where(and(eq(posts.parentId, sql.placeholder("postId")), postIsNotDeleted))
+  .where(and(postIsNotDeleted, eq(posts.parentId, sql.placeholder("postId"))))
   .prepare("getCommentCountByPostIdQuery");
 
 const getLikesByPostId = db
@@ -113,18 +114,11 @@ const getPostByIdQuery = db.query.posts
   .findFirst({
     with: {
       author: {
-        columns: {
-          id: true,
-          username: true,
-          displayName: true,
-          profilePicture: true,
-          role: true,
-          active: true,
-        },
+        columns: safeUserColumns,
       },
       media: true,
     },
-    where: and(eq(posts.id, sql.placeholder("postId")), postIsNotDeleted),
+    where: and(postIsNotDeleted, eq(posts.id, sql.placeholder("postId"))),
   })
   .prepare("getPostByIdQuery");
 
@@ -160,6 +154,7 @@ const likePostDbQuery = db
     userId: sql.placeholder("userId"),
     postId: sql.placeholder("postId"),
   })
+  .returning()
   .prepare("likePostDbQuery");
 
 const unlikePostDbQuery = db
@@ -170,25 +165,45 @@ const unlikePostDbQuery = db
       eq(likes.userId, sql.placeholder("userId"))
     )
   )
+  .returning()
   .prepare("unlikePostDbQuery");
 
 /**
  * Functions for the post controller to use
  */
+
 export async function getPostsPaginated(page: number, objectsPerPage: number) {
   const offset = (page - 1) * objectsPerPage;
   const result = await getPostsPaginatedQuery.execute({
     offset,
     limit: objectsPerPage,
   });
-  return result;
+
+  result.forEach((post) =>
+    !post.author ? (post.author = placeholderUser) : post.author
+  );
+
+  return result as Post[];
 }
 
 export async function getPostById(postId: string) {
-  const result = await getPostByIdQuery.execute({ postId });
+  const result = (await getPostByIdQuery.execute({ postId })) as Post;
+  if (!result.author) result.author = placeholderUser;
   return result;
 }
 
+/**
+ * Get posts created by a certain user
+ * currently uses an alternative way of querying the database
+ * because findMany is not the way I want to go
+ * TODO: compare how effective it is in comparison to the db.query.posts.findMany
+ *
+ * @param {string} userId id of user whose posts will be searched
+ * @param @enum {PostType} type post type to search for
+ * @param {number} page pagination page (skips the first <page * objectsPerPage> posts)
+ * @param {number} objectsPerPage number of posts to return per page
+ * @returns array of posts
+ */
 export async function getPostsByUserIdPaginated(
   userId: string,
   type: PostType,
@@ -200,22 +215,31 @@ export async function getPostsByUserIdPaginated(
     .from(posts)
     .where(
       and(
-        eq(posts.isDeleted, false),
         eq(posts.type, type),
-        eq(posts.authorId, userId)
-      )
+        eq(posts.authorId, userId),
+        eq(posts.type, type),
+        postIsNotDeleted
+      ) // asdasdas
     )
     .leftJoin(users, eq(posts.authorId, users.id))
     .orderBy(desc(posts.createdAt))
     .offset((page - 1) * objectsPerPage)
     .limit(objectsPerPage);
 
-  const result =
-    await postMediaHandler.populatePostObjectWithMediaFilesManually(postsPage);
+  const result: Post[] =
+    await postMediaHandler.populatePostObjectsWithMediaFilesManually(postsPage);
 
   return result;
 }
 
+/**
+ * Gets "comment" type posts of a certain post
+ *
+ * @param postId parentId of the post whose comments will be searched
+ * @param page pagination page (skips the first <page * objectsPerPage> comments)
+ * @param objectsPerPage number of comments to return per page
+ * @returns paginated array of comments and the total number of comments on that post
+ */
 export async function getPostCommentsPaginated(
   postId: string,
   page: number,
@@ -233,6 +257,14 @@ export async function getPostCommentsPaginated(
   return { result, commentCount: commentCount };
 }
 
+/**
+ *
+ * @param authorId id of the user who will create the post
+ * @param textContent text content of the post
+ * @param postType @enum {PostType} type of the post
+ * @param parentId optional - id of the parent post (if it is a comment or repost)
+ * @returns the newly created post
+ */
 export async function insertPost(
   authorId: string,
   textContent: string,
@@ -257,12 +289,33 @@ export async function findLike(userId: string, postId: string) {
   return like;
 }
 
+/**
+ * Creates a like entry, increments the likesAmount of the post and returns the like
+ * @param postId id of the post to like
+ * @param userId id of the user who will like the post
+ * @returns like object
+ */
 export async function likePost(postId: string, userId: string) {
   const like = await likePostDbQuery.execute({ postId, userId });
+  await db
+    .update(posts)
+    .set({ likesAmount: sql.raw("likesAmount + 1") })
+    .where(and(eq(posts.id, postId)))
+    .returning();
   return like;
 }
 
+/**
+ * Deletes the like entry, decrements the likesAmount of the post
+ * @param postId id of the post to like
+ * @param userId id of the user who will like the post
+ */
 export async function unlikePost(postId: string, userId: string) {
   const like = await unlikePostDbQuery.execute({ postId, userId });
+  await db
+    .update(posts)
+    .set({ likesAmount: sql.raw("likesAmount - 1") })
+    .where(and(eq(posts.id, postId)))
+    .returning();
   return like;
 }

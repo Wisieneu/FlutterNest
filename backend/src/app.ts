@@ -1,16 +1,16 @@
-import express, { Application } from 'express';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
+import express, { Application } from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 // import compression from 'compression';
 // import helmet from 'helmet';
 // import { constants } from 'zlib';
 
-import morganMiddleware from './middlewares/morgan.middleware';
-import userRouter from './routes/user.routes';
-import postRouter from './routes/post.routes';
-import globalErrorHandler from './controllers/error.controller';
+import morganMiddleware from "./middlewares/morgan.middleware";
+import userRouter from "./routes/user.routes";
+import postRouter from "./routes/post.routes";
+import globalErrorHandler from "./controllers/error.controller";
 
-import { db } from './db';
+import { db } from "./db";
 
 class App {
   public app: Application;
@@ -30,7 +30,7 @@ class App {
     // TODO: configure cors, helmet, urlencoded, compression for production
     this.app.use(
       cors({
-        origin: 'http://localhost:5173',
+        origin: "http://localhost:5173",
         optionsSuccessStatus: 200,
         credentials: true,
       })
@@ -44,8 +44,8 @@ class App {
   }
 
   protected attachRoutes(): void {
-    this.app.use('/api/v1/users', userRouter);
-    this.app.use('/api/v1/posts', postRouter);
+    this.app.use("/api/v1/users", userRouter);
+    this.app.use("/api/v1/posts", postRouter);
     this.app.use(globalErrorHandler);
   }
 }

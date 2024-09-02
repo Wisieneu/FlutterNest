@@ -6,6 +6,9 @@ export default {
   minPasswordLength: 8,
   defaultProfilePicture: "default.png",
   maxProfilePictureSize: 1024 * 1024 * 2, // 2MB
+  maxBioLength: 128,
+  maxWebsiteLink: 24,
+  maxLocationLength: 64,
   roleTypes: ["user", "mod", "admin"],
 } as const;
 

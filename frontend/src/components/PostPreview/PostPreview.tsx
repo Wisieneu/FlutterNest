@@ -11,27 +11,28 @@ import { Post as PostType } from "@/types";
 export default function PostPreview({ data }: { data: PostType }) {
   const convertedPostDate = convertDateRelative(data.createdAt);
   function handleOptionsBtnClick() {
-    console.log("clicked");
+    console.log("clicked"); // TODO: implement
   }
+
+  // Whether the post is created less than a minute ago - used for the golden highlight effect class
   const createdTimeAgo =
     new Date().getTime() - new Date(data.createdAt).getTime() < 60000;
-  console.log(new Date(data.createdAt).getTime());
-  console.log(new Date().getTime());
-  console.log(createdTimeAgo);
 
   return (
     <div
-      className={`flex w-full border-b border-gray-700 px-8 py-6 shadow-lg ${createdTimeAgo ? "highlight-container" : ""}`}
+      className={`relative flex w-full border-b border-gray-700 px-8 py-6 shadow-lg ${createdTimeAgo ? "highlight-container" : ""}`}
     >
-      <img
-        className="mr-4 h-12 w-12 rounded-full object-cover shadow"
-        src={createImageUrl(data.author.profilePicture)}
-        alt="pfp"
-      />
+      <a href={`/u/${data.author.username}`}>
+        <img
+          className="mr-4 h-12 w-12 rounded-full object-cover shadow"
+          src={createImageUrl(data.author.profilePicture)}
+          alt="pfp"
+        />
+      </a>
       <div className="w-full">
         <div className="flex justify-between font-semibold">
           <div className="text-sm">
-            <a href={`/profile/${data.author.username}`}>
+            <a href={`/u/${data.author.username}`}>
               {data.author.displayName + " "}
               <span className="text-gray-600">
                 @{data.author.username}
@@ -60,7 +61,7 @@ export default function PostPreview({ data }: { data: PostType }) {
           <LikeBtn
             postId={data.id}
             likesAmount={data.likesAmount}
-            isLiked={false}
+            isLiked={data.isLiked}
             size="S"
           />
           <CommentsBtn

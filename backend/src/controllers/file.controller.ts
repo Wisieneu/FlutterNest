@@ -6,6 +6,7 @@ import sharp from "sharp";
 import AppError from "../utils/appError";
 import catchAsync from "../utils/catchAsync";
 import userConfig from "../db/user/user.config";
+import postConfig from "../db/post/post.config";
 
 /**
  * Attach the uploaded file in the req.file object - with a buffer
@@ -73,10 +74,13 @@ export const uploadPostMedia = multer({
     file: Express.Multer.File,
     cb: FileFilterCallback
   ) => {
-    if (!file.mimetype.startsWith("image/")) {
-      cb(new AppError("Invalid file type. Only images are allowed", 400));
-    } else {
+    if (
+      file.mimetype.startsWith("image/") &&
+      file.size <= postConfig.maxPostMediaImageSize
+    ) {
       cb(null, true);
+    } else {
+      cb(new AppError("An error has occurred when processing the file.", 400));
     }
   },
 }).array("media", 6);

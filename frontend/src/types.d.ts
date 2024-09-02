@@ -15,6 +15,9 @@ export interface User {
   profilePicture: string;
   role: userRolesEnum;
   active: boolean;
+  bio?: string;
+  website?: string;
+  location?: string;
 }
 
 export interface Post {
@@ -29,6 +32,7 @@ export interface Post {
   commentsAmount: number;
   author: User;
   media?: Media[];
+  isLiked: boolean;
   isDeleted: boolean;
   bookmarksAmount: number;
   viewsAmount: number;

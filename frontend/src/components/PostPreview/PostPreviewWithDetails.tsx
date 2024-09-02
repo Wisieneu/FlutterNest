@@ -25,13 +25,15 @@ export default function PostPreviewWithDetails({ data }: { data: PostType }) {
   return (
     <div className="flex flex-col shadow-lg">
       <div className="flex w-full items-center px-8 py-6">
-        <img
-          className="mr-4 h-16 w-16 rounded-full object-cover shadow"
-          src={createImageUrl(data.author.profilePicture)}
-          alt="pfp"
-        />
+        <a href={`/u/${data.author.username}`}>
+          <img
+            className="mr-4 h-16 w-16 rounded-full object-cover shadow"
+            src={createImageUrl(data.author.profilePicture)}
+            alt="pfp"
+          />
+        </a>
         <div className="flex w-full justify-between font-semibold">
-          <a href={`/profile/${data.author.username}`}>
+          <a href={`/u/${data.author.username}`}>
             <div className="flex flex-col">
               <span>{data.author.displayName}</span>
               <span className="text-gray-600">@{data.author.username}</span>
@@ -46,10 +48,8 @@ export default function PostPreviewWithDetails({ data }: { data: PostType }) {
       <p className="post-text-content my-3 whitespace-normal text-wrap break-words px-8 text-lg">
         {data.textContent}
       </p>
-      <div className="flex w-full px-8 py-4">
-        {/* Post media */}
-        {mediaPreviewElement}
-      </div>
+      {/* Post media */}
+      <div className="flex w-full px-8 py-4">{mediaPreviewElement}</div>
       <div className="flex w-full px-8 pb-4 text-sm text-gray-500">
         <span className="text-base">
           {convertedPostDate} · {data.viewsAmount} views

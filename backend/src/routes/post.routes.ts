@@ -9,8 +9,6 @@ import {
 
 const postRouter = express.Router();
 
-import multer from "multer";
-
 /**
  * General post routes
  */
@@ -27,7 +25,6 @@ postRouter
   .route("/")
   .post(uploadPostMedia, processPostMedia, postController.createPost);
 
-// postRouter.route('/').post(uploadPostMedia, postController.test);
 postRouter
   .route("/:postId/comments")
   .get(postController.getPostCommentsPaginated)
@@ -42,6 +39,7 @@ postRouter
 
 postRouter.route("/:postId/like").post(postController.likePost);
 postRouter.route("/:postId/unlike").post(postController.unlikePost);
+postRouter.route("/likes/:userId").get(postController.getPostsLikedByUser);
 
 postRouter.get("/user/:userId", postController.getPostsByUserId);
 

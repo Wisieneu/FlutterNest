@@ -12,8 +12,8 @@
     "generate": "drizzle-kit generate",
     "migrate": "tsx -r dotenv/config src/db/migrate.ts",
     "studio": "drizzle-kit studio --config=drizzle.config.ts",
-    "devscript": "tsx -r dotenv/config src/db/devScripts/devScript.ts",
-    "createadmin": "tsx -r dotenv/config src/db/devScripts/createAdminUser.ts"
+    "devscript": "tsx -r dotenv/config src/dev-data/devScript.ts",
+    "createadmin": "tsx -r dotenv/config src/dev-data/create.admin.user.ts"
   },
   "keywords": [],
   "author": "",

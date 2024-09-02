@@ -1,22 +1,23 @@
 import { NextFunction, Request, Response } from "express";
-
-import { db } from "../db";
 import { Like, Post, likes, posts } from "../db/post/post.schema";
 import { and, eq } from "drizzle-orm";
+
 import * as postHandler from "../db/post/post.handlers";
 import * as postMediaFilesHandler from "../db/postMediaFiles/post.media.files.handlers";
 
+import { db } from "../db";
 import catchAsync from "../utils/catchAsync";
 import AppError from "../utils/appError";
-import { postMediaFiles } from "db/postMediaFiles/post.media.files.schema";
+
+import postConfig, { PostType } from "../db/post/post.config";
 import { User } from "db/user/user.schema";
-import { PostType } from "db/post/post.config";
 
 export const getPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
-    const result: Post[] = await postHandler.getPostsPaginated(page, limit);
+
+    const result = await postHandler.getPostsPaginated(page, limit);
 
     return res.status(200).json({
       status: "success",
@@ -89,7 +90,26 @@ export const getPostsByUserId = catchAsync(
       Number(limit)
     );
 
-    console.log(result);
+    return res.status(200).json({
+      status: "success",
+      data: {
+        result,
+      },
+    });
+  }
+);
+
+export const getPostsLikedByUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    const { page, limit, type } = req.query;
+
+    const result = await postHandler.getPostsByUserIdPaginated(
+      userId,
+      type as PostType,
+      Number(page),
+      Number(limit)
+    );
 
     return res.status(200).json({
       status: "success",
@@ -264,7 +284,6 @@ export const deletePost = catchAsync(
 /**
  * A controller which creates a like for a post
  * Checks if the user has liked the post already
- * Checks if the post exists and has not been deleted already
  */
 export const likePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -292,8 +311,7 @@ export const likePost = catchAsync(
 
 /**
  * A controller which removes a like from a post
- * Checks if the user has liked the post already
- * Checks if the post exists and has not been deleted already
+ * Checks if the user has liked the post or not
  */
 export const unlikePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import isEmail from "validator/lib/isEmail";
 
 import { db } from "../db";
-import { User, NewUser, users, UserUnsafe } from "../db/user/user.schema";
+import { NewUser, users, UserUnsafe } from "../db/user/user.schema";
 import { filterUserObj, signUpEndUser } from "../db/user/user.handlers";
 
 import AppError from "../utils/appError";

@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
-import AppError from '../utils/appError';
-import logger from '../utils/logger';
+import { NextFunction, Request, Response } from "express";
+import AppError from "../utils/appError";
+import logger from "../utils/logger";
 
 const sendDevError = (err: AppError, req: Request, res: Response) => {
   console.log(err.message);
@@ -21,8 +21,8 @@ const sendProdError = (err: AppError, req: Request, res: Response) => {
       message: err.message,
     });
   } else {
-    res.status(err.statusCode).render('error', {
-      title: 'Error',
+    res.status(err.statusCode).render("error", {
+      title: "Error",
       msg: err.message,
     });
   }
@@ -37,7 +37,7 @@ const globalErrorHandler = (
   const appErr: AppError =
     err instanceof AppError ? err : new AppError(err.message, 500, false);
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     sendDevError(appErr, req, res);
   } else {
     sendProdError(appErr, req, res);

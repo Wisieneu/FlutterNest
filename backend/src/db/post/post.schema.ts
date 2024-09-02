@@ -80,12 +80,12 @@ export const likesRelations = relations(likes, ({ one }) => ({
   user: one(users, {
     fields: [likes.userId],
     references: [users.id],
-    relationName: "followers",
+    relationName: "likeAuthor",
   }),
   post: one(posts, {
     fields: [likes.postId],
     references: [posts.id],
-    relationName: "createdPosts",
+    relationName: "likedPost",
   }),
 }));
 

@@ -7,12 +7,13 @@ import PostDetailPage from "./routes/PostDetailPage";
 import UserDetailPage from "@/routes/UserDetailPage";
 import ErrorPage from "@/routes/ErrorPage";
 import AuthenticationPage from "@/routes/Authentication";
-import AuthProvider from "@/components/Wrappers/AuthProvider";
+import AuthProvider, { AuthContext } from "@/components/Wrappers/AuthProvider";
 
 import { fetchPostById, fetchUserByUsername } from "./API";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
+import { useContext } from "react";
 
 const router = createBrowserRouter([
   {
@@ -28,8 +29,9 @@ const router = createBrowserRouter([
         path: "/u/:username",
         element: <UserDetailPage />,
         loader: async ({ params }) => {
+          if (params.username === "me") return "me";
           const user = await fetchUserByUsername(params.username!);
-          return user || null;
+          return user ? user : params.username;
         },
       },
       {
