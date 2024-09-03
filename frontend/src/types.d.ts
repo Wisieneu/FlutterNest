@@ -28,11 +28,11 @@ export interface Post {
   createdAt: string;
   updatedAt: string | null;
   parentId: string | null;
-  likesAmount: number;
-  commentsAmount: number;
   author: User;
   media?: Media[];
-  isLiked: boolean;
+  likesAmount: number;
+  commentsAmount: number;
+  isLikedByCurrentUser: boolean;
   isDeleted: boolean;
   bookmarksAmount: number;
   viewsAmount: number;

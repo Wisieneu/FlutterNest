@@ -36,7 +36,6 @@ export default function UserDetailPage() {
     async function fetchPostsPage(page: number) {
       setIsFormBeingSubmitted(true);
       if (activeTab === "Posts") {
-        console.log("111111111");
         const newPosts: Post[] = await fetchPostsByUserIdPaginated(
           user.id,
           "post",
@@ -45,7 +44,6 @@ export default function UserDetailPage() {
         );
         setPosts([...posts, ...newPosts]);
       } else if (activeTab === "Comments") {
-        console.log("2222222222");
         const newCommments: Post[] = await fetchPostsByUserIdPaginated(
           user.id,
           "comment",
@@ -83,8 +81,6 @@ export default function UserDetailPage() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  console.log(posts);
 
   return (
     <>

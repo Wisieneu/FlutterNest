@@ -69,14 +69,19 @@ export const resizeUserPhoto = catchAsync(
 
 export const uploadPostMedia = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: postConfig.maxPostMediaImageSize,
+  },
   fileFilter: async (
     req: Request,
     file: Express.Multer.File,
     cb: FileFilterCallback
   ) => {
+    const fileSize = parseInt(req.headers["content-length"]!);
+    console.log(file);
     if (
       file.mimetype.startsWith("image/") &&
-      file.size <= postConfig.maxPostMediaImageSize
+      fileSize <= postConfig.maxPostMediaImageSize
     ) {
       cb(null, true);
     } else {

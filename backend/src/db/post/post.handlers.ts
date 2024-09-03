@@ -1,7 +1,16 @@
-import { and, desc, eq, getTableColumns, SQL, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+  SQL,
+  sql,
+} from "drizzle-orm";
 
 import { db } from "..";
-import { likes, Post, posts } from "./post.schema";
+import { bookmarks, ExposedPost, likes, Post, posts } from "./post.schema";
 import { users } from "../user/user.schema";
 import { PostType } from "./post.config";
 import * as postMediaHandler from "../postMediaFiles/post.media.files.handlers";
@@ -20,18 +29,15 @@ const postBody = {
     id: users.id,
     username: users.username,
     displayName: users.displayName,
-    createdAt: users.createdAt,
-    birthDate: users.birthDate,
     profilePicture: users.profilePicture,
     role: users.role,
     active: users.active,
+    createdAt: users.createdAt,
+    birthDate: users.birthDate,
     bio: users.bio,
     website: users.website,
     location: users.location,
   },
-  likesAmount: posts.likesAmount,
-  commentsAmount: posts.commentsAmount,
-  bookmarksAmount: posts.bookmarksAmount,
   viewsAmount: posts.viewsAmount,
   authorId: posts.authorId,
 };
@@ -53,23 +59,29 @@ Object.keys(nonSensitiveColumns).forEach(
 
 const postIsNotDeleted = eq(posts.isDeleted, false);
 
-/**
- * Prepared queries for the schema handlers below to use
- */
-const getPostsPaginatedQuery = db.query.posts
-  .findMany({
-    with: {
-      author: {
-        columns: safeUserColumns,
-      },
-      media: true,
-    },
-    offset: sql.placeholder("offset"),
-    limit: sql.placeholder("limit"),
-    where: and(postIsNotDeleted, eq(posts.type, "post")),
-    orderBy: desc(posts.createdAt),
-  })
-  .prepare("getPostsPaginatedQuery");
+export async function getPostsPaginatedQuery(
+  queryStatement: SQL<unknown> | undefined,
+  page: number,
+  objectsPerPage: number,
+  userId?: string
+): Promise<ExposedPost[]> {
+  let result = await db
+    .select(postBody)
+    .from(posts)
+    .where(queryStatement)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .offset((page - 1) * objectsPerPage)
+    .limit(objectsPerPage)
+    .orderBy(desc(posts.createdAt));
+
+  const resultWithMedia =
+    await postMediaHandler.populatePostObjectsWithMediaFilesManually(result);
+
+  const resultWithMediaAndInteractions =
+    await popuatePostObjectsWithInteractionsData(resultWithMedia, userId);
+
+  return resultWithMediaAndInteractions;
+}
 
 const getPostCommentsPaginatedQuery = db.query.posts
   .findMany({
@@ -108,6 +120,7 @@ const getLikesByPostId = db
   .from(likes)
   .leftJoin(users, eq(likes.userId, users.id))
   .where(eq(likes.postId, sql.placeholder("postId")))
+  .orderBy(desc(likes.createdAt))
   .prepare("getLikesByPostId");
 
 const getPostByIdQuery = db.query.posts
@@ -122,19 +135,101 @@ const getPostByIdQuery = db.query.posts
   })
   .prepare("getPostByIdQuery");
 
-async function getPostsPaginatedQuery2(
-  queryStatement: SQL,
-  page: number,
-  objectsPerPage: number
-) {
-  const result = await db
-    .select(postBody)
-    .from(posts)
-    .where(queryStatement)
-    .offset((page - 1) * objectsPerPage)
-    .limit(objectsPerPage);
+/**
+ *
+ * @param postIdsArray array of post IDs to search likes for
+ * @returns { {count: number; postId: string; }[] } array of amount of likes for each post
+ */
+const getPostsLikesAmounts = async (
+  postIdsArray: string[]
+): Promise<{ count: number; postId: string }[]> =>
+  await db
+    .select({
+      count: count(),
+      postId: likes.postId,
+    })
+    .from(likes)
+    .where(inArray(likes.postId, postIdsArray))
+    .groupBy(likes.postId);
 
-  return result;
+const checkPostsUserLikeStatus = async (
+  postIdsArray: string[],
+  userId: string
+): Promise<{ postId: string }[]> =>
+  await db
+    .select({ postId: likes.postId })
+    .from(likes)
+    .where(and(inArray(likes.postId, postIdsArray), eq(likes.userId, userId)));
+
+const getPostsCommentsAmounts = async (
+  postIdsArray: string[]
+): Promise<{ count: number; postId: string | null }[]> =>
+  await db
+    .select({
+      count: count(),
+      postId: posts.parentId,
+    })
+    .from(posts)
+    .where(
+      and(
+        eq(posts.type, "comment"),
+        inArray(posts.parentId, postIdsArray),
+        postIsNotDeleted
+      )
+    )
+    .groupBy(posts.parentId);
+
+const getPostsBookmarksAmounts = async (
+  postIdsArray: string[]
+): Promise<{ count: number; postId: string }[]> =>
+  await db
+    .select({
+      count: count(),
+      postId: bookmarks.postId,
+    })
+    .from(bookmarks)
+    .where(inArray(bookmarks.postId, postIdsArray))
+    .groupBy(bookmarks.postId);
+
+/**
+ * Populates all of the posts with:
+ * - the amount of likes they have
+ * - the amount of comments they have
+ * - the amount of bookmarks that has been created for them
+ * - whether the user has liked the post or not
+ *
+ * @param postsArray IDs of the posts to populate
+ * @param userId ID of the user who is viewing the posts
+ * @returns array of posts with the interactions data populated
+ */
+export async function popuatePostObjectsWithInteractionsData(
+  postsArray: Post[],
+  userId: string | undefined
+): Promise<ExposedPost[]> {
+  const postIdsArray = postsArray.map((post) => post.id);
+  const likesAmountArray = await getPostsLikesAmounts(postIdsArray);
+  const commentsAmountArray = await getPostsCommentsAmounts(postIdsArray);
+  const bookmarksAmountArray = await getPostsBookmarksAmounts(postIdsArray);
+  let isLikedArray: { postId: string }[] | null;
+  if (userId)
+    isLikedArray = await checkPostsUserLikeStatus(postIdsArray, userId);
+
+  return postsArray.map((post) => ({
+    ...post,
+    // Populate every post with the amount of likes it has
+    likesAmount:
+      likesAmountArray.find((el) => el.postId === post.id)?.count || 0,
+    // Populate every post with the amount of comments created for it
+    commentsAmount:
+      commentsAmountArray.find((el) => el.postId === post.id)?.count || 0,
+    // ...with amount of bookmarks users have created for it
+    bookmarksAmount:
+      bookmarksAmountArray.find((el) => el.postId === post.id)?.count || 0,
+    // ...with whether the user has liked the post or not
+    isLikedByCurrentUser: isLikedArray
+      ? isLikedArray.map((el) => el.postId).includes(post.id)
+      : false,
+  }));
 }
 
 const findLikeQuery = db
@@ -171,24 +266,9 @@ const unlikePostDbQuery = db
 /**
  * Functions for the post controller to use
  */
-
-export async function getPostsPaginated(page: number, objectsPerPage: number) {
-  const offset = (page - 1) * objectsPerPage;
-  const result = await getPostsPaginatedQuery.execute({
-    offset,
-    limit: objectsPerPage,
-  });
-
-  result.forEach((post) =>
-    !post.author ? (post.author = placeholderUser) : post.author
-  );
-
-  return result as Post[];
-}
-
 export async function getPostById(postId: string) {
-  const result = (await getPostByIdQuery.execute({ postId })) as Post;
-  if (!result.author) result.author = placeholderUser;
+  const result = await getPostByIdQuery.execute({ postId });
+  if (!result!.author) result!.author = placeholderUser;
   return result;
 }
 
@@ -219,7 +299,7 @@ export async function getPostsByUserIdPaginated(
         eq(posts.authorId, userId),
         eq(posts.type, type),
         postIsNotDeleted
-      ) // asdasdas
+      )
     )
     .leftJoin(users, eq(posts.authorId, users.id))
     .orderBy(desc(posts.createdAt))
@@ -297,11 +377,6 @@ export async function findLike(userId: string, postId: string) {
  */
 export async function likePost(postId: string, userId: string) {
   const like = await likePostDbQuery.execute({ postId, userId });
-  await db
-    .update(posts)
-    .set({ likesAmount: sql.raw("likesAmount + 1") })
-    .where(and(eq(posts.id, postId)))
-    .returning();
   return like;
 }
 
@@ -312,10 +387,5 @@ export async function likePost(postId: string, userId: string) {
  */
 export async function unlikePost(postId: string, userId: string) {
   const like = await unlikePostDbQuery.execute({ postId, userId });
-  await db
-    .update(posts)
-    .set({ likesAmount: sql.raw("likesAmount - 1") })
-    .where(and(eq(posts.id, postId)))
-    .returning();
   return like;
 }

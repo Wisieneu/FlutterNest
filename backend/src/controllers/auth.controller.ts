@@ -126,6 +126,38 @@ export const restrictLoginAccess = catchAsync(
   }
 );
 
+export const attachUserToRequest = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+
+    // If the token is not there
+    if (!token) {
+      return next();
+    }
+
+    const decodedToken = <jwt.JwtPayload>(
+      jwt.verify(token, process.env.JWT_SECRET as string)
+    );
+
+    const [currentUser]: UserUnsafe[] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, decodedToken.userId));
+
+    req.user = currentUser;
+    res.locals.user = currentUser;
+    next();
+  }
+);
+
 /**
  * A function wrapper, making the route accessible only to users of a certain role
  * @param {string} role - specific role

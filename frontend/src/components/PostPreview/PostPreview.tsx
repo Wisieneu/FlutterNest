@@ -1,4 +1,5 @@
 import { BsThreeDots } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 import PostMediaPreview from "../MediaPreview/PostMediaPreview";
 import ShareBtn from "./ShareBtn";
@@ -51,9 +52,11 @@ export default function PostPreview({ data }: { data: PostType }) {
           </div>
         </div>
 
-        <p className="post-text-content my-3 text-wrap break-words sm:max-w-[448px]">
-          {data.textContent}
-        </p>
+        <Link to={`/post/${data.id}`}>
+          <p className="post-text-content my-3 text-wrap break-words sm:max-w-[448px]">
+            {data.textContent}
+          </p>
+        </Link>
 
         <PostMediaPreview data={data} />
 
@@ -61,7 +64,7 @@ export default function PostPreview({ data }: { data: PostType }) {
           <LikeBtn
             postId={data.id}
             likesAmount={data.likesAmount}
-            isLiked={data.isLiked}
+            isLikedByCurrentUser={data.isLikedByCurrentUser}
             size="S"
           />
           <CommentsBtn

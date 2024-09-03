@@ -9,7 +9,7 @@ import { db } from "../db";
 import catchAsync from "../utils/catchAsync";
 import AppError from "../utils/appError";
 
-import postConfig, { PostType } from "../db/post/post.config";
+import { PostType } from "../db/post/post.config";
 import { User } from "db/user/user.schema";
 
 export const getPosts = catchAsync(
@@ -17,15 +17,18 @@ export const getPosts = catchAsync(
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
-    const result = await postHandler.getPostsPaginated(page, limit);
+    const data = await postHandler.getPostsPaginatedQuery(
+      and(eq(posts.isDeleted, false), eq(posts.type, "post")),
+      Number(req.query.page) || 1,
+      limit,
+      req.user?.id
+    );
 
     return res.status(200).json({
       status: "success",
-      data: {
-        result,
-        page,
-        amount: result.length,
-      },
+      data,
+      page,
+      amount: data.length,
     });
   }
 );
@@ -318,20 +321,34 @@ export const unlikePost = catchAsync(
     const { postId } = req.params;
     const userId = req.user!.id;
     const post = await postHandler.getPostById(postId);
-
     if (!post)
       return next(new AppError("Could not find a post with this id", 400));
-
     const [likeLookup]: Like[] = await postHandler.findLike(userId, postId);
-
     if (!likeLookup)
       return next(new AppError("Post is not liked by the current user", 400));
 
-    await db.delete(likes).where(eq(likes.id, likeLookup.id));
+    await postHandler.unlikePost(postId, userId);
 
     res.status(200).json({
       status: "success",
       message: "Like removed successfully",
+    });
+  }
+);
+
+export const test = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const response = await postHandler.getPostsPaginatedQuery(
+      and(eq(posts.isDeleted, false), eq(posts.type, "post")),
+      Number(req.query.page) || 1,
+      Number(req.query.limit) || 10,
+      req.user!.id
+    );
+    res.status(200).json({
+      status: "success",
+      data: {
+        response,
+      },
     });
   }
 );

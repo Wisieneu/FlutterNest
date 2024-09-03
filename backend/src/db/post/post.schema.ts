@@ -9,19 +9,15 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { User, users, UserUnsafe } from "../user/user.schema";
+import { User, users } from "../user/user.schema";
 import postConfig from "./post.config";
 import {
   PostMediaFile,
   postMediaFiles,
 } from "../postMediaFiles/post.media.files.schema";
 
-// Post Schema
 /**
- * TODO: relations
- * likes
- * reposts
- * dynamic typing, everything is a post
+ * POST SCHEMA
  */
 export const typeEnum = pgEnum("type", postConfig.postTypes);
 
@@ -36,10 +32,7 @@ export const posts = pgTable("posts", {
   authorId: uuid("authorId").notNull(),
   parentId: uuid("parentId"),
   isDeleted: boolean("isDeleted").default(false).notNull(),
-  likesAmount: integer("likesAmount").default(0).notNull(),
-  commentsAmount: integer("commentsAmount").default(0).notNull(),
   viewsAmount: integer("viewsAmount").default(0).notNull(),
-  bookmarksAmount: integer("bookmarksAmount").default(0).notNull(),
 });
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -58,22 +51,29 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
 }));
 
-/**
- * Infer the Post type
- * Omit the authorId field
- * Add the author field as a User object
- */
+// Post after populating it with the author field
 export type Post = InferSelectModel<typeof posts> & {
   author: User | null;
-} & {
+};
+
+// Post after populating it with all of the fields needed for frontend
+export type ExposedPost = Post & {
+  likesAmount: number;
+  commentsAmount: number;
+  bookmarksAmount: number;
+  isLikedByCurrentUser: boolean;
   media?: PostMediaFile[];
 };
 export type NewPost = InferInsertModel<typeof posts>;
 
+/**
+ * LIKE SCHEMA
+ */
 export const likes = pgTable("likes", {
   id: serial("id").primaryKey(),
   userId: uuid("userId").notNull(),
   postId: uuid("postId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
 export const likesRelations = relations(likes, ({ one }) => ({
@@ -91,3 +91,29 @@ export const likesRelations = relations(likes, ({ one }) => ({
 
 export type Like = InferSelectModel<typeof likes>;
 export type NewLike = InferInsertModel<typeof likes>;
+
+/**
+ * BOOKMARK SCHEMA
+ */
+export const bookmarks = pgTable("bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: uuid("userId").notNull(),
+  postId: uuid("postId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+});
+
+export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
+  user: one(users, {
+    fields: [bookmarks.userId],
+    references: [users.id],
+    relationName: "bookmarkAuthor",
+  }),
+  post: one(posts, {
+    fields: [bookmarks.postId],
+    references: [posts.id],
+    relationName: "bookmarkedPost",
+  }),
+}));
+
+export type Bookmark = InferSelectModel<typeof bookmarks>;
+export type NewBookmark = InferInsertModel<typeof bookmarks>;

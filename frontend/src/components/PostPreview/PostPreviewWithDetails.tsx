@@ -61,7 +61,7 @@ export default function PostPreviewWithDetails({ data }: { data: PostType }) {
           <LikeBtn
             postId={data.id}
             likesAmount={data.likesAmount}
-            isLiked={false}
+            isLikedByCurrentUser={data.isLikedByCurrentUser}
             size={"L"}
           />
           <CommentsBtn

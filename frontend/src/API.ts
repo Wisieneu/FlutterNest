@@ -15,7 +15,7 @@ export async function fetchPostsPaginated(
   limit: number = 10,
 ): Promise<Post[]> {
   const response = await API.get(`/posts?page=${page}&limit=${limit}`);
-  return response.data.data.result;
+  return response.data.data;
 }
 
 export async function fetchPostsByUserIdPaginated(
@@ -38,7 +38,7 @@ export async function fetchUserLikesPaginated(
   const response = await API.get(
     `/posts/likes/${userId}?page=${page}&limit=${limit}`,
   );
-  return response.data.data.result;
+  return response.data.data;
 }
 
 export async function fetchPostById(postId: string): Promise<Post> {
@@ -114,6 +114,6 @@ export async function likePost(postId: string) {
 }
 
 export async function unlikePost(postId: string) {
-  const response = await API.delete(`/posts/${postId}/like`);
+  const response = await API.delete(`/posts/${postId}/unlike`);
   return response;
 }
