@@ -11,7 +11,7 @@
     "baseUrl": "src",
     "types": ["node"]
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./**/*.ts"],
   "exclude": ["node_modules"],
   "files": ["src/utils/types.d.ts"],
   "ts-node": {
