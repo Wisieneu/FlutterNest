@@ -39,7 +39,7 @@ export function isScrolledToBottom() {
 }
 
 export function createImageUrl(fileName: string) {
-  return `${process.env.REACT_APP_S3_BUCKET_URL}/${fileName}`;
+  return `${import.meta.env.VITE_REACT_APP_S3_BUCKET_URL}/${fileName}`;
 }
 
 export function useEffectSkipFirst(effect: React.EffectCallback, deps: any[]) {
