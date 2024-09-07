@@ -1,17 +1,22 @@
-import { BsThreeDots } from "react-icons/bs";
+import { useContext, useState } from "react";
 
 import ShareBtn from "./ShareBtn";
 import CommentsBtn from "./CommentsBtn";
 import LikeBtn from "./LikeBtn";
+import SingleMediaElementPreview from "@/components/MediaPreview/SingleMediaElementPreview";
+import TwoMediaElementsPreview from "@/components/MediaPreview/TwoMediaElementsPreview";
+import { AuthContext } from "@/components/Auth/AuthProvider";
 
 import { convertDateDetailed, createImageUrl } from "@/utils";
 
 import { Post as PostType } from "@/types";
-import SingleMediaElementPreview from "../MediaPreview/SingleMediaElementPreview";
-import TwoMediaElementsPreview from "../MediaPreview/TwoMediaElementsPreview";
+import TripleDotButton from "../Buttons/TripleDotButton";
+import PostSettingsContextMenu from "./PostSettingsContextMenu";
 
 export default function PostPreviewWithDetails({ data }: { data: PostType }) {
   const convertedPostDate = convertDateDetailed(data.createdAt);
+  const currentUser = useContext(AuthContext);
+  const [isOptionsExpanded, expandOptionsMenu] = useState(false);
 
   let mediaPreviewElement;
   if (data.media && data.media.length > 0) {
@@ -40,8 +45,18 @@ export default function PostPreviewWithDetails({ data }: { data: PostType }) {
             </div>
           </a>
 
-          <div className="options-btn-container cursor-pointer">
-            <BsThreeDots size="28" className="ml-2 text-gray-600" />
+          <div className="options-btn-container">
+            {currentUser?.id === data.authorId && (
+              <>
+                <div className="relative">
+                  <TripleDotButton
+                    size="24"
+                    onClickFn={() => expandOptionsMenu((state) => !state)}
+                  />
+                  {isOptionsExpanded && <PostSettingsContextMenu post={data} />}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

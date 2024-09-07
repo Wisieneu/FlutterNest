@@ -158,3 +158,20 @@ export async function updateUserProfilePicture(formData: FormData) {
   });
   return response;
 }
+
+export async function getNewcomerUsers(limit: number) {
+  const response = await API.get(`/users/newcomers?limit=${limit}`);
+  return response.data.data.users;
+}
+
+export async function updatePost(postId: string, textContent: string) {
+  const response = await API.patch(`/posts/${postId}`, {
+    textContent,
+  });
+  return response;
+}
+
+export async function deletePost(postId: string) {
+  const response = await API.delete(`/posts/${postId}`);
+  return response;
+}

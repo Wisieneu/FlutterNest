@@ -3,19 +3,20 @@ import { ToastContainer } from "react-toastify";
 
 import Root from "@/routes/root";
 import Home from "@/routes/Home";
-import PostDetailPage from "./routes/PostDetailPage";
+import PostDetailPage from "@/routes/PostDetailPage";
 import UserDetailPage from "@/routes/UserDetailPage";
 import ErrorPage from "@/routes/ErrorPage";
 import AuthenticationPage from "@/routes/Authentication";
 import Settings from "@/routes/Settings";
+import NotFoundPage from "@/routes/NotFoundPage";
+
 import AuthProvider from "@/components/Auth/AuthProvider";
+import LoginProtectedRoute from "@/components/Auth/LoginProtectedRoute";
 
 import { fetchPostById, fetchUserByUsername } from "./API";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
-import NotFoundPage from "./routes/NotFoundPage";
-import LoginProtectedRoute from "./components/Auth/LoginProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -51,10 +52,6 @@ const router = createBrowserRouter([
             <Settings />
           </LoginProtectedRoute>
         ),
-      },
-      {
-        path: "/adasdasdasd",
-        element: <LoginProtectedRoute>asdasdasd</LoginProtectedRoute>,
       },
     ],
   },

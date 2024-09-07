@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 
 import { FiLogIn, FiSettings } from "react-icons/fi";
 import { FaRegMessage } from "react-icons/fa6";
-import { FaBell, FaHome, FaSearch, FaRegUser } from "react-icons/fa";
+import { FaBell, FaHome, FaSearch, FaRegUser, FaGithub } from "react-icons/fa";
 import { CiLogout } from "react-icons/ci";
 
 import { createImageUrl } from "@/utils";
@@ -63,6 +63,11 @@ export default function Sidebar() {
       name: "Chats",
       url: "/chat",
       icon: FaRegMessage,
+    },
+    {
+      name: "FlutterNest on GitHub",
+      url: "https://github.com/Wisieneu/FlutterNest",
+      icon: FaGithub,
     },
   ];
 

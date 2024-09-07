@@ -9,12 +9,15 @@ import LikeBtn from "./LikeBtn";
 import { convertDateRelative, createImageUrl } from "@/utils";
 import { Post as PostType } from "@/types";
 import TripleDotButton from "../Buttons/TripleDotButton";
+import PostSettingsContextMenu from "./PostSettingsContextMenu";
+import { useContext, useState } from "react";
+import { AuthContext } from "../Auth/AuthProvider";
 
-export default function PostPreview({ data }: { data: PostType }) {
+export default function PostPreview(props: { data: PostType }) {
+  const { data } = props;
+  const currentUser = useContext(AuthContext);
   const convertedPostDate = convertDateRelative(data.createdAt);
-  function handleOptionsBtnClick() {
-    console.log("clicked"); // TODO: implement
-  }
+  const [isOptionsExpanded, expandOptionsMenu] = useState(false);
 
   // Whether the post is created less than a minute ago - used for the golden highlight effect class
   const createdTimeAgo =
@@ -45,14 +48,18 @@ export default function PostPreview({ data }: { data: PostType }) {
               {convertedPostDate}
             </div>
           </div>
-          <div
-            className="options-btn-container cursor-pointer"
-            onClick={handleOptionsBtnClick}
-          >
-            <TripleDotButton
-              size="24"
-              onClickFn={() => console.log("clicked")}
-            />
+          <div className="options-btn-container">
+            {currentUser?.id === data.authorId && (
+              <>
+                <div className="relative">
+                  <TripleDotButton
+                    size="24"
+                    onClickFn={() => expandOptionsMenu((state) => !state)}
+                  />
+                  {isOptionsExpanded && <PostSettingsContextMenu post={data} />}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
