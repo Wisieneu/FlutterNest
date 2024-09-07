@@ -6,9 +6,7 @@ import Sidebar from "@/components/Sidebar";
 export default function Root() {
   return (
     <div className="page-wrapper flex flex-auto justify-center">
-      <div id="navbar" className="border-r border-gray-700">
-        <Navbar />
-      </div>
+      <Navbar />
       <div id="main-content" className="min-h-screen max-w-xl grow">
         <Outlet />
       </div>

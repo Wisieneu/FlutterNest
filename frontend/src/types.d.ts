@@ -20,6 +20,11 @@ export interface User {
   location?: string;
 }
 
+export interface SettingsUser extends User {
+  email: string;
+  lastPasswordChangeDate: string;
+}
+
 export interface Post {
   id: string;
   authorId: string;

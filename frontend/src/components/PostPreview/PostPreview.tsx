@@ -8,6 +8,7 @@ import LikeBtn from "./LikeBtn";
 
 import { convertDateRelative, createImageUrl } from "@/utils";
 import { Post as PostType } from "@/types";
+import TripleDotButton from "../Buttons/TripleDotButton";
 
 export default function PostPreview({ data }: { data: PostType }) {
   const convertedPostDate = convertDateRelative(data.createdAt);
@@ -48,7 +49,10 @@ export default function PostPreview({ data }: { data: PostType }) {
             className="options-btn-container cursor-pointer"
             onClick={handleOptionsBtnClick}
           >
-            <BsThreeDots size="24" className="ml-2 text-gray-600" />
+            <TripleDotButton
+              size="24"
+              onClickFn={() => console.log("clicked")}
+            />
           </div>
         </div>
 

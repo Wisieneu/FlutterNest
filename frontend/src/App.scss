@@ -62,6 +62,12 @@
   animation: fadeOutToNone 1.5s ease-out forwards;
 }
 
+.mouse-tracker {
+  position: fixed;
+  pointer-events: none;
+  visibility: hidden;
+}
+
 // Mobile style media queries
 @media (max-width: 978px) {
   #sidebar {

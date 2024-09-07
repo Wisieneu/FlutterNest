@@ -2,9 +2,9 @@ import express from "express";
 
 import * as userController from "../controllers/user.controller";
 import * as authController from "../controllers/auth.controller";
+import * as fileController from "../controllers/file.controller";
 import { validateRegistrationData } from "../middlewares/user.validation.middleware";
 import validatorMiddleware from "../middlewares/validation.middleware";
-import * as fileController from "../controllers/file.controller";
 
 const userRouter = express.Router();
 
@@ -22,6 +22,13 @@ userRouter
 userRouter.route("/signin").post(authController.signIn);
 userRouter.route("/logout").get(authController.logout);
 
+userRouter
+  .route("/authContext")
+  .get(
+    authController.attachUserToRequest,
+    userController.returnAuthContextUser
+  );
+
 /**
  * Login protected routes
  */
@@ -33,8 +40,12 @@ userRouter
   .patch(userController.updateMyAccount)
   .delete(userController.deactivateAccount);
 
+userRouter.route("/me/settings").get(userController.getMyAccountSettingsData);
+
+userRouter.route("/me/pwChange").patch(userController.updateUserPassword);
+
 userRouter
-  .route("/uploadProfilePicture")
+  .route("/me/profilePicture")
   .patch(
     fileController.uploadProfilePic,
     fileController.resizeUserPhoto,
@@ -53,6 +64,7 @@ userRouter
   .route("/:userId")
   .patch(userController.updateUserById)
   .delete(userController.deleteOneUserById);
+
 userRouter
   .route("/")
   .get(userController.getUsers)

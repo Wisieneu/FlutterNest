@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { Id, Slide, toast } from "react-toastify";
 
 import { signUp } from "@/API";
+import {
+  generateLoadingToastUpdateBody,
+  loadingToastBody,
+} from "@/components/Toast";
 
 interface RegisterFormProps {
   toggleFormFn: () => void;
@@ -44,26 +48,18 @@ export default function RegisterForm(props: RegisterFormProps) {
     }
 
     toast.dismiss(toastId.current as Id);
-    toastId.current = toast.loading("Signing up...", {
-      position: "top-right",
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "dark",
-
-      transition: Slide,
-    });
+    toastId.current = toast.loading("Signing up...", loadingToastBody);
 
     // Signing up
     try {
       const response = await signUp(formState);
-      toast.update(toastId.current, {
-        render: "Registration successful. Redirecting...",
-        type: "success",
-        isLoading: false,
-        autoClose: 3000,
-      });
+      toast.update(
+        toastId.current,
+        generateLoadingToastUpdateBody(
+          "Registration successful. Redirecting...",
+          "success",
+        ),
+      );
 
       setTimeout(() => {
         toast.dismiss(toastId.current as Id);
@@ -78,8 +74,9 @@ export default function RegisterForm(props: RegisterFormProps) {
         ? errors.split(": ")[1].split(", ")
         : Array(errors);
 
-      toast.update(toastId.current, {
-        render: (
+      toast.update(
+        toastId.current,
+        generateLoadingToastUpdateBody(
           <div>
             <h1 className="mb-3">Registration failed:</h1>
             <ul className="ml-4 list-disc text-sm">
@@ -87,12 +84,10 @@ export default function RegisterForm(props: RegisterFormProps) {
                 <li key={index}>{error}</li>
               ))}
             </ul>
-          </div>
+          </div>,
+          "error",
         ),
-        type: "error",
-        isLoading: false,
-        autoClose: 10000,
-      });
+      );
     }
   }
 

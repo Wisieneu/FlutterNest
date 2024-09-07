@@ -1,10 +1,11 @@
 import { Response, Request, NextFunction } from "express";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 import { db } from "../db";
-import * as userSchemaHandler from "../db/user/user.handlers";
+import * as userHandler from "../db/user/user.handlers";
 import catchAsync from "../utils/catchAsync";
-import { User, users } from "../db/user/user.schema";
+import { User, users, UserUnsafe } from "../db/user/user.schema";
 import AppError from "../utils/appError";
 import { deleteFileFromS3, uploadFileToS3 } from "../utils/s3";
 import userConfig from "../db/user/user.config";
@@ -25,8 +26,8 @@ export const getOneUser = catchAsync(
 
     const user =
       (username &&
-        (await userSchemaHandler.getEndUserByUsername(username as string))) ||
-      (id && (await userSchemaHandler.getEndUserById(id as string)));
+        (await userHandler.getEndUserByUsername(username as string))) ||
+      (id && (await userHandler.getEndUserById(id as string)));
 
     return res.status(200).json({
       status: "success",
@@ -43,9 +44,7 @@ export const getMyAccount = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const user = await userSchemaHandler.getEndUserByUsername(
-      req.user!.username
-    );
+    const user = await userHandler.getEndUserByUsername(req.user!.username);
     if (!user)
       next(
         new AppError("An error has occurred while searching for the user", 403)
@@ -60,6 +59,40 @@ export const getMyAccount = catchAsync(
   }
 );
 
+export const getMyAccountSettingsData = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    // TODO: omit some of the sensitive data (to be figured out which, later)
+
+    const user = await userHandler.getEndUserSettingsData(req.user!.id);
+    if (!user)
+      next(
+        new AppError("An error has occurred while searching for the user", 403)
+      );
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        user,
+      },
+    });
+  }
+);
+
+export const returnAuthContextUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    return res.status(200).json({
+      status: "success",
+      data: {
+        user: req.user,
+      },
+    });
+  }
+);
+
 // PATCH routes
 export const updateMyAccount = catchAsync(
   async (
@@ -67,9 +100,43 @@ export const updateMyAccount = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const updatedUser = await userSchemaHandler.updateEndUser(
-      req.user!.id,
-      req.body
+    const { displayName, location, website, bio } = req.body;
+    const updatedUser = await userHandler.updateEndUser(req.user!.id, {
+      displayName,
+      location,
+      website,
+      bio,
+    });
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        updatedUser,
+      },
+    });
+  }
+);
+
+export const updateUserPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { currentPassword, newPassword } = req.body;
+    const [user]: UserUnsafe[] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, req.user!.id));
+
+    if (!user || user.active === false)
+      return next(new AppError("User not found", 400));
+
+    const isPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordCorrect)
+      return next(new AppError("Incorrect password", 400));
+    const updatedUser = await userHandler.updateUserPassword(
+      user.id,
+      newPassword
     );
 
     return res.status(200).json({
@@ -119,9 +186,8 @@ export const deactivateAccount = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    const deactivatedUser = await userSchemaHandler.deactivateEndUser(
-      req.user!
-    );
+    console.log(req.body);
+    const deactivatedUser = await userHandler.deactivateEndUser(req.user!);
 
     res.cookie("jwt", "loggedout");
 

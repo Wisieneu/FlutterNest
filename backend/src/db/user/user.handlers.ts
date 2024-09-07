@@ -2,7 +2,8 @@ import { and, eq, getTableColumns } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 import { db } from "..";
-import { users, User, NewUser, UserUnsafe } from "./user.schema";
+import { users, User, NewUser, UserUnsafe, SettingsUser } from "./user.schema";
+import userConfig from "./user.config";
 
 // Define columns that are safe to expose to other end users
 const {
@@ -30,12 +31,28 @@ export function filterUserObj(userObj: UserUnsafe): User {
   userObj.lastPasswordChangeDate = undefined!;
   userObj.passwordResetToken = undefined!;
   userObj.passwordResetExpires = undefined!;
+  userObj.fileStorageOccupied = undefined!;
+  userObj.profilePicture = undefined!;
+  userObj.role = undefined!;
+  userObj.createdAt = undefined!;
+  userObj.id = undefined!;
+  userObj.username = undefined!;
   return userObj;
+}
+
+export function validatePassword(password: string): boolean {
+  return (
+    password.length >= userConfig.minPasswordLength &&
+    password.length <= userConfig.maxPasswordLength
+  );
 }
 
 const userIsNotInactive = eq(users.active, true);
 
-// Functions responsible for manipulating the user model
+/**
+ * Functions responsible for manipulating the user model
+ */
+
 /**
  * Sign up a new end user.
  *
@@ -79,6 +96,16 @@ export async function getEndUserByUsername(username: string): Promise<User> {
   return user;
 }
 
+export async function getEndUserSettingsData(
+  userId: string
+): Promise<UserUnsafe> {
+  const [user]: UserUnsafe[] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId));
+  return user;
+}
+
 export async function getEndUserById(userId: string): Promise<User> {
   const [user]: User[] = await db
     .select({ ...nonSensitiveColumns })
@@ -96,16 +123,33 @@ export async function getEndUserById(userId: string): Promise<User> {
  */
 export async function updateEndUser(
   userId: string,
-  fieldsToUpdateObj: UserUnsafe
+  fieldsToUpdateObj: Partial<SettingsUser>
 ): Promise<Partial<UserUnsafe>> {
-  const filteredUpdateFields = filterUserObj(fieldsToUpdateObj);
-
-  //TODO: update users
   const [result]: Partial<UserUnsafe>[] = await db
     .update(users)
-    .set(filteredUpdateFields)
+    .set(fieldsToUpdateObj)
     .where(eq(users.id, userId))
     .returning({ ...nonSensitiveColumns, email: users.email });
+  return result;
+}
+
+export async function updateUserPassword(
+  userId: string,
+  newPassword: string
+): Promise<Partial<UserUnsafe>> {
+  if (validatePassword(newPassword) === false)
+    throw new Error("Password must be at least 8 characters long.");
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  const [result]: Partial<UserUnsafe>[] = await db
+    .update(users)
+    .set({
+      password: hashedPassword,
+      lastPasswordChangeDate: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning({ ...nonSensitiveColumns, email: users.email });
+
   return result;
 }
 

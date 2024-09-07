@@ -8,12 +8,14 @@ import UserDetailPage from "@/routes/UserDetailPage";
 import ErrorPage from "@/routes/ErrorPage";
 import AuthenticationPage from "@/routes/Authentication";
 import Settings from "@/routes/Settings";
-import AuthProvider from "@/components/Wrappers/AuthProvider";
+import AuthProvider from "@/components/Auth/AuthProvider";
 
 import { fetchPostById, fetchUserByUsername } from "./API";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
+import NotFoundPage from "./routes/NotFoundPage";
+import LoginProtectedRoute from "./components/Auth/LoginProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -44,7 +46,15 @@ const router = createBrowserRouter([
       },
       {
         path: "/settings",
-        element: <Settings />,
+        element: (
+          <LoginProtectedRoute>
+            <Settings />
+          </LoginProtectedRoute>
+        ),
+      },
+      {
+        path: "/adasdasdasd",
+        element: <LoginProtectedRoute>asdasdasd</LoginProtectedRoute>,
       },
     ],
   },
@@ -52,6 +62,10 @@ const router = createBrowserRouter([
     path: "/auth/*",
     element: <AuthenticationPage />,
     errorElement: <ErrorPage />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 

@@ -4,7 +4,7 @@ import UserDetailHeader from "@/components/UserDetailHeader";
 
 import { Post, PostType, User } from "@/types";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "@/components/Wrappers/AuthProvider";
+import { AuthContext } from "@/components/Auth/AuthProvider";
 import { isScrolledToBottom } from "@/utils";
 import { fetchPostsByUserIdPaginated, fetchUserLikesPaginated } from "@/API";
 import PostPreview from "@/components/PostPreview/PostPreview";
@@ -19,8 +19,6 @@ export default function UserDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>("Posts");
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<number | null>(1);
-  const [isFormBeingSubmitted, setIsFormBeingSubmitted] =
-    useState<boolean>(false);
 
   let user: User;
   let isViewingSelf: boolean;
@@ -29,12 +27,13 @@ export default function UserDetailPage() {
     isViewingSelf = true;
   } else {
     user = loaderUser as User;
-    isViewingSelf = loaderUser.username === currentUser?.username;
+    isViewingSelf =
+      currentUser !== "unauthorized" &&
+      loaderUser.username === currentUser?.username;
   }
 
   useEffect(() => {
     async function fetchPostsPage(page: number) {
-      setIsFormBeingSubmitted(true);
       if (activeTab === "Posts") {
         const newPosts: Post[] = await fetchPostsByUserIdPaginated(
           user.id,
@@ -53,13 +52,12 @@ export default function UserDetailPage() {
         setPosts([...posts, ...newCommments]);
       } else if (activeTab === "Likes") {
         const newLikedPosts: Post[] = await fetchUserLikesPaginated(
-          currentUser!.id,
+          user.id,
           page,
           10,
         );
         setPosts([...posts, ...newLikedPosts]);
       }
-      setIsFormBeingSubmitted(false);
     }
 
     if (page !== null) fetchPostsPage(page);
@@ -107,9 +105,7 @@ export default function UserDetailPage() {
       </ul>
 
       {/* User's post contributions */}
-      <div
-        className={`posts-container border-t border-gray-700 ${isFormBeingSubmitted ? "blur-container" : ""}`}
-      >
+      <div className="posts-container border-t border-gray-700">
         {posts &&
           posts.map((post, index) => <PostPreview key={index} data={post} />)}
       </div>

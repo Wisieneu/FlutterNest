@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from "axios";
-
-import { Post, User } from "@/types";
 import FormData from "form-data";
+
+import { Post, SettingsUser, User } from "@/types";
+import { UserMetadataUpdateFormState } from "@/components/Settings/UserMetadataChangeForm";
 
 type APIPostType = "post" | "comment" | "repost";
 
@@ -52,6 +53,7 @@ export async function createPost(formData: FormData) {
       "Content-Type": "multipart/form-data",
       Accept: "application/json",
     },
+    maxBodyLength: 4096,
   });
   return response;
 }
@@ -89,12 +91,12 @@ export async function signIn(formState: { login: string; password: string }) {
 }
 
 export async function signOut() {
-  const response = await API.post("/users/signout");
+  const response = await API.get("/users/logout");
   return response;
 }
 
-export async function fetchCurrentUser(): Promise<User> {
-  const response = await API.get("/users/me");
+export async function fetchAuthContext(): Promise<User> {
+  const response = await API.get("/users/authContext");
   return response.data.data.user;
 }
 
@@ -108,6 +110,11 @@ export async function fetchUserById(username: string): Promise<User> {
   return response.data.data.user;
 }
 
+export async function fetchUserSettingsData(): Promise<SettingsUser> {
+  const response = await API.get(`/users/me/settings`);
+  return response.data.data.user;
+}
+
 export async function likePost(postId: string) {
   const response = await API.post(`/posts/${postId}/like`);
   return response;
@@ -115,5 +122,39 @@ export async function likePost(postId: string) {
 
 export async function unlikePost(postId: string) {
   const response = await API.delete(`/posts/${postId}/unlike`);
+  return response;
+}
+
+export async function deactivateAccount(password: string) {
+  const response = await API.delete("/users/me", { data: password });
+  return response;
+}
+
+export async function updateUserPassword(
+  currentPassword: string,
+  newPassword: string,
+) {
+  const response = await API.patch("/users/me/pwChange", {
+    currentPassword,
+    newPassword,
+  });
+  return response;
+}
+
+export async function updateUserMetadata(
+  formData: UserMetadataUpdateFormState,
+) {
+  const response = await API.patch("/users/me", formData);
+  return response;
+}
+
+export async function updateUserProfilePicture(formData: FormData) {
+  const response = await API.patch("/users/me/profilePicture", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Accept: "application/json",
+    },
+    maxBodyLength: 1024 * 1024 * 2, // 2MB
+  });
   return response;
 }

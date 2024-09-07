@@ -1,4 +1,31 @@
-import { Slide, toast, ToastOptions, ToastPosition } from "react-toastify";
+import {
+  Slide,
+  toast,
+  ToastContent,
+  ToastOptions,
+  ToastPosition,
+  UpdateOptions,
+} from "react-toastify";
+
+export const loadingToastBody = {
+  position: "top-right",
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  theme: "dark",
+  transition: Slide,
+} as ToastOptions;
+
+export const generateLoadingToastUpdateBody = (
+  innerContent: ToastContent,
+  type: "success" | "error",
+): UpdateOptions => ({
+  render: innerContent,
+  type,
+  isLoading: false,
+  autoClose: 3000,
+});
 
 export function displayToast(
   message: string,

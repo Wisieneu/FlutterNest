@@ -78,7 +78,6 @@ export const uploadPostMedia = multer({
     cb: FileFilterCallback
   ) => {
     const fileSize = parseInt(req.headers["content-length"]!);
-    console.log(file);
     if (
       file.mimetype.startsWith("image/") &&
       fileSize <= postConfig.maxPostMediaImageSize

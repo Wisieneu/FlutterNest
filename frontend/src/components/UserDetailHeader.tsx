@@ -6,6 +6,7 @@ import { CiCalendar, CiLocationOn } from "react-icons/ci";
 import { User } from "@/types";
 import { createImageUrl } from "@/utils";
 import UserNotFoundHeader from "./UserNotFoundHeader";
+import { Link } from "react-router-dom";
 
 export interface UserDetailHeaderProps {
   user: User | string;
@@ -35,9 +36,11 @@ export default function UserDetailHeader(props: UserDetailHeaderProps) {
               src={createImageUrl(user.profilePicture)}
             />
             {isViewingSelf && (
-              <button className="rounded-full border border-gray-300 px-4 py-1.5 font-bold transition duration-150 ease-in-out hover:bg-gray-200 dark:border-gray-500 dark:hover:bg-gray-700">
-                Edit profile
-              </button>
+              <Link to="/settings">
+                <button className="rounded-full border border-gray-300 px-4 py-1.5 font-bold transition duration-150 ease-in-out hover:bg-gray-700">
+                  Edit profile
+                </button>
+              </Link>
             )}
           </div>
 

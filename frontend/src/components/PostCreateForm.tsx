@@ -3,7 +3,11 @@ import { useDropzone } from "react-dropzone";
 import FormData from "form-data";
 
 import { createComment, createPost } from "@/API";
-import { displayToast } from "./Toast";
+import {
+  displayToast,
+  generateLoadingToastUpdateBody,
+  loadingToastBody,
+} from "./Toast";
 // import { debounce } from "@/../../shared";
 
 import SubmitBtn from "@/components/Buttons/SubmitBtn";
@@ -127,16 +131,10 @@ export default function PostCreateForm(props: PostCreateFormProps) {
   async function handleSubmit() {
     setIsFormBeingSubmitted(true);
     toast.dismiss(toastId.current as Id);
-    toastId.current = toast.loading(`Adding your ${props.postType}...`, {
-      position: "top-right",
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "dark",
-
-      transition: Slide,
-    });
+    toastId.current = toast.loading(
+      `Adding your ${props.postType}...`,
+      loadingToastBody,
+    );
     const formData = new FormData();
     formData.append("textContent", textContent);
 
@@ -155,12 +153,13 @@ export default function PostCreateForm(props: PostCreateFormProps) {
 
     if (response!.status === 201) {
       setTimeout(() => {
-        toast.update(toastId.current!, {
-          render: `The ${props.postType} has been added successfully.`,
-          type: "success",
-          isLoading: false,
-          autoClose: 2000,
-        });
+        toast.update(
+          toastId.current!,
+          generateLoadingToastUpdateBody(
+            `The ${props.postType} has been added successfully.`,
+            "success",
+          ),
+        );
         if (props.postType === "post") {
           navigate(`/post/${response!.data.data.newPost.id}`);
         } else {
@@ -172,12 +171,13 @@ export default function PostCreateForm(props: PostCreateFormProps) {
         }
       }, 1000);
     } else {
-      toast.update(toastId.current, {
-        render: `An error occurred while creating the ${props.postType}.`,
-        type: "error",
-        isLoading: false,
-        autoClose: 3000,
-      });
+      toast.update(
+        toastId.current,
+        generateLoadingToastUpdateBody(
+          `An error occurred while creating the ${props.postType}.`,
+          "error",
+        ),
+      );
     }
     setIsFormBeingSubmitted(false);
   }

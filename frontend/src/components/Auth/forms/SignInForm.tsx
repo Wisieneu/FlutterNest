@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 
 import { signIn } from "@/API";
 import { AxiosError } from "axios";
+import {
+  generateLoadingToastUpdateBody,
+  loadingToastBody,
+} from "@/components/Toast";
 
 interface SignInFormProps {
   toggleFormFn: () => void;
@@ -32,26 +36,15 @@ export default function SignInForm(props: SignInFormProps) {
     event.preventDefault();
 
     toast.dismiss(toastId.current as Id);
-    toastId.current = toast.loading("Signing in...", {
-      position: "top-right",
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "dark",
-
-      transition: Slide,
-    });
+    toastId.current = toast.loading("Signing in...", loadingToastBody);
 
     // Signing in
     try {
       const response = await signIn(formState);
-      toast.update(toastId.current, {
-        render: "Logged in. Redirecting...",
-        type: "success",
-        isLoading: false,
-        autoClose: 3000,
-      });
+      toast.update(
+        toastId.current,
+        generateLoadingToastUpdateBody("Logged in. Redirecting...", "success"),
+      );
 
       setTimeout(() => {
         toast.dismiss(toastId.current as Id);
@@ -59,17 +52,16 @@ export default function SignInForm(props: SignInFormProps) {
       }, 2000);
     } catch (error) {
       const err = error as AxiosError<any>;
-      toast.update(toastId.current, {
-        render: (
+      toast.update(
+        toastId.current,
+        generateLoadingToastUpdateBody(
           <div>
             <h1 className="mb-3">Authentication failed:</h1>
             <p className="text-sm">{err.response?.data?.message}</p>
-          </div>
+          </div>,
+          "error",
         ),
-        type: "error",
-        isLoading: false,
-        autoClose: 5000,
-      });
+      );
     }
   }
 

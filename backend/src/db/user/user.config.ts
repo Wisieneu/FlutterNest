@@ -7,7 +7,7 @@ export default {
   defaultProfilePicture: "default.png",
   maxProfilePictureSize: 1024 * 1024 * 2, // 2MB
   maxBioLength: 128,
-  maxWebsiteLink: 24,
+  maxWebsiteLinkLength: 64,
   maxLocationLength: 64,
   roleTypes: ["user", "mod", "admin"],
 } as const;

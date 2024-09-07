@@ -45,7 +45,7 @@ export const users = pgTable("users", {
   bio: varchar("bio", { length: userConfig.maxBioLength }).default(
     "No bio added."
   ),
-  website: varchar("website", { length: userConfig.maxWebsiteLink }),
+  website: varchar("website", { length: userConfig.maxWebsiteLinkLength }),
   location: varchar("location", { length: userConfig.maxLocationLength }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   birthDate: date("birthDate"),
@@ -69,8 +69,8 @@ export const users = pgTable("users", {
 export const usersRelations = relations(users, ({ one, many }) => ({
   // Posts
   posts: many(posts),
-  // likedPosts: many(posts),
-  // bookmarkedPosts: many(posts),
+  likedPosts: many(posts),
+  bookmarkedPosts: many(posts),
 
   // // Other users
   // following: many(users),
@@ -87,4 +87,8 @@ type SensitiveFields =
 
 export type User = Omit<InferSelectModel<typeof users>, SensitiveFields>;
 export type UserUnsafe = InferSelectModel<typeof users>;
+export type SettingsUser = Omit<
+  InferSelectModel<typeof users>,
+  "passwordResetToken" | "passwordResetExpires" | "password"
+>;
 export type NewUser = InferInsertModel<typeof users>;
