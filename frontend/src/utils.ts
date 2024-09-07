@@ -1,7 +1,6 @@
+import { useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { displayToast } from "./components/Toast";
-import { useEffect, useRef } from "react";
 
 dayjs.extend(relativeTime);
 
@@ -39,9 +38,8 @@ export function isScrolledToBottom() {
   return isReachBottom;
 }
 
-// TODO: work out and prob .env this thing somehow 🤔, when the site becomes bigger
 export function createImageUrl(fileName: string) {
-  return `https://wisie-flutternest.s3.eu-central-1.amazonaws.com/${fileName}`;
+  return `${process.env.REACT_APP_S3_BUCKET_URL}/${fileName}`;
 }
 
 export function useEffectSkipFirst(effect: React.EffectCallback, deps: any[]) {
