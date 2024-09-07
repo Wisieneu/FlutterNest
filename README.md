@@ -34,6 +34,30 @@ In the future, I plan to add (once I actually find the time):
   - Videos and posts attachment handling
   - Post reporting
   - More stuff to add to your posts, like polls, voting
+- Code:
+  - A major refactor of the codebase
+  - Better error handling
+  - More tests
+  - Better documentation
+  - For frontend:
+    - <strong>UX improvements</strong>
+    - <strong>Focus on performance and accessibility</strong>
+    - Use more cached functions - useMemo, useCallback, useRef
+    - Maybe use shadcn ui
+    - Organize the structure better
+    - Use more hooks
+    - More custom hooks
+    - Use more components
+    - Handle the duplicated code better
+    - State management improvements, maybe use some library
+    - Replace axios for querying 😭😭
+  - For backend:
+    - Keep an eye on drizzle-orm and drizzle-kit updates
+    - Once drizzle-kit supports views, use them and redesign the database
+    - In general a redesign of the database is needed once drizzle is developed better
+    - Use more middlewares
+    - Organize model handlers better
+    - Better relations usage
 
 ## Contribution
 
