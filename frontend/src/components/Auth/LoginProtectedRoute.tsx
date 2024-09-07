@@ -1,20 +1,20 @@
-import { PropsWithChildren, useContext, useEffect } from "react";
+import { PropsWithChildren, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "./AuthProvider";
 
-import { User } from "@/types";
-
 export default function LoginProtectedRoute({ children }: PropsWithChildren) {
   const navigate = useNavigate();
-  const user: User | null | "unauthorized" = useContext(AuthContext);
+  const user = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (user === "unauthorized") {
+    if (!user) {
       navigate("/auth/signin");
     }
+    setIsLoading(false);
   }, []);
 
   // Block rendering of children until the application has figured out whether the user is authenticated or not
-  return <>{user ? children : null}</>;
+  return <>{isLoading ? null : children}</>;
 }

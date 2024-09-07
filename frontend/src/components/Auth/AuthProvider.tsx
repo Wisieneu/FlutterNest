@@ -10,18 +10,21 @@ import { fetchAuthContext } from "@/API";
 
 import { User } from "@/types";
 
-export const AuthContext = createContext<User | "unauthorized" | null>(null);
+export const AuthContext = createContext<User | null>(null);
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<User | "unauthorized" | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   async function fetchMe() {
     try {
       const user = await fetchAuthContext();
-      if (!user) setUser("unauthorized");
+      if (!user) setUser(null);
       setUser(user);
     } catch {
-      setUser("unauthorized");
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -31,7 +34,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
   return (
     <AuthContext.Provider value={user}>
-      {user !== null ? children : null}
+      {isLoading ? null : children}
     </AuthContext.Provider>
   );
 }

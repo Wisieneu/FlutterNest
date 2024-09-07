@@ -27,9 +27,9 @@ export default function UserDetailPage() {
     isViewingSelf = true;
   } else {
     user = loaderUser as User;
-    isViewingSelf =
-      currentUser !== "unauthorized" &&
-      loaderUser.username === currentUser?.username;
+    isViewingSelf = Boolean(
+      currentUser && loaderUser.username === currentUser?.username,
+    );
   }
 
   useEffect(() => {

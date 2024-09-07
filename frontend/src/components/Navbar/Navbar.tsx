@@ -43,31 +43,28 @@ export default function Sidebar() {
     },
   ];
 
-  const personalButtonsData =
-    user === "unauthorized" || user === null
-      ? []
-      : [
-          {
-            name: "My profile",
-            url: `/u/${user.username}`,
-            icon: FaRegUser,
-          },
-          {
-            name: "Notifications",
-            url: "/notifications",
-            icon: FaBell,
-          },
-          {
-            name: "User settings",
-            url: "/settings",
-            icon: FiSettings,
-          },
-          {
-            name: "Chats",
-            url: "/chat",
-            icon: FaRegMessage,
-          },
-        ];
+  const personalButtonsData = [
+    {
+      name: "My profile",
+      url: user ? `/u/${user.username}` : "/auth/signin",
+      icon: FaRegUser,
+    },
+    {
+      name: "Notifications",
+      url: "/notifications",
+      icon: FaBell,
+    },
+    {
+      name: "User settings",
+      url: "/settings",
+      icon: FiSettings,
+    },
+    {
+      name: "Chats",
+      url: "/chat",
+      icon: FaRegMessage,
+    },
+  ];
 
   return (
     <>
@@ -99,7 +96,7 @@ export default function Sidebar() {
               ))}
             </div>
             <div className="relative mt-auto">
-              {user === "unauthorized" || user === null ? (
+              {!user ? (
                 <div className="mt-auto flex w-full flex-col items-center pb-4">
                   <NavbarItem
                     name={"Sign in"}
