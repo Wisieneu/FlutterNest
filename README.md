@@ -51,6 +51,8 @@ In the future, I plan to add (once I actually find the time):
     - Handle the duplicated code better
     - State management improvements, maybe use some library
     - Replace axios for querying 😭😭
+    - Rewrite frontend into next.js?
+    - Write a mobile version with react-native?
   - For backend:
     - Keep an eye on drizzle-orm and drizzle-kit updates
     - Once drizzle-kit supports views, use them and redesign the database
@@ -58,6 +60,7 @@ In the future, I plan to add (once I actually find the time):
     - Use more middlewares
     - Organize model handlers better
     - Better relations usage
+    - Rewrite backend into nest.js?
 
 ## Contribution
 
