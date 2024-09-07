@@ -29,6 +29,8 @@ userRouter
     userController.returnAuthContextUser
   );
 
+userRouter.get("/newcomers", userController.getNewcomerUsers);
+
 /**
  * Login protected routes
  */

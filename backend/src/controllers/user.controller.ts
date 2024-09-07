@@ -93,6 +93,19 @@ export const returnAuthContextUser = catchAsync(
   }
 );
 
+export const getNewcomerUsers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const limit = Number(req.body.limit) || 4;
+    const users = await userHandler.getNewcomerUsers(limit);
+    return res.status(200).json({
+      status: "success",
+      data: {
+        users,
+      },
+    });
+  }
+);
+
 // PATCH routes
 export const updateMyAccount = catchAsync(
   async (

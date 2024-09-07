@@ -10,7 +10,7 @@ import {
   numeric,
 } from "drizzle-orm/pg-core";
 
-import userConfig from "./user.config";
+import userConfig, { roleType } from "./user.config";
 import { posts } from "../post/post.schema";
 
 // User Schema
@@ -87,8 +87,34 @@ type SensitiveFields =
 
 export type User = Omit<InferSelectModel<typeof users>, SensitiveFields>;
 export type UserUnsafe = InferSelectModel<typeof users>;
+export type PreviewUser = {
+  id: string;
+  username: string;
+  displayName: string;
+  profilePicture: string;
+  createdAt: Date;
+  role: roleType;
+};
 export type SettingsUser = Omit<
   InferSelectModel<typeof users>,
   "passwordResetToken" | "passwordResetExpires" | "password"
 >;
 export type NewUser = InferInsertModel<typeof users>;
+
+export const previewUserBody = {
+  id: users.id,
+  username: users.username,
+  displayName: users.displayName,
+  profilePicture: users.profilePicture,
+  createdAt: users.createdAt,
+  role: users.role,
+};
+
+export const authorUserBody = {
+  ...previewUserBody,
+  active: users.active,
+  birthDate: users.birthDate,
+  bio: users.bio,
+  website: users.website,
+  location: users.location,
+};

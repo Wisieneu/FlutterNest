@@ -6,14 +6,17 @@ enum userRolesEnum {
   admin,
 }
 
-export interface User {
+export interface PreviewUser {
   id: string;
   username: string;
   displayName: string;
-  createdAt: string;
-  birthDate: string | null;
   profilePicture: string;
+  createdAt: string;
   role: userRolesEnum;
+}
+
+export interface User extends PreviewUser {
+  birthDate?: string;
   active: boolean;
   bio?: string;
   website?: string;

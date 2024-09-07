@@ -1,8 +1,16 @@
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, desc, eq, getTableColumns } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 import { db } from "..";
-import { users, User, NewUser, UserUnsafe, SettingsUser } from "./user.schema";
+import {
+  users,
+  User,
+  NewUser,
+  UserUnsafe,
+  SettingsUser,
+  PreviewUser,
+  previewUserBody,
+} from "./user.schema";
 import userConfig from "./user.config";
 
 // Define columns that are safe to expose to other end users
@@ -113,6 +121,17 @@ export async function getEndUserById(userId: string): Promise<User> {
     .where(and(eq(users.id, userId), userIsNotInactive));
 
   return user;
+}
+
+export async function getNewcomerUsers(limit: number): Promise<PreviewUser[]> {
+  const usersArray = await db
+    .select(previewUserBody)
+    .from(users)
+    .where(userIsNotInactive)
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+
+  return usersArray;
 }
 
 /**

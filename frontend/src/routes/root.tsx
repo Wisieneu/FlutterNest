@@ -10,7 +10,7 @@ export default function Root() {
       <div id="main-content" className="min-h-screen max-w-xl grow">
         <Outlet />
       </div>
-      <div id="sidebar" className="border-l border-gray-700 p-10">
+      <div id="sidebar" className="border-l border-gray-700 p-2">
         <Sidebar />
       </div>
     </div>
