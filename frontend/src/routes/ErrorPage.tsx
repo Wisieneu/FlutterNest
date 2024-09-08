@@ -1,4 +1,4 @@
-import { useRouteError } from "react-router-dom";
+import { Link, useRouteError } from "react-router-dom";
 
 import { FaBomb, FaBug, FaExclamationTriangle } from "react-icons/fa";
 import { IconContext } from "react-icons";
@@ -30,13 +30,13 @@ export default function ErrorPage() {
             </p>
             <p>
               If you believe this issue should be addressed,{" "}
-              <a
-                href="https://github.com/Wisieneu/FlutterNest/issues"
+              <Link
+                to="https://github.com/Wisieneu/FlutterNest/issues"
                 className="repo-link"
                 target="_blank"
               >
                 submit a ticket
-              </a>
+              </Link>
             </p>
           </div>
         </div>

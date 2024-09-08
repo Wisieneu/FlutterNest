@@ -1,4 +1,5 @@
 import { FaBug, FaLightbulb } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function RepoLinkSidebarElement() {
   return (
@@ -13,7 +14,12 @@ export default function RepoLinkSidebarElement() {
         Are you encountering any bugs? Would you like to request a new feature?{" "}
         <br />
         Please submit any tickets to our{" "}
-        <span className="repo-link">GitHub repository</span>
+        <Link
+          to="https://github.com/Wisieneu/FlutterNest/issues"
+          target="_blank"
+        >
+          <span className="repo-link">GitHub repository</span>
+        </Link>
       </div>
     </div>
   );
