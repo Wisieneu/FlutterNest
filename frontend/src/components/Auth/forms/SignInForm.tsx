@@ -66,7 +66,7 @@ export default function SignInForm(props: SignInFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} id="sign-in-form">
       <div className="group relative rounded-lg border px-3 pb-1.5 pt-2.5 duration-200 focus-within:border-sky-200 focus-within:ring focus-within:ring-sky-300/30">
         <div className="flex justify-between">
           <label className="text-muted-foreground text-xs font-medium text-gray-400 group-focus-within:text-white">

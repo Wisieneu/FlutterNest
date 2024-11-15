@@ -92,7 +92,7 @@ export default function RegisterForm(props: RegisterFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} id="sign-up-form">
       <div className="group relative rounded-lg border px-3 pb-1.5 pt-2.5 duration-200 focus-within:border-sky-200 focus-within:ring focus-within:ring-sky-300/30">
         <div className="flex justify-between">
           <label
@@ -109,7 +109,7 @@ export default function RegisterForm(props: RegisterFormProps) {
           placeholder="How should everyone call you?"
           autoComplete="off"
           onChange={handleFormChange}
-          className="file:bg-accent placeholder:text-muted-foreground/90 text-foreground block w-full border-0 bg-transparent p-0 text-sm file:my-1 file:rounded-full file:border-0 file:px-4 file:py-2 file:font-medium focus:outline-none focus:ring-0 sm:leading-7"
+          className="placeholder:text-muted-foreground/90 text-foreground block w-full border-0 bg-transparent p-0 text-sm file:my-1 file:rounded-full file:border-0 file:px-4 file:py-2 file:font-medium focus:outline-none focus:ring-0 sm:leading-7"
         />
       </div>
 

@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
+  retries: 2,
   testDir: "./tests",
   fullyParallel: true,
   // forbidOnly: !!import.meta.env.CI,
@@ -9,9 +10,15 @@ export default defineConfig({
   reporter: "html",
 
   use: {
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
     baseURL: "http://localhost:5173/",
-    headless: false,
+    headless: true,
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+  },
+  timeout: 30 * 1000,
+  expect: {
+    timeout: 5 * 1000,
   },
 
   projects: [
