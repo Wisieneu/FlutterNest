@@ -17,6 +17,7 @@ import { fetchPostById, fetchUserByUsername } from "./API";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
+import { AutomationProvider } from "./components/Wrappers/AutomationContext";
 
 const router = createBrowserRouter([
   {
@@ -69,8 +70,10 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
-      <ToastContainer />
+      <AutomationProvider>
+        <RouterProvider router={router} />
+        <ToastContainer />
+      </AutomationProvider>
     </AuthProvider>
   );
 }
