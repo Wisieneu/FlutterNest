@@ -25,10 +25,6 @@ test.describe("Sign In e2e", () => {
   });
 
   test("Sign in - positive scenario", { tag: "@smoke" }, async ({ page }) => {
-    const signInPage = new SignInPage(page);
-    const loginInputText = "test";
-    const passwordInputText = "test";
-
     await signInPage.navigateTo();
     await signInPage.inputCredentials("test", "test");
     await signInPage.clickSignInButton();
