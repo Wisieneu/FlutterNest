@@ -1,6 +1,6 @@
 {
-  "userLogin": "automationtester",
-  "userPassword": "Testing321123",
+  "userLogin": "CHANGEME",
+  "userPassword": "CHANGEME",
   "baseUrl": "http://localhost:5173",
   "baseApiUrl": "http://localhost:6699/api/v1"
 }
