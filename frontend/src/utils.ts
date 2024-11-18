@@ -56,5 +56,5 @@ export function useEffectSkipFirst(effect: React.EffectCallback, deps: any[]) {
 
 export const useTestId = (testId: string) => {
   const { isAutomationEnabled } = useAutomation();
-  return isAutomationEnabled ? { "data-test-id": testId } : {};
+  return isAutomationEnabled ? testId : undefined;
 };

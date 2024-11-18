@@ -15,6 +15,7 @@ import {
 } from "../Toast";
 import { AxiosError } from "axios";
 import { Id, Slide, toast } from "react-toastify";
+import { useTestId } from "@/utils";
 
 export interface UserMetadataChangeFormProps {
   user: User;
@@ -74,7 +75,11 @@ export default function UserMetadataChangeForm(
   }
 
   return (
-    <form onClick={() => setIsExpanded(true)} onSubmit={handleSubmit}>
+    <form
+      data-test-id={useTestId("user-metadata-change-form")}
+      onClick={() => setIsExpanded(true)}
+      onSubmit={handleSubmit}
+    >
       <div className="my-4 flex items-center text-sm text-gray-400">
         <div className="w-1/2 flex-col">
           <div className="py-2">
@@ -83,7 +88,7 @@ export default function UserMetadataChangeForm(
               <div className="flex items-center">
                 <CiAt size={24} />
                 <input
-                  id="username-input"
+                  data-test-id={useTestId("username-input")}
                   value={user.username}
                   className="ml-2 w-full cursor-not-allowed rounded-full border border-gray-500 bg-transparent px-3 py-1 text-sm text-gray-500"
                   disabled
