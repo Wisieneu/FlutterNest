@@ -9,6 +9,8 @@ export abstract class AbstractPage {
       {
         name: "automation-tests",
         value: "true",
+        domain: "localhost:6699", // FIXME: change me post production
+        path: "/",
       },
     ]);
   }

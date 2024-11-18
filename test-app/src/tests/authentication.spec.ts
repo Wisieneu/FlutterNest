@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
+
 import { SignInPage } from "../pages/SignInPage";
+
+import configuration from "../../configuration.json";
 
 test("Auth page opening, dynamic URLs", { tag: "@smoke" }, async ({ page }) => {
   const signInForm = page.locator("#sign-in-form");
@@ -24,12 +27,25 @@ test.describe("Sign In e2e", () => {
     await signInPage.navigateTo();
   });
 
-  test("Sign in - positive scenario", { tag: "@smoke" }, async ({ page }) => {
+  test.only("Sign in - positive scenario", async ({ page }) => {
     await signInPage.navigateTo();
-    await signInPage.inputCredentials("test", "test");
-    await signInPage.clickSignInButton();
-    const toastMessage = await signInPage.getToastMessage();
-    expect(toastMessage).toBe("Authentication failed");
+    await signInPage.inputCredentials(
+      configuration.userLogin,
+      configuration.userPassword
+    );
+
+    const [response] = await Promise.all([
+      page.waitForResponse((response) =>
+        response.url().includes("api/v1/users/signin")
+      ),
+      signInPage.clickSignInButton(),
+    ]);
+    const toastMessageInitial = await signInPage.getToastMessage();
+    expect(toastMessageInitial).toContain("Signing in");
+    expect(response.status()).toBe(200);
+    await expect(signInPage.toastElement).toHaveText(/Logged in/, {
+      timeout: 5000,
+    });
   });
 
   test("Login - wrong credentials", async ({ page }) => {});

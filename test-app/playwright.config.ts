@@ -8,6 +8,7 @@ export default defineConfig({
   // retries: import.meta.env.CI ? 2 : 0,
   // workers: import.meta.env.CI ? 1 : undefined,
   reporter: "html",
+  globalTimeout: 10 * 1000,
 
   use: {
     trace: "retain-on-failure",

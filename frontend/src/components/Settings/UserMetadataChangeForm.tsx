@@ -104,8 +104,8 @@ export default function UserMetadataChangeForm(
               <div className="flex items-center">
                 <HiOutlineUserGroup size={24} />
                 <input
-                  id="display-name-input"
                   name="displayName"
+                  data-test-id={useTestId("display-name-input")}
                   onChange={handleInputChange}
                   value={formData.displayName}
                   className="ml-2 w-full rounded-full border bg-transparent px-3 py-1 text-sm"
@@ -121,7 +121,7 @@ export default function UserMetadataChangeForm(
               <div className="flex items-center">
                 <CiLocationOn size={24} />
                 <input
-                  id="location-input"
+                  data-test-id={useTestId("location-input")}
                   name="location"
                   onChange={handleInputChange}
                   value={formData.location}
@@ -138,7 +138,7 @@ export default function UserMetadataChangeForm(
               <div className="flex items-center">
                 <FiLink size={24} />
                 <input
-                  id="website-input"
+                  data-test-id={useTestId("website-input")}
                   name="website"
                   onChange={handleInputChange}
                   value={formData.website}
@@ -155,7 +155,7 @@ export default function UserMetadataChangeForm(
               <div className="flex items-center">
                 <FiLink size={24} />
                 <textarea
-                  id="bio-input"
+                  data-test-id={useTestId("bio-input")}
                   name="bio"
                   onChange={handleInputChange}
                   defaultValue={formData.bio}
@@ -171,6 +171,7 @@ export default function UserMetadataChangeForm(
       </div>
       {isExpanded && (
         <button
+          data-test-id={useTestId("metadata-form-submit-button")}
           type="submit"
           className={`rounded-full border-2 border-gray-500 px-4 py-1`}
         >

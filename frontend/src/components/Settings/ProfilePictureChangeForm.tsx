@@ -12,7 +12,7 @@ import {
 } from "@/components/Toast";
 import GreySettingsSubmitBtn from "@/components/Buttons/GreySettingsSubmitBtn";
 
-import { createImageUrl, useEffectSkipFirst } from "@/utils";
+import { createImageUrl, useEffectSkipFirst, useTestId } from "@/utils";
 
 import { User } from "@/types";
 import { Id, toast } from "react-toastify";
@@ -73,7 +73,11 @@ export default function ProfilePictureChangeForm({ user }: { user: User }) {
   }
 
   return (
-    <form onClick={() => setIsExpanded(true)} onSubmit={handleSubmit}>
+    <form
+      data-test-id={useTestId("profile-picture-change-form")}
+      onClick={() => setIsExpanded(true)}
+      onSubmit={handleSubmit}
+    >
       <div className={`${isFormBeingSubmitted ? "blur-container" : ""}`}>
         {isExpanded ? (
           <>
@@ -102,7 +106,10 @@ export default function ProfilePictureChangeForm({ user }: { user: User }) {
                 <p className="py-3 text-end text-sm text-gray-500">32x32 px</p>
               </div>
               <div className="mb-auto mt-auto h-full">
-                <div className="cursor-pointer rounded-full border border-gray-500 p-3 text-sm hover:bg-gray-800">
+                <div
+                  className="cursor-pointer rounded-full border border-gray-500 p-3 text-sm hover:bg-gray-800"
+                  data-test-id={useTestId("profile-picture-upload-button")}
+                >
                   <SingleFileUploadField
                     setFile={setUploadedImage}
                     icon={FiUpload}
@@ -110,7 +117,10 @@ export default function ProfilePictureChangeForm({ user }: { user: User }) {
                 </div>
               </div>
             </div>
-            <GreySettingsSubmitBtn isSubmittable={Boolean(uploadedImage)} />
+            <GreySettingsSubmitBtn
+              isSubmittable={Boolean(uploadedImage)}
+              data-test-id={useTestId("profile-picture-form-submit-button")}
+            />
           </>
         ) : (
           <TripleDotButton size="16" />

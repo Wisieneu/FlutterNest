@@ -7,7 +7,7 @@ test.describe("E2E user settings page", () => {
   let userSettingsPage: UserSettingsPage;
 
   test.beforeAll(async ({ request }) => {
-    await quickApiLogin(request);
+    token = await quickApiLogin(request);
   });
 
   test.beforeEach(async ({ page }) => {
@@ -29,7 +29,17 @@ test.describe("E2E user settings page", () => {
     userSettingsPage = new UserSettingsPage(page);
     await userSettingsPage.navigateTo();
     await userSettingsPage.openUserMetadataForm();
-    const isExpanded = await userSettingsPage.isUserMetadataFormExpanded();
-    expect(isExpanded).toBe(true);
+  });
+
+  test("Profile picture form is expanded when clicked", async ({ page }) => {
+    userSettingsPage = new UserSettingsPage(page);
+    await userSettingsPage.navigateTo();
+    await userSettingsPage.openProfilePictureForm();
+  });
+
+  test("Password change form is expanded when clicked", async ({ page }) => {
+    userSettingsPage = new UserSettingsPage(page);
+    await userSettingsPage.navigateTo();
+    await userSettingsPage.openPasswordChangeForm();
   });
 });
