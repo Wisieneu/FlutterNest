@@ -23,7 +23,6 @@ In the future, I plan to add (once I actually find the time):
   - Group chats
 - A search engine - I'm thinking of using Algolia
 - A CMS UI for admins to manage posts, users, reports, configurations without having to hardcode them
-- E2E frontend tests
 - CI/CD pipeline with automated builds, deployments and tests
 - User features:
   - User blocking
@@ -35,32 +34,27 @@ In the future, I plan to add (once I actually find the time):
   - Post reporting
   - More stuff to add to your posts, like polls, voting
 - Code:
-  - A major refactor of the codebase
   - Better error handling
   - More tests
   - Better documentation
   - For frontend:
-    - <strong>UX improvements</strong>
-    - <strong>Focus on performance and accessibility</strong>
+    - UX
+    - Animations
+    - <strong>Performance and accessibility</strong>
     - Use more cached functions - useMemo, useCallback, useRef
-    - Maybe use shadcn ui
-    - Organize the structure better
-    - Use more hooks
-    - More custom hooks
-    - Use more components
+    - Maybe use shadcn ui for components
+    - Use more components, make them reusable and even more generic
     - Handle the duplicated code better
     - State management improvements, maybe use some library
     - Replace axios for querying 😭😭
-    - Rewrite frontend into next.js?
-    - Write a mobile version with react-native?
+    - Rewrite frontend into next.js
+    - Write a mobile version with react-native
   - For backend:
-    - Keep an eye on drizzle-orm and drizzle-kit updates
     - Once drizzle-kit supports views, use them and redesign the database
     - In general a redesign of the database is needed once drizzle is developed better
     - Use more middlewares
     - Organize model handlers better
-    - Better relations usage
-    - Rewrite backend into nest.js?
+    - Rewrite backend into nest.js
 
 ## Contribution
 
@@ -75,5 +69,5 @@ In the future, I plan to add (once I actually find the time):
 
 ### Notes:
 
-- This is a monorepo, so it includes separate `package.json` files in **_backend_** and **_frontend_** folders
+- This is a monorepo, so it includes separate `package.json` files in **_backend_**, **_frontend_** and **_test-app_** folders
 - Please notice different Node environments: _development_ and _production_ when testing/contributing
