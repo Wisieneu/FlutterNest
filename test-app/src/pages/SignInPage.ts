@@ -1,7 +1,7 @@
 import { expect, Locator, Page } from "@playwright/test";
+import { AbstractPage } from "./AbstractPage";
 
-export class SignInPage {
-  private page: Page;
+export class SignInPage extends AbstractPage {
   private loginField: Locator;
   private passwordField: Locator;
   private signInSubmitButton: Locator;
@@ -9,7 +9,7 @@ export class SignInPage {
   private signInForm: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.loginField = page.locator("[name=login]");
     this.passwordField = page.locator("[name=password]");
     this.signInSubmitButton = page.locator("[type=submit]");
