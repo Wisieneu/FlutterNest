@@ -7,9 +7,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "test": "npx playwright test --reporter=html",
-    "test:report": "npx playwright show-report"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@types/react-toastify": "^4.1.0",
@@ -26,7 +24,6 @@
     "vite-plugin-tsconfig-paths": "^1.4.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.47.0",
     "@types/node": "^22.5.1",
     "@types/react": "^18.2.52",
     "@types/react-dom": "^18.2.18",
@@ -37,7 +34,6 @@
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "playwright": "^1.47.0",
     "postcss": "^8.4.41",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",

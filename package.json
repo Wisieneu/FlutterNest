@@ -5,6 +5,7 @@
     "start": "lerna run start --parallel",
     "start:backend": "cd backend && pnpm start",
     "start:frontend": "cd frontend && pnpm start",
+    "test": "cd test-app && pnpm start",
     "createadmin": "cd backend && pnpm createadmin"
   },
   "devDependencies": {
