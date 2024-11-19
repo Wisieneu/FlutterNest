@@ -8,7 +8,7 @@ import EmailChangeForm from "@/components/Settings/EmailChangeForm";
 import AccountDeleteModal from "@/components/Settings/AccountDeleteModal";
 
 import { fetchUserSettingsData } from "@/API";
-import { convertDateRelative } from "@/utils";
+import { convertDateRelative, useTestId } from "@/utils";
 
 import { SettingsUser } from "@/types";
 
@@ -63,6 +63,7 @@ export default function Settings() {
             )}
             <button
               className="inline-flex text-sm font-semibold text-blue-600 underline decoration-2"
+              data-test-id={useTestId("pw-change-form__open-btn")}
               onClick={() =>
                 setFormsDisplayState({
                   ...formsDisplayState,

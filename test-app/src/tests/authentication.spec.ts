@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-import { SignInPage } from "../pages/SignInPage";
+import { SignInPage } from "@pages/SignInPage";
 
-import configuration from "../../configuration.json";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 test("Auth page opening, dynamic URLs", { tag: "@smoke" }, async ({ page }) => {
   const signInForm = page.locator("#sign-in-form");
@@ -21,18 +23,16 @@ test("Auth page opening, dynamic URLs", { tag: "@smoke" }, async ({ page }) => {
 
 test.describe("Sign In e2e", () => {
   let signInPage: SignInPage;
+  const { userLogin, userPassword } = process.env;
 
   test.beforeEach(async ({ page }) => {
     signInPage = new SignInPage(page);
     await signInPage.navigateTo();
   });
 
-  test.only("Sign in - positive scenario", async ({ page }) => {
+  test("Sign in - positive scenario", async ({ page }) => {
     await signInPage.navigateTo();
-    await signInPage.inputCredentials(
-      configuration.userLogin,
-      configuration.userPassword
-    );
+    await signInPage.inputCredentials(userLogin, userPassword);
 
     const [response] = await Promise.all([
       page.waitForResponse((response) =>
@@ -40,13 +40,18 @@ test.describe("Sign In e2e", () => {
       ),
       signInPage.clickSignInButton(),
     ]);
-    const toastMessageInitial = await signInPage.getToastMessage();
-    expect(toastMessageInitial).toContain("Signing in");
+    await expect(signInPage.toastElement).toHaveText(/Signing in/, {
+      timeout: 5000,
+    });
     expect(response.status()).toBe(200);
     await expect(signInPage.toastElement).toHaveText(/Logged in/, {
       timeout: 5000,
     });
   });
 
-  test("Login - wrong credentials", async ({ page }) => {});
+  test("Login - wrong credentials", async ({ page }) => {
+    signInPage = new SignInPage(page);
+    await signInPage.navigateTo();
+    await signInPage.inputCredentials(process.env.userLogin, "wrongPassword");
+  });
 });

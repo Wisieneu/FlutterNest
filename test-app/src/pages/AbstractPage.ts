@@ -9,13 +9,13 @@ export abstract class AbstractPage {
       {
         name: "automation-tests",
         value: "true",
-        domain: "localhost:6699", // FIXME: change me post production
+        domain: "localhost",
         path: "/",
       },
     ]);
   }
 
-  public getElementByTestId(testId: string): Locator {
+  public testIdLocator(testId: string): Locator {
     return this.page.locator(`[data-test-id=${testId}]`);
   }
 }

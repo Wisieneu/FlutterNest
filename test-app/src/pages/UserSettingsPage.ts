@@ -10,63 +10,59 @@ export class UserSettingsPage extends AbstractPage {
   metadataLocationInput: Locator;
   metadataWebsiteInput: Locator;
   metadataBioInput: Locator;
-  metadataFormSubmitButton: Locator;
+  metadataFormSubmitBtn: Locator;
 
   // Profile picture change form
-  profilePictureChangeForm: Locator;
-  profilePictureFormFileUploadButton: Locator;
-  profilePictureFormSubmitButton: Locator;
+  pfpChangeForm: Locator;
+  pfpFormFileUploadBtn: Locator;
+  pfpFormSubmitBtn: Locator;
 
   // Password change form
-  passwordChangeForm: Locator;
-  passwordChangeCurrentPasswordInput: Locator;
-  passwordChangeFormInput: Locator;
-  passwordChangeFormConfirmInput: Locator;
-  passwordChangeFormSubmitButton: Locator;
+  pwChangeForm: Locator;
+  pwChangeFormExpandBtn: Locator;
+  pwChangeFormCurrentPasswordInput: Locator;
+  pwChangeFormInput: Locator;
+  pwChangeFormConfirmInput: Locator;
+  pwChangeFormSubmitBtn: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.metadataChangeForm = this.getElementByTestId(
-      "user-metadata-change-form"
-    );
-    this.metadataUsernameInput = this.getElementByTestId("username-input");
-    this.metadataDisplayNameInput =
-      this.getElementByTestId("display-name-input");
-    this.metadataLocationInput = this.getElementByTestId("location-input");
-    this.metadataWebsiteInput = this.getElementByTestId("website-input");
-    this.metadataBioInput = this.getElementByTestId("bio-input");
-    this.metadataFormSubmitButton = this.getElementByTestId(
+    this.metadataChangeForm = this.testIdLocator("user-metadata-change-form");
+    this.metadataUsernameInput = this.testIdLocator("username-input");
+    this.metadataDisplayNameInput = this.testIdLocator("display-name-input");
+    this.metadataLocationInput = this.testIdLocator("location-input");
+    this.metadataWebsiteInput = this.testIdLocator("website-input");
+    this.metadataBioInput = this.testIdLocator("bio-input");
+    this.metadataFormSubmitBtn = this.testIdLocator(
       "metadata-form-submit-button"
     );
 
-    this.profilePictureChangeForm = this.getElementByTestId(
-      "profile-picture-change-form"
-    );
-    this.profilePictureFormFileUploadButton = this.getElementByTestId(
+    // Profile picture change form
+    this.pfpChangeForm = this.testIdLocator("profile-picture-change-form");
+    this.pfpFormFileUploadBtn = this.testIdLocator(
       "profile-picture-upload-button"
     );
-    this.profilePictureFormSubmitButton = this.getElementByTestId(
+    this.pfpFormSubmitBtn = this.testIdLocator(
       "profile-picture-form-submit-button"
     );
 
-    this.passwordChangeForm = this.getElementByTestId("password-change-form");
-    this.passwordChangeCurrentPasswordInput = this.getElementByTestId(
-      "current-password-input"
+    // Password change form
+    this.pwChangeForm = this.testIdLocator("pw-change-form");
+    this.pwChangeFormExpandBtn = this.testIdLocator("pw-change-form__open-btn");
+    this.pwChangeFormCurrentPasswordInput = this.testIdLocator(
+      "pw-change-current-pw-input"
     );
-    this.passwordChangeFormInput = this.getElementByTestId(
-      "password-change-form-input"
+    this.pwChangeFormInput = this.testIdLocator("pw-change-form-input");
+    this.pwChangeFormConfirmInput = this.testIdLocator(
+      "pw-change-form-confirm-input"
     );
-    this.passwordChangeFormConfirmInput = this.getElementByTestId(
-      "password-change-form-confirm-input"
-    );
-    this.passwordChangeFormSubmitButton = this.getElementByTestId(
-      "password-change-form-submit-button"
+    this.pwChangeFormSubmitBtn = this.testIdLocator(
+      "pw-change-form-submit-button"
     );
   }
 
   async navigateTo(): Promise<void> {
     await this.page.goto("/settings");
-    await this.metadataChangeForm.waitFor();
   }
 
   async openUserMetadataForm(): Promise<void> {
@@ -77,22 +73,23 @@ export class UserSettingsPage extends AbstractPage {
     await expect(this.metadataLocationInput).toBeVisible();
     await expect(this.metadataWebsiteInput).toBeVisible();
     await expect(this.metadataBioInput).toBeVisible();
-    await expect(this.metadataFormSubmitButton).toBeVisible();
+    await expect(this.metadataFormSubmitBtn).toBeVisible();
   }
 
   async openProfilePictureForm(): Promise<void> {
-    this.profilePictureChangeForm.click();
-    await expect(this.profilePictureFormFileUploadButton).toBeVisible();
-    await expect(this.profilePictureFormSubmitButton).toBeVisible();
-    await expect(this.profilePictureFormSubmitButton).toBeDisabled();
+    this.pfpChangeForm.click();
+    await expect(this.pfpFormFileUploadBtn).toBeVisible();
+    await expect(this.pfpFormSubmitBtn).toBeVisible();
+    await expect(this.pfpFormSubmitBtn).toBeDisabled();
   }
 
   async openPasswordChangeForm(): Promise<void> {
-    this.passwordChangeForm.click();
-    await expect(this.passwordChangeFormInput).toBeVisible();
-    await expect(this.passwordChangeCurrentPasswordInput).toBeVisible();
-    await expect(this.passwordChangeFormConfirmInput).toBeVisible();
-    await expect(this.passwordChangeFormSubmitButton).toBeVisible();
-    await expect(this.passwordChangeFormSubmitButton).toBeDisabled();
+    this.pwChangeFormExpandBtn.click();
+    await expect(this.pwChangeForm).toBeVisible();
+    await expect(this.pwChangeFormInput).toBeVisible();
+    await expect(this.pwChangeFormCurrentPasswordInput).toBeVisible();
+    await expect(this.pwChangeFormConfirmInput).toBeVisible();
+    await expect(this.pwChangeFormSubmitBtn).toBeVisible();
+    await expect(this.pwChangeFormSubmitBtn).toBeDisabled();
   }
 }

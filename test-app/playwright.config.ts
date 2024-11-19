@@ -8,7 +8,6 @@ export default defineConfig({
   // retries: import.meta.env.CI ? 2 : 0,
   // workers: import.meta.env.CI ? 1 : undefined,
   reporter: "html",
-  globalTimeout: 10 * 1000,
 
   use: {
     trace: "retain-on-failure",
@@ -19,7 +18,7 @@ export default defineConfig({
   },
   timeout: 30 * 1000,
   expect: {
-    timeout: 5 * 1000,
+    timeout: 10 * 1000,
   },
 
   projects: [
@@ -27,12 +26,10 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
-
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },

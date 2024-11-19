@@ -20,7 +20,7 @@ export const AutomationProvider = (props: { children: ReactNode }) => {
   useEffect(() => {
     const cookie = document.cookie
       .split("; ")
-      .find((row) => row.startsWith("automation-tests="))
+      .find((row) => row.startsWith("automation-tests"))
       ?.split("=")[1];
     setIsAutomationEnabled(cookie === "true");
   }, []);

@@ -68,17 +68,14 @@ export default function PasswordChangeForm() {
   }
 
   return (
-    <form
-      data-test-id={useTestId("password-change-form")}
-      onSubmit={handleSubmit}
-    >
+    <form data-test-id={useTestId("pw-change-form")} onSubmit={handleSubmit}>
       <div className="my-4 flex items-center text-sm text-gray-400">
         <div className="w-1/2 flex-col">
           <div className="py-2">
             <label htmlFor="password-reset">Current password</label>
             <input
               type={`${isPasswordVisible ? "text" : "password"}`}
-              data-test-id={useTestId("current-password-input")}
+              data-test-id={useTestId("pw-change-current-pw-input")}
               name="currentPassword"
               className="w-full rounded-sm border bg-transparent p-1 text-base"
               value={formState.currentPassword}
@@ -89,7 +86,7 @@ export default function PasswordChangeForm() {
             <label htmlFor="password-reset">New password</label>
             <input
               type={`${isPasswordVisible ? "text" : "password"}`}
-              data-test-id={useTestId("password-change-form-input")}
+              data-test-id={useTestId("pw-change-form-input")}
               name="newPassword"
               className="w-full rounded-sm border bg-transparent p-1 text-base"
               value={formState.newPassword}
@@ -100,7 +97,7 @@ export default function PasswordChangeForm() {
             <label htmlFor="password-reset">Confirm password</label>
             <input
               type={`${isPasswordVisible ? "text" : "password"}`}
-              data-test-id={useTestId("password-change-form-confirm-input")}
+              data-test-id={useTestId("pw-change-form-confirm-input")}
               name="newPasswordConfirm"
               className="w-full rounded-sm border bg-transparent p-1 text-base"
               value={formState.newPasswordConfirm}
@@ -123,7 +120,7 @@ export default function PasswordChangeForm() {
         )}
       </div>
       <GreySettingsSubmitBtn
-        data-test-id={useTestId("password-change-form-submit-button")}
+        data-test-id={useTestId("pw-change-form-submit-button")}
         isSubmittable={isSubmittable}
       />
     </form>

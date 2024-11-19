@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "playwright test",
+    "start": "playwright test --reporter=html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@playwright/test": "^1.48.2",
+    "dotenv": "^16.4.5",
     "playwright": "^1.48.2"
   },
   "devDependencies": {
