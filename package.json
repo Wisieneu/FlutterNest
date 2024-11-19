@@ -2,13 +2,10 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "start": "lerna run start --parallel",
+    "start": "pnpm -r start",
     "start:backend": "cd backend && pnpm start",
     "start:frontend": "cd frontend && pnpm start",
-    "test": "cd test-app && pnpm start",
+    "test": "pnpm start --workspace=test-app",
     "createadmin": "cd backend && pnpm createadmin"
-  },
-  "devDependencies": {
-    "lerna": "^8.1.8"
   }
 }
