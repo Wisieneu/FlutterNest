@@ -30,7 +30,7 @@ class App {
     // TODO: configure cors, helmet, urlencoded, compression for production
     this.app.use(
       cors({
-        origin: "http://localhost:5173",
+        origin: "http://localhost:6700",
         optionsSuccessStatus: 200,
         credentials: true,
       })
