@@ -10,11 +10,11 @@ export class SignInPage extends AbstractPage {
 
   constructor(page: Page) {
     super();
-    // this.loginField = page.locator("[name=login]");
-    // this.passwordField = page.locator("[name=password]");
-    // this.signInSubmitButton = page.locator("[type=submit]");
-    // this.toastElement = page.locator(".Toastify__toast");
-    // this.signInForm = page.locator("#sign-in-form");
+    this.loginField = page.locator("[name=login]");
+    this.passwordField = page.locator("[name=password]");
+    this.signInSubmitButton = page.locator("[type=submit]");
+    this.toastElement = page.locator(".Toastify__toast");
+    this.signInForm = page.locator("#sign-in-form");
   }
 
   async navigateTo(): Promise<void> {

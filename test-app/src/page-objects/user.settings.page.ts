@@ -1,5 +1,3 @@
-import { expect, Page } from "@playwright/test";
-
 import { AbstractPage } from "./abstract.page";
 import { InputElement } from "@/elements/input.element";
 import { getTestIdLocator } from "@/elements/abstract.element";
@@ -8,7 +6,8 @@ import { FormElement } from "@/elements/form.element";
 import playwrightObject from "@/engine/playwright.object";
 
 export class UserSettingsPage extends AbstractPage {
-  url = "/settings";
+  url: string;
+  tabName: string;
 
   metadataChangeForm: {
     container: FormElement;
@@ -85,12 +84,6 @@ export class UserSettingsPage extends AbstractPage {
     };
   }
 
-  async open(wait = true): Promise<void> {
-    await playwrightObject.open(this.url);
-    if (wait) await this.waitForLoadState("networkidle");
-    await this.shouldBeOpened();
-  }
-
   async openMetadataChangeForm(): Promise<void> {
     await this.metadataChangeForm.container.click();
     await this.metadataChangeForm.usernameInput.toBeVisible();
@@ -100,6 +93,31 @@ export class UserSettingsPage extends AbstractPage {
     await this.metadataChangeForm.websiteInput.toBeVisible();
     await this.metadataChangeForm.bioInput.toBeVisible();
     await this.metadataChangeForm.submitBtn.toBeVisible();
+  }
+
+  async fillDisplayNameInput(displayNameInput: string): Promise<void> {
+    await this.metadataChangeForm.displayNameInput.fill(displayNameInput);
+    await this.metadataChangeForm.displayNameInput.toHaveText(displayNameInput);
+  }
+
+  async fillLocationInput(locationInput: string): Promise<void> {
+    await this.metadataChangeForm.locationInput.fill(locationInput);
+    await this.metadataChangeForm.locationInput.toHaveText(locationInput);
+  }
+
+  async fillWebsiteInput(websiteInput: string): Promise<void> {
+    await this.metadataChangeForm.websiteInput.fill(websiteInput);
+    await this.metadataChangeForm.websiteInput.toHaveText(websiteInput);
+  }
+
+  async fillBioInput(bioInput: string): Promise<void> {
+    await this.metadataChangeForm.bioInput.fill(bioInput);
+    await this.metadataChangeForm.bioInput.toHaveText(bioInput);
+  }
+
+  async submitMetadataChangeForm(): Promise<void> {
+    await this.metadataChangeForm.submitBtn.click();
+    // TODO: verify toast message etc
   }
 
   async openProfilePictureForm(): Promise<void> {

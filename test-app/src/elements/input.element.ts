@@ -5,7 +5,7 @@ export class InputElement extends AbstractElement {
     super(selector);
   }
 
-  type(text: string) {
+  fill(text: string): Promise<void> {
     return this.element().fill(text);
   }
 }

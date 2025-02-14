@@ -50,6 +50,14 @@ class PlaywrightObject {
     if (this.browser) return;
     this.browser = init.playwrightBrowser;
     this.context = await this.browser.newContext();
+    this.context.addCookies([
+      {
+        name: "automation-tests",
+        value: "true",
+        domain: "localhost",
+        path: "/",
+      },
+    ]);
     this.playwrightPage = await this.context.newPage();
   }
 

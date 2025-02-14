@@ -1,7 +1,7 @@
-import { defineConfig, devices, PlaywrightTestConfig } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  retries: 0,
+  retries: 2,
   testDir: "./src/tests",
   fullyParallel: true,
   // forbidOnly: !!import.meta.env.CI,
@@ -17,9 +17,11 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "off",
   },
+
   timeout: 10 * 1000,
+
   expect: {
-    timeout: 10 * 1000,
+    timeout: 5 * 1000,
   },
 
   projects: [
@@ -27,13 +29,13 @@ export default defineConfig({
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
-    // {
-    //   name: "chromium",
-    //   use: { ...devices["Desktop Chrome"] },
-    // },
-    // {
-    //   name: "webkit",
-    //   use: { ...devices["Desktop Safari"] },
-    // },
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
   ],
 });

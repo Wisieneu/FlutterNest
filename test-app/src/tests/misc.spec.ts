@@ -1,15 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 
-test("homepage has title", async ({ page }) => {
-  await page.goto("/");
-  await expect(page).toHaveTitle("FlutterNest");
+import { test } from "@/engine/fixtures";
+import playwrightObject from "@/engine/playwright.object";
+
+test("homepage has title", async ({ unauthenticatedPage }) => {
+  await unauthenticatedPage.goto("/");
+  await expect(unauthenticatedPage).toHaveTitle("FlutterNest");
 });
 
-test("Repo redirect functionality", async ({ context }) => {
-  const page = await context.newPage();
-  await page.goto("/");
-  const repoPageEvent = context.waitForEvent("page");
-  await page.locator(".repo-link").click();
+test("Repo redirect functionality", async ({ unauthenticatedPage }) => {
+  await unauthenticatedPage.goto("/");
+  const repoPageEvent = playwrightObject.context.waitForEvent("page");
+  await unauthenticatedPage.locator(".repo-link").click();
   const repoPage = await repoPageEvent;
   await repoPage.waitForLoadState("networkidle");
   expect(await repoPage.title()).toContain("Issues");

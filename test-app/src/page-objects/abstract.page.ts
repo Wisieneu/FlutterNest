@@ -1,15 +1,26 @@
+import { DivElement } from "@/elements/div.element";
+import { TextElement } from "@/elements/text.element";
 import playwrightObject from "@/engine/playwright.object";
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 export abstract class AbstractPage {
   protected tabName: string;
   protected partialUrl: string;
   protected pageSelector: string = ".page-wrapper";
 
+  toastElement: {
+    container: DivElement;
+    text: TextElement;
+  };
+
   constructor(tabName?: string, partialUrl?: string, pageSelector?: string) {
     this.tabName = tabName;
     this.partialUrl = partialUrl;
     this.pageSelector = pageSelector;
+  }
+
+  async openPage() {
+    await playwrightObject.open(this.partialUrl);
   }
 
   async openUrl(url: string) {

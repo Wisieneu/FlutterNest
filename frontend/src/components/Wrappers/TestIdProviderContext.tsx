@@ -6,15 +6,15 @@ import {
   useState,
 } from "react";
 
-interface AutomationContextType {
+interface TestIdProviderContextType {
   isAutomationEnabled: boolean;
 }
 
-const AutomationContext = createContext<AutomationContextType>({
+const TestIdProviderContext = createContext<TestIdProviderContextType>({
   isAutomationEnabled: false,
 });
 
-export const AutomationProvider = (props: { children: ReactNode }) => {
+export const TestIdProvider = (props: { children: ReactNode }) => {
   const [isAutomationEnabled, setIsAutomationEnabled] = useState(false);
 
   useEffect(() => {
@@ -26,11 +26,11 @@ export const AutomationProvider = (props: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AutomationContext.Provider value={{ isAutomationEnabled }}>
+    <TestIdProviderContext.Provider value={{ isAutomationEnabled }}>
       {props.children}
-    </AutomationContext.Provider>
+    </TestIdProviderContext.Provider>
   );
 };
 
-export const useAutomation = (): AutomationContextType =>
-  useContext(AutomationContext);
+export const useTestAutomation = (): TestIdProviderContextType =>
+  useContext(TestIdProviderContext);
