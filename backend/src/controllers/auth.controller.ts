@@ -23,7 +23,7 @@ dotenv.config({ path: "./.env" });
  */
 const signToken = (userId: string): string => {
   return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
-    expiresIn: `${process.env.JWT_EXPIRES_IN}d`,
+    expiresIn: Number(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000, // number of days from .env file - converted to ms
   });
 };
 
