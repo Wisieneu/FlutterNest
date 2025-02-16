@@ -5,7 +5,7 @@
     "start": "pnpm -r start",
     "start:backend": "cd backend && pnpm start",
     "start:frontend": "cd frontend && pnpm start",
-    "test": "pnpm start --workspace=test-app",
+    "test": "cd ./test-app && pnpm test",
     "createadmin": "cd backend && pnpm createadmin"
   }
 }
