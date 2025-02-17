@@ -1,4 +1,4 @@
-import { APIRequestContext, Page } from "@playwright/test";
+import { APIRequestContext, BrowserContext } from "@playwright/test";
 
 const { userLogin, userPassword, baseApiUrl } = process.env;
 
@@ -15,8 +15,11 @@ export async function quickApiLogin(
   return responseBody.token;
 }
 
-export async function setAuthCookie(page: Page, token: string): Promise<void> {
-  await page.context().addCookies([
+export async function setAuthCookie(
+  context: BrowserContext,
+  token: string
+): Promise<void> {
+  await context.addCookies([
     {
       name: "jwt",
       value: token,

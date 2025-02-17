@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
-import { AbstractPage } from "./AbstractPage";
+import { AbstractPage } from "./abstract.page";
 
 export class SignInPage extends AbstractPage {
   loginField: Locator;
@@ -9,16 +9,16 @@ export class SignInPage extends AbstractPage {
   signInForm: Locator;
 
   constructor(page: Page) {
-    super(page);
-    this.loginField = page.locator("[name=login]");
-    this.passwordField = page.locator("[name=password]");
-    this.signInSubmitButton = page.locator("[type=submit]");
-    this.toastElement = page.locator(".Toastify__toast");
-    this.signInForm = page.locator("#sign-in-form");
+    super();
+    // this.loginField = page.locator("[name=login]");
+    // this.passwordField = page.locator("[name=password]");
+    // this.signInSubmitButton = page.locator("[type=submit]");
+    // this.toastElement = page.locator(".Toastify__toast");
+    // this.signInForm = page.locator("#sign-in-form");
   }
 
   async navigateTo(): Promise<void> {
-    await this.page.goto("/auth/signin");
+    // await this.page.goto("/auth/signin");
   }
 
   async inputCredentials(login: string, password: string): Promise<void> {

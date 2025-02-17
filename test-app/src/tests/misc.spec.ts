@@ -11,5 +11,6 @@ test("Repo redirect functionality", async ({ context }) => {
   const repoPageEvent = context.waitForEvent("page");
   await page.locator(".repo-link").click();
   const repoPage = await repoPageEvent;
+  await repoPage.waitForLoadState("networkidle");
   expect(await repoPage.title()).toContain("Issues");
 });

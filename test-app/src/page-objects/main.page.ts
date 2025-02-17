@@ -1,4 +1,4 @@
-import { AbstractPage } from "./AbstractPage";
+import { AbstractPage } from "./abstract.page";
 
 export class MainPage extends AbstractPage {
   constructor(page) {

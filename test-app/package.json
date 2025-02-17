@@ -2,7 +2,6 @@
   "name": "test-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "test": "npx playwright test --reporter=html"
   },
@@ -10,9 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@playwright/test": "^1.48.2",
+    "@playwright/test": "^1.50.1",
     "dotenv": "^16.4.5",
-    "playwright": "^1.48.2"
+    "playwright": "^1.50.1"
   },
   "devDependencies": {
     "@types/node": "^22.9.0"
