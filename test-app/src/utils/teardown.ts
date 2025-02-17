@@ -7,12 +7,12 @@ const { baseApiUrl } = process.env;
 export async function cleanupTestUserData(
   request: APIRequestContext
 ): Promise<void> {
-  await request.patch(`${baseApiUrl}/api/vi/users/me`, {
-    data: {
-      displayName: "automationtester",
-      location: null,
-      website: null,
-      bio: null,
-    },
-  });
+  // await request.patch(`${baseApiUrl}/api/vi/users/me`, {
+  //   data: {
+  //     displayName: "automationtester",
+  //     location: null,
+  //     website: null,
+  //     bio: null,
+  //   },
+  // });
 }

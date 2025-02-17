@@ -217,7 +217,7 @@ importers:
         specifier: ^0.6.6
         version: 0.6.11(prettier@3.5.1)
       sass:
-        specifier: ^1.77.8
+        specifier: ^1.85.0
         version: 1.85.0
       tailwindcss:
         specifier: ^3.4.10
