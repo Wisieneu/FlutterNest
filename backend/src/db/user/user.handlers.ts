@@ -1,5 +1,5 @@
 import { and, desc, eq, getTableColumns } from "drizzle-orm";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import { db } from "..";
 import {

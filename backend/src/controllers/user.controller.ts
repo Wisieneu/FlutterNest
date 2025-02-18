@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import { db } from "../db";
 import * as userHandler from "../db/user/user.handlers";

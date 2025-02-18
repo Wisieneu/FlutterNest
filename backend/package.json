@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsnd --respawn ./src/server.ts",
-    "dev": "nodemon src/index.ts",
+    "start": "npx tsnd --respawn ./src/server.ts",
     "build": "npx tsc",
     "start:prod": "node dist/index.js",
     "introspect": "drizzle-kit introspect:pg --config=drizzle.config.ts",
@@ -42,7 +41,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.749.0",
     "aws-sdk": "^2.1692.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
