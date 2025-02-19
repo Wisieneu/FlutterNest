@@ -1,16 +1,17 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18
+FROM node:20-alpine
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy pnpm-lock.yaml and package.json
-COPY test-app/package.json test-app/pnpm-lock.yaml ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
-# Install pnpm
 RUN npm install -g pnpm
 
-# Install dependencies without starting the app
-RUN pnpm install
+COPY test-app/package.json ./test-app/
+RUN pnpm install --filter ./test-app
+
+# Copy the rest of the files (apart from ones listed in .dockerignore)
+COPY test-app ./test-app
+
+WORKDIR /app/test-app
 
 # No need to expose ports or run commands

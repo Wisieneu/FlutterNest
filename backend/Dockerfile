@@ -1,25 +1,19 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18
+FROM node:20-alpine
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy pnpm-lock.yaml and package.json
-COPY backend/package.json backend/pnpm-lock.yaml ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
-# Install pnpm
 RUN npm install -g pnpm
 
-# Install backend dependencies
-RUN pnpm install
+COPY backend/package.json ./backend/
+RUN pnpm install --filter ./backend
 
-# Copy the rest of the backend files
-COPY backend .
-
-RUN pnpm install
+# Copy the rest of the files (apart from ones listed in .dockerignore)
+COPY backend ./backend
 
 # Expose the port the app runs on
 EXPOSE 6699
 
 # Command to run the backend
-CMD ["pnpm", "start"]
+CMD ["pnpm", "run", "start:backend"]
