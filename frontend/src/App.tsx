@@ -12,12 +12,12 @@ import NotFoundPage from "@/routes/NotFoundPage";
 
 import AuthProvider from "@/components/Auth/AuthProvider";
 import LoginProtectedRoute from "@/components/Auth/LoginProtectedRoute";
+import { TestIdProvider } from "@/components/Wrappers/TestIdProviderContext";
 
 import { fetchPostById, fetchUserByUsername } from "./API";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
-import { AutomationProvider } from "./components/Wrappers/AutomationContext";
 
 const router = createBrowserRouter([
   {
@@ -70,10 +70,10 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <AuthProvider>
-      <AutomationProvider>
+      <TestIdProvider>
         <RouterProvider router={router} />
         <ToastContainer />
-      </AutomationProvider>
+      </TestIdProvider>
     </AuthProvider>
   );
 }

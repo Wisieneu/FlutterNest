@@ -5,7 +5,6 @@ export class SignInPage extends AbstractPage {
   loginField: Locator;
   passwordField: Locator;
   signInSubmitButton: Locator;
-  toastElement: Locator;
   signInForm: Locator;
 
   constructor(page: Page) {
@@ -13,7 +12,6 @@ export class SignInPage extends AbstractPage {
     this.loginField = page.locator("[name=login]");
     this.passwordField = page.locator("[name=password]");
     this.signInSubmitButton = page.locator("[type=submit]");
-    this.toastElement = page.locator(".Toastify__toast");
     this.signInForm = page.locator("#sign-in-form");
   }
 
@@ -31,6 +29,6 @@ export class SignInPage extends AbstractPage {
   }
 
   async getToastMessage(): Promise<string> {
-    return await this.toastElement.innerText();
+    return this.toastElement.text.getText();
   }
 }

@@ -15,6 +15,17 @@ export class Config {
   language: Languages = language;
   translations: Translation = getTranslations(language);
 
+  user = {
+    login: process.env.userLogin,
+    password: process.env.userPassword,
+    metadata: {
+      displayName: process.env.userMetadataDisplayName,
+      location: process.env.userMetadataLocation,
+      bio: process.env.userMetadataBio,
+      website: process.env.userMetadataWebsite,
+    },
+  };
+
   public static getInstance(): Config {
     if (!Config.instance) {
       Config.instance = new Config();

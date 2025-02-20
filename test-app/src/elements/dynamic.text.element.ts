@@ -12,4 +12,8 @@ export class DynamicTextElement extends AbstractElement {
   async validateText(text: string) {
     await this.toHaveText(text);
   }
+
+  async getText(): Promise<string> {
+    return await this.element().textContent();
+  }
 }

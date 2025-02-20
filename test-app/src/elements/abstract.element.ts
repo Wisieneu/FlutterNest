@@ -1,6 +1,7 @@
-import playwrightObject from "@/engine/playwright.object";
 import { Locator } from "playwright";
 import { expect } from "playwright/test";
+
+import playwrightObject from "@/engine/playwright.object";
 
 export abstract class AbstractElement {
   constructor(public selector: string) {}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useAutomation } from "./components/Wrappers/AutomationContext";
+import { useTestAutomation } from "./components/Wrappers/TestIdProviderContext";
 
 dayjs.extend(relativeTime);
 
@@ -55,6 +55,6 @@ export function useEffectSkipFirst(effect: React.EffectCallback, deps: any[]) {
 }
 
 export const useTestId = (testId: string) => {
-  const { isAutomationEnabled } = useAutomation();
+  const { isAutomationEnabled } = useTestAutomation();
   return isAutomationEnabled ? testId : undefined;
 };

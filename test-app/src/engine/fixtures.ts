@@ -30,7 +30,7 @@ export const test = base.extend<TestRunnerFixtures>({
     });
     const context = playwrightObject.context;
     const token = await quickApiLogin(request);
-    setAuthCookie(context, token);
+    setAuthCookie(token);
     await use(playwrightObject.page());
     await playwrightObject.close();
   },
@@ -42,7 +42,7 @@ export const test = base.extend<TestRunnerFixtures>({
     });
     const context = playwrightObject.context;
     const token = await quickApiLogin(request);
-    setAuthCookie(context, token);
+    setAuthCookie(token);
     await use(new MainPage());
     await playwrightObject.close();
   },
@@ -54,7 +54,7 @@ export const test = base.extend<TestRunnerFixtures>({
     });
     const context = playwrightObject.context;
     const token = await quickApiLogin(request);
-    setAuthCookie(context, token);
+    setAuthCookie(token);
     await use(new UserSettingsPage());
     await playwrightObject.close();
   },

@@ -97,27 +97,29 @@ export class UserSettingsPage extends AbstractPage {
 
   async fillDisplayNameInput(displayNameInput: string): Promise<void> {
     await this.metadataChangeForm.displayNameInput.fill(displayNameInput);
-    await this.metadataChangeForm.displayNameInput.toHaveText(displayNameInput);
+    await this.metadataChangeForm.displayNameInput.verifyInputValue(
+      displayNameInput
+    );
   }
 
   async fillLocationInput(locationInput: string): Promise<void> {
     await this.metadataChangeForm.locationInput.fill(locationInput);
-    await this.metadataChangeForm.locationInput.toHaveText(locationInput);
+    await this.metadataChangeForm.locationInput.verifyInputValue(locationInput);
   }
 
   async fillWebsiteInput(websiteInput: string): Promise<void> {
     await this.metadataChangeForm.websiteInput.fill(websiteInput);
-    await this.metadataChangeForm.websiteInput.toHaveText(websiteInput);
+    await this.metadataChangeForm.websiteInput.verifyInputValue(websiteInput);
   }
 
   async fillBioInput(bioInput: string): Promise<void> {
     await this.metadataChangeForm.bioInput.fill(bioInput);
-    await this.metadataChangeForm.bioInput.toHaveText(bioInput);
+    await this.metadataChangeForm.bioInput.verifyInputValue(bioInput);
   }
 
   async submitMetadataChangeForm(): Promise<void> {
     await this.metadataChangeForm.submitBtn.click();
-    // TODO: verify toast message etc
+    await this.toastElement.text.validateText("Updating...");
   }
 
   async openProfilePictureForm(): Promise<void> {

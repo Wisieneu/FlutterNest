@@ -1,7 +1,9 @@
-import { DivElement } from "@/elements/div.element";
-import { TextElement } from "@/elements/text.element";
-import playwrightObject from "@/engine/playwright.object";
 import { expect } from "@playwright/test";
+
+import playwrightObject from "@/engine/playwright.object";
+
+import { DivElement } from "@/elements/div.element";
+import { DynamicTextElement } from "@/elements/dynamic.text.element";
 
 export abstract class AbstractPage {
   protected tabName: string;
@@ -10,13 +12,14 @@ export abstract class AbstractPage {
 
   toastElement: {
     container: DivElement;
-    text: TextElement;
+    text: DynamicTextElement;
   };
 
   constructor(tabName?: string, partialUrl?: string, pageSelector?: string) {
     this.tabName = tabName;
     this.partialUrl = partialUrl;
     this.pageSelector = pageSelector;
+    this.initializeCommonElements();
   }
 
   async openPage() {
@@ -25,6 +28,10 @@ export abstract class AbstractPage {
 
   async openUrl(url: string) {
     await playwrightObject.open(url);
+  }
+
+  async reloadPage() {
+    await playwrightObject.page().reload();
   }
 
   async shouldBeOpened() {
@@ -71,5 +78,12 @@ export abstract class AbstractPage {
     }
     const actualTitle = await playwrightObject.page().title();
     expect(actualTitle).toEqual(this.tabName);
+  }
+
+  initializeCommonElements() {
+    this.toastElement = {
+      container: new DivElement(".Toastify__toast-container"),
+      text: new DynamicTextElement(".Toastify__toast-body"),
+    };
   }
 }

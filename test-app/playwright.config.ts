@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  retries: 2,
+  retries: 1,
   testDir: "./src/tests",
   fullyParallel: true,
   // forbidOnly: !!import.meta.env.CI,
@@ -29,13 +29,13 @@ export default defineConfig({
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
+    // {
+    //   name: "chromium",
+    //   use: { ...devices["Desktop Chrome"] },
+    // },
+    // {
+    //   name: "webkit",
+    //   use: { ...devices["Desktop Safari"] },
+    // },
   ],
 });

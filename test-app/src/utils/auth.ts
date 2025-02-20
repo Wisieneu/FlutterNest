@@ -1,3 +1,4 @@
+import playwrightObject from "@/engine/playwright.object";
 import { APIRequestContext, BrowserContext } from "@playwright/test";
 
 const { userLogin, userPassword, baseApiUrl } = process.env;
@@ -15,11 +16,8 @@ export async function quickApiLogin(
   return responseBody.token;
 }
 
-export async function setAuthCookie(
-  context: BrowserContext,
-  token: string
-): Promise<void> {
-  await context.addCookies([
+export async function setAuthCookie(token: string): Promise<void> {
+  await playwrightObject.context.addCookies([
     {
       name: "jwt",
       value: token,
