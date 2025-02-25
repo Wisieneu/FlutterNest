@@ -28,7 +28,7 @@ test.describe("E2E user settings page", () => {
     await userSettingsPage.openMetadataChangeForm();
   });
 
-  test.only("User metadata form can be submitted, metadata is updated", async ({
+  test("User metadata form can be submitted, metadata is updated", async ({
     userSettingsPage,
   }) => {
     const testMetadata = {

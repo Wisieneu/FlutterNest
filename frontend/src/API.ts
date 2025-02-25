@@ -6,8 +6,16 @@ import { UserMetadataUpdateFormState } from "@/components/Settings/UserMetadataC
 
 type APIPostType = "post" | "comment" | "repost";
 
+let baseURL: string;
+
+if (import.meta.env.VITE_ENV === "PROD") {
+  baseURL = import.meta.env.VITE_API_URL_PROD;
+} else {
+  baseURL = import.meta.env.VITE_API_URL_DEV;
+}
+
 const API: AxiosInstance = axios.create({
-  baseURL: `http://localhost:6699/api/v1`,
+  baseURL,
   withCredentials: true,
 });
 

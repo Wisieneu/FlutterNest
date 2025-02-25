@@ -7,5 +7,6 @@ export default defineConfig({
   server: {
     port: 6700,
     host: "0.0.0.0",
+    allowedHosts: ["flutternest.wise-ee.com"],
   },
 });

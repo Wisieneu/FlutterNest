@@ -5,9 +5,10 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "6699:6699"
-    # volumes:
-    #   - ./backend:/app
-    #   - /app/node_modules
+    volumes:
+      #   - ./backend:/app
+      - /app/node_modules
+      - /app/backend/node_modules
 
   frontend:
     build:
@@ -15,9 +16,10 @@ services:
       dockerfile: frontend/Dockerfile
     ports:
       - "6700:6700"
-    # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
+    volumes:
+      #   - ./frontend:/app
+      - /app/node_modules
+      - /app/frontend/node_modules
     depends_on:
       - backend
 
@@ -25,9 +27,10 @@ services:
     build:
       context: .
       dockerfile: test-app/Dockerfile
-    # volumes:
-    #   - ./test-app:/app
-    #   - /app/node_modules
+    volumes:
+      #   - ./test-app:/app
+      - /app/node_modules
+      - /app/test-app/node_modules
     depends_on:
       - backend
       - frontend
