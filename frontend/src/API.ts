@@ -10,8 +10,12 @@ let baseURL: string;
 
 if (import.meta.env.VITE_ENV === "PROD") {
   baseURL = import.meta.env.VITE_API_URL_PROD;
-} else {
+} else if (import.meta.env.VITE_ENV === "DEV") {
   baseURL = import.meta.env.VITE_API_URL_DEV;
+} else {
+  throw new Error(
+    "Unknown environment. Please set VITE_ENV to an appropriate value.",
+  );
 }
 
 const API: AxiosInstance = axios.create({
