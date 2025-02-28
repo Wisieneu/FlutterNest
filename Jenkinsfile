@@ -9,7 +9,7 @@ pipeline {
         stage('Build and Deploy') {
             steps {
                 sh 'docker version' 
-                sh 'docker compose version' 
+                sh 'docker-compose version' 
                 sh 'docker-compose build'
                 sh 'docker-compose up -d'
             }
@@ -20,9 +20,9 @@ pipeline {
         //     }
         // }
     }
-    post {
-        always {
-            junit 'test-results/**/*.xml'
-        }
-    }
+    // post {
+    //     always {
+    //         junit 'test-results/**/*.xml'
+    //     }
+    // }
 }
