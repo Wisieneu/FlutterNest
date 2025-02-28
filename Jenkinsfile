@@ -6,12 +6,31 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('verify tooling') {
+            steps {
+                sh '''
+                docker version 
+                docker info 
+                docker-compose version
+                curl --version
+                '''
+            }
+        }
+
+        stage('Prune Docker data') {
+            steps {
+                sh 'docker system prune -a --volumes -f'
+            }
+        }
+
         stage('Build and Deploy') {
             steps {
-                sh 'docker version' 
-                sh 'docker-compose version' 
-                sh 'docker-compose build'
-                sh 'docker-compose up -d'
+                sh '''docker version 
+                docker-compose version
+                docker-compose build
+                docker-compose up -d
+                '''
             }
         }
         // stage('Test') {
@@ -20,9 +39,11 @@ pipeline {
         //     }
         // }
     }
-    // post {
-    //     always {
-    //         junit 'test-results/**/*.xml'
-    //     }
-    // }
+    post {
+        always {
+            sh 'docker-compose down --remove-orphans -v'
+            sh 'docker-compose ps'
+            // junit 'test-results/**/*.xml'
+        }
+    }
 }
