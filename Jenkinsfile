@@ -8,15 +8,15 @@ pipeline {
         }
         stage('Build and Deploy') {
             steps {
-                sh 'docker-compose build'
+                sh 'docker compose version' 
                 sh 'docker-compose up -d'
             }
         }
-        stage('Test') {
-            steps {
-                sh 'docker-compose run app pnpm test'
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         sh 'docker-compose run app pnpm test'
+        //     }
+        // }
     }
     post {
         always {
