@@ -1,6 +1,6 @@
 # [FlutterNest](https://flutternest.wise-ee.xyz/)
 
-Website can be visited at: [_https://flutternest.wise-ee.xyz/_](https://flutternest.wise-ee.xyz/)  
+Website can be visited at: [_https://flutternest.wise-ee.xyz/_](https://flutternest.wise-ee.com/)  
 FlutterNest is a fullstack Twitter-like, feature-rich app made with tests and a public REST API.
 
 ## Features
