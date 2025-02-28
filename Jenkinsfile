@@ -26,11 +26,8 @@ pipeline {
 
         stage('Build and Deploy') {
             steps {
-                sh '''docker version 
-                docker-compose version
-                docker-compose build
-                docker-compose up -d
-                '''
+                sh 'docker-compose build'
+                sh 'docker-compose up -d'
             }
         }
         // stage('Test') {
