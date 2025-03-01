@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx tsnd --respawn ./src/server.ts",
     "build": "npx tsc",
-    "start:prod": "node dist/index.js",
+    "start:prod": "tsc && node dist/src/server.js",
     "introspect": "drizzle-kit introspect:pg --config=drizzle.config.ts",
     "generate": "drizzle-kit generate",
     "migrate": "tsx -r dotenv/config src/db/migrate.ts",

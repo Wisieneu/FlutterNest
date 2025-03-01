@@ -16,4 +16,4 @@ COPY backend ./backend
 EXPOSE 6699
 
 # Command to run the backend
-CMD ["pnpm", "run", "start:backend"]
+CMD ["pnpm", "run", "start:backend:prod"]

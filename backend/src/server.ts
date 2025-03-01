@@ -15,9 +15,8 @@ class Server {
   }
 
   private listen(app: Application) {
-    const baseUrl = `http://localhost:${this.port}`;
     return app.listen(this.port, (): void => {
-      logger.info(`API running on ${baseUrl}`);
+      logger.info(`API running on port ${this.port}`);
     });
   }
 }

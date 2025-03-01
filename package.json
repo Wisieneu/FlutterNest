@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "start": "pnpm -r start",
-    "start:backend": "cd backend && pnpm start",
-    "start:frontend": "cd frontend && pnpm start",
+    "start:backend:prod": "cd backend && pnpm start:prod",
+    "start:frontend:prod": "cd frontend && pnpm start:prod",
     "test": "cd ./test-app && pnpm test",
     "createadmin": "cd backend && pnpm createadmin"
   }

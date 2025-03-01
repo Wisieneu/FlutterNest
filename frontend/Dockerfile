@@ -16,4 +16,4 @@ COPY frontend ./frontend
 EXPOSE 6700
 
 # Command to run the frontend
-CMD ["pnpm", "run", "start:frontend"]
+CMD ["pnpm", "run", "start:frontend:prod"]
