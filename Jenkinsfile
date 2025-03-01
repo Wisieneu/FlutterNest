@@ -24,6 +24,14 @@ pipeline {
             }
         }
 
+        stage('Copy .env files') {
+            steps {
+                sh 'cp /var/jenkins_secrets/flutternest/backend.env ${WORKSPACE}/backend/.env'
+                sh 'cp /var/jenkins_secrets/flutternest/frontend.env ${WORKSPACE}/frontend/.env'
+                sh 'cp /var/jenkins_secrets/flutternest/test-app.env ${WORKSPACE}/test-app/.env'
+            }
+        }
+
         stage('Build and Deploy') {
             steps {
                 sh 'docker-compose build'
