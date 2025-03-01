@@ -199,7 +199,6 @@ export const deactivateAccount = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<Response> => {
-    console.log(req.body);
     const deactivatedUser = await userHandler.deactivateEndUser(req.user!);
 
     res.cookie("jwt", "loggedout");

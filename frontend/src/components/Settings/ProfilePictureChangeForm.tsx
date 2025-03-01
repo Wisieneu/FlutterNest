@@ -42,7 +42,6 @@ export default function ProfilePictureChangeForm({ user }: { user: User }) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log(uploadedImage);
     setIsFormBeingSubmitted(true);
     toast.dismiss(toastId.current as Id);
     toastId.current = toast.loading(`Processing...`, loadingToastBody);

@@ -46,7 +46,6 @@ export default function UserMetadataChangeForm(
 
     toast.dismiss(toastId.current as Id);
     toastId.current = toast.loading("Updating...", loadingToastBody);
-    console.log(formData);
     try {
       const response = await updateUserMetadata(formData);
       toast.update(
