@@ -3,8 +3,6 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-      env_file:
-        - ./backend/.env
     ports:
       - "6699:6699"
     volumes:
@@ -16,8 +14,6 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-      env_file:
-        - ./frontend/.env
     ports:
       - "6700:6700"
     volumes:
@@ -31,8 +27,6 @@ services:
     build:
       context: .
       dockerfile: test-app/Dockerfile
-      env_file:
-        - ./test-app/.env
     volumes:
       #   - ./test-app:/app
       - /app/node_modules
